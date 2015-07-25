@@ -60,7 +60,7 @@ class ClimbsfRentedImporter
         date_listed: rental_diff[:date_listed],
         date_rented: rental_diff[:date_rented],
         days_on_market: days_on_market,
-        is_latest: is_latest_transaction(rental_diff)
+        is_latest: RentalTransaction.is_latest_transaction(rental_diff)
       )  
 
     # This transaction was priorly captured

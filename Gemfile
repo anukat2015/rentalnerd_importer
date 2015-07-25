@@ -29,6 +29,8 @@ gem 'spring',        group: :development
 gem 'mysql2'
 gem 'pry'
 
+gem 'guard'
+
 gem 'awesome_print'
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
@@ -42,3 +44,22 @@ gem 'awesome_print'
 # Use debugger
 # gem 'debugger', group: [:development, :test]
 
+group :development, :test do
+  gem 'rspec-rails'
+  gem 'guard-rspec'
+  gem 'factory_girl_rails'
+  gem 'pry-byebug'
+  gem 'pry-stack_explorer'
+  gem 'jasminerice', git: 'https://github.com/bradphelan/jasminerice.git'
+  gem 'guard-jasmine'
+  gem 'fuubar'
+  gem 'activerecord-import'
+end
+
+group :development do
+  gem 'quiet_assets'
+  gem 'foreman'
+  gem 'bullet'
+  gem 'active_record_query_trace'
+  gem 'ruby-prof'
+end
