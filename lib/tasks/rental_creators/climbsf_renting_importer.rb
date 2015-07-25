@@ -1,6 +1,6 @@
 require './lib/tasks/rental_creators/rental_creator'
 
-class ClimbsfRentedImporter
+class ClimbsfRentingImporter
   include RentalCreator  
 
   DEFAULT_TRANSACTION_TYPE = "rental"
@@ -15,7 +15,7 @@ class ClimbsfRentedImporter
 
   def is_changed? old_log, new_log
 
-    if old_log[:price] != new_log[:price] || old_log[:date_rented] != new_log[:date_rented]
+    if old_log[:price] != new_log[:price]
       puts "\trecord change detected\n"
       puts "\n"
       ap old_log
@@ -32,29 +32,21 @@ class ClimbsfRentedImporter
 
     # This transaction was never priorly captured
     if transaction.nil?
-      
-      days_on_market = nil
-      if !rental_diff[:date_rented].nil?
-        days_on_market = (
-          rental_diff[:date_rented] - rental_diff[:date_listed] 
-        ).to_i / 1.day
-      end
-
       is_latest = RentalTransaction.is_latest_transaction property[:id], rental_diff[:date_rented], rental_diff[:date_listed], "rental"
       RentalTransaction.create!(
         property_id: property[:id],
         price: rental_diff[:price],
-        transaction_status: "closed",
-        date_listed: rental_diff[:date_listed],
+        transaction_status: "open",
+        date_listed: Date.today,
         date_rented: rental_diff[:date_rented],
-        days_on_market: days_on_market,
+        days_on_market: nil,
         is_latest: is_latest,
         transaction_type: DEFAULT_TRANSACTION_TYPE
       )  
 
     # This transaction was priorly captured
     else
-      transaction.transaction_status = "closed"
+      transaction.transaction_status = transaction.transaction_status || "open"
       transaction.date_rented = rental_diff[:date_rented]
       if !rental_diff[:date_rented].nil?
         transaction.days_on_market = (

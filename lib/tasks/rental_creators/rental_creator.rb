@@ -60,7 +60,7 @@ module RentalCreator
 
   # To Be Completed
   def generate_deleted_diffs( curr_rental_import_job_id )
-    puts "\tProcessing created, updated rental_diffs"
+    puts "\tProcessing deleted rental_diffs"
     previous_rental_import_job_id = self.get_previous_batch_id curr_rental_import_job_id
 
     return if previous_rental_import_job_id.nil?
@@ -132,7 +132,7 @@ module RentalCreator
 
   def create_property rental_diff
 
-    property = get_matching_property rental_diff
+    property = get_matching_property rental_diff[:origin_url]
     if property.nil?
       puts "\tNew property detected: #{rental_diff[:origin_url]}\n\tSource: #{rental_diff[:source]}"
       property = Property.create!(
@@ -157,41 +157,9 @@ module RentalCreator
     end
   end
 
-  def is_latest_transaction rental_diff
-    property = get_matching_property rental_diff
-    RentalTransaction.where(property_id: property[:id]).each do |curr_transaction|
-
-      if !curr_transaction[:date_rented].nil? &&
-        !rental_diff[:date_rented].nil? && 
-        curr_transaction[:date_rented]  > rental_diff[:date_rented]
-        return false
-      end
-
-      if !curr_transaction[:date_rented].nil? &&
-        !rental_diff[:date_listed].nil? && 
-        curr_transaction[:date_rented]  > rental_diff[:date_listed]
-        return false
-      end
-
-      if !curr_transaction[:date_listed].nil? &&
-        !rental_diff[:date_rented].nil? && 
-        curr_transaction[:date_listed]  > rental_diff[:date_rented]
-        return false
-      end
-
-      if !curr_transaction[:date_listed].nil? &&
-        !rental_diff[:date_listed].nil? && 
-        curr_transaction[:date_listed]  > rental_diff[:date_listed]
-        return false
-      end            
-    end
-
-    return true
-  end
-
   # Method to be overwritten
   # Creates the transaction
-  def create_transaction rental_diff
+  def create_transaction rental_diff, transaction_type = "rental"
   end
 
   # Method to be overwritten
@@ -202,8 +170,8 @@ module RentalCreator
 
   # Method to be overwritten
   # Returns the matching property record
-  def get_matching_property rental_diff
-    Property.where( origin_url: rental_diff[:origin_url], source: rental_diff[:source] ).first
+  def get_matching_property property_url
+    Property.where( origin_url: property_url ).first
   end
 
   # Method to be overwritten
