@@ -4,47 +4,6 @@ class PropertyTransactionLog < ActiveRecord::Base
   after_validation :set_transaction_status
   after_commit :update_property_transaction
 
-  def set_days_on_market
-    if !date_listed.nil? && !date_rented.nil?
-      self.days_on_market = (
-        date_rented - date_listed
-      ).to_i / 1.day
-    end    
-  end
-
-  def set_transaction_status
-    if !date_rented.nil?
-      self.transaction_status = "closed"
-
-    else
-      self.transaction_status = "open"
-
-    end
-  end
-
-  def update_property_transaction
-
-    if is_latest_transaction?
-      pt = PropertyTransaction.where(
-        property_id: property_id,
-        transaction_type: transaction_type
-      ).first_or_create 
-      pt.transaction_log_id = self.id
-      pt.save!
-      
-    end
-
-  end
-
-  def is_latest_transaction?
-    date_to_check = date_rented || date_listed || -1
-    greater_transaction = PropertyTransactionLog.where(property_id: property_id)
-      .where( transaction_type: transaction_type)
-      .where(" date_rented > ? or date_listed > ? ", date_to_check, date_to_check)
-      .first    
-    return true if greater_transaction.nil?
-    return false      
-  end
 
   class << self
 
@@ -100,4 +59,48 @@ class PropertyTransactionLog < ActiveRecord::Base
     end
 
   end
+
+
+  def set_days_on_market
+    if !date_listed.nil? && !date_rented.nil?
+      self.days_on_market = (
+        date_rented - date_listed
+      ).to_i / 1.day
+    end    
+  end
+
+  def set_transaction_status
+    if !date_rented.nil?
+      self.transaction_status = "closed"
+
+    else
+      self.transaction_status = "open"
+
+    end
+  end
+
+  def update_property_transaction
+
+    if is_latest_transaction?
+      pt = PropertyTransaction.where(
+        property_id: property_id,
+        transaction_type: transaction_type
+      ).first_or_create 
+      pt.transaction_log_id = self.id
+      pt.save!
+      
+    end
+
+  end
+
+  def is_latest_transaction?
+    date_to_check = date_rented || date_listed || -1
+    greater_transaction = PropertyTransactionLog.where(property_id: property_id)
+      .where( transaction_type: transaction_type)
+      .where(" date_rented > ? or date_listed > ? ", date_to_check, date_to_check)
+      .first    
+    return true if greater_transaction.nil?
+    return false      
+  end
+
 end
