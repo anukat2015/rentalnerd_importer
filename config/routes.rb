@@ -1,4 +1,9 @@
+require 'sidekiq/web'
+
 Rails.application.routes.draw do
+
+  # mount RailsAdmin::Engine => '/admin/panel', :as => 'rails_admin'
+  mount Sidekiq::Web => '/admin/sidekiq'
   
   post "/webhook",  :to => "webhook#ping"  
   # The priority is based upon order of creation: first created -> highest priority.

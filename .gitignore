@@ -1,2 +1,28 @@
 .env
 /log/*.log
+
+# Ignore bundler config.
+/.bundle
+
+dump.rdb
+
+# Ignore the default SQLite database.
+/db/*.sqlite3
+/db/*.sqlite3-journal
+
+# Ignore all logfiles and tempfiles.
+/log/*.log
+log/explain_statements.sql
+/tmp
+
+# Ignore other unneeded files.
+config/database.yml
+config/doc_config.rb
+*.swp
+*~
+.project
+.DS_Store
+.idea
+.secret
+.vagrant
+.env
