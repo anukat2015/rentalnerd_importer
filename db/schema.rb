@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150726013137) do
+ActiveRecord::Schema.define(version: 20150726021449) do
 
   create_table "import_diffs", force: true do |t|
     t.string   "address"
@@ -81,9 +81,11 @@ ActiveRecord::Schema.define(version: 20150726013137) do
   create_table "property_transactions", force: true do |t|
     t.integer  "property_id"
     t.integer  "transaction_log_id"
-    t.string   "transaction_type"
+    t.string   "transaction_type",   limit: 8
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  add_index "property_transactions", ["property_id", "transaction_type"], name: "index_property_transactions_on_property_id_and_transaction_type", unique: true, using: :btree
 
 end
