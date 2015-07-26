@@ -12,8 +12,8 @@ namespace :db do
     counter = 0
     datasource_url = "http://data.getdata.io/n4_46fae6367035ff1e0e869e80d4fccc71eses/csv"
 
-    puts "Processing rental_logs"
-    job = RentalImportJob.create!(
+    puts "Processing import_logs"
+    job = ImportJob.create!(
       source: "climbsf_renting"
     )
     cri = ClimbsfRentingImporter.new
@@ -21,12 +21,12 @@ namespace :db do
     CSV.new( open(datasource_url), :headers => :first_row ).each do |row|
       row["source"] = "climbsf_renting"
       row["origin_url"] = row["apartment page"]
-      row["rental_import_job_id"] = job.id
-      cri.create_rental_log row
+      row["import_job_id"] = job.id
+      cri.create_import_log row
     end
     puts "\n\n\n"
 
-    cri.generate_rental_diffs job.id
+    cri.generate_import_diffs job.id
     cri.generate_properties job.id
     cri.generate_transactions job.id
   end

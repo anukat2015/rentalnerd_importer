@@ -1,17 +1,52 @@
-class RentalTransaction < ActiveRecord::Base
-  class << self
+class PropertyTransactionLog < ActiveRecord::Base
 
-    # Returns true if we could not find a transaction record for the property that is greater than date provided
-    def is_latest_transaction property_id, date_rented=nil, date_listed=nil, transaction_type = "rental"
-      date_to_check = date_rented || date_listed || -1
-      greater_transaction = RentalTransaction.where(property_id: property_id)
-        .where( transaction_type: transaction_type)
-        .where(" date_rented > ? or date_listed > ? ", date_to_check, date_to_check)
-        .first
+  after_validation :set_days_on_market
+  after_validation :set_transaction_status
+  after_commit :update_property_transaction
 
-      return true if greater_transaction.nil?
-      return false
+  def set_days_on_market
+    if !date_listed.nil? && !date_rented.nil?
+      self.days_on_market = (
+        date_rented - date_listed
+      ).to_i / 1.day
+    end    
+  end
+
+  def set_transaction_status
+    if !date_rented.nil?
+      self.transaction_status = "closed"
+
+    else
+      self.transaction_status = "open"
+
     end
+  end
+
+  def update_property_transaction
+
+    if is_latest_transaction?
+      pt = PropertyTransaction.where(
+        property_id: property_id,
+        transaction_type: transaction_type
+      ).first_or_create 
+      pt.transaction_log_id = self.id
+      pt.save!
+      
+    end
+
+  end
+
+  def is_latest_transaction?
+    date_to_check = date_rented || date_listed || -1
+    greater_transaction = PropertyTransactionLog.where(property_id: property_id)
+      .where( transaction_type: transaction_type)
+      .where(" date_rented > ? or date_listed > ? ", date_to_check, date_to_check)
+      .first    
+    return true if greater_transaction.nil?
+    return false      
+  end
+
+  class << self
 
     # Returns the closest transaction for a property that matches the criteria
     def guess property_id, rented_date = nil , listed_date = nil, transaction_type = "rental"
@@ -33,7 +68,7 @@ class RentalTransaction < ActiveRecord::Base
 
       # When only the rented_date is provided - 
       elsif !rented_date.nil?
-        RentalTransaction.where( property_id: property_id )
+        PropertyTransactionLog.where( property_id: property_id )
           .where(transaction_type: transaction_type)        
           .where(" date_rented is NULL ")
           .where(" date_listed < ? ", rented_date)
@@ -42,7 +77,7 @@ class RentalTransaction < ActiveRecord::Base
           .first
 
       elsif !listed_date.nil?
-        RentalTransaction.where( property_id: property_id )
+        PropertyTransactionLog.where( property_id: property_id )
           .where(transaction_type: transaction_type)
           .where(" date_listed is NULL ")
           .where(" date_rented > ? ", listed_date)
@@ -56,7 +91,7 @@ class RentalTransaction < ActiveRecord::Base
     # Gets exact matching transaction
     def get_exact_matching_transaction property_id, rented_date = nil, listed_date = nil, transaction_type = "rental"
 
-      query = RentalTransaction.where( property_id: property_id )
+      query = PropertyTransactionLog.where( property_id: property_id )
       query = query.where( transaction_type: transaction_type )
       query = query.where(date_rented: rented_date ) unless rented_date.nil?
       query = query.where(date_listed: listed_date ) unless listed_date.nil?

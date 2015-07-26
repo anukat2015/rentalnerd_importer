@@ -1,6 +1,6 @@
-class CreateRentalDiffs < ActiveRecord::Migration
+class CreateImportDiffs < ActiveRecord::Migration
   def change
-    create_table :rental_diffs do |t|
+    create_table :import_diffs do |t|
       t.string :address      
       t.string :neighborhood      
       t.integer :bedrooms      

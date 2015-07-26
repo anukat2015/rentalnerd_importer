@@ -11,21 +11,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150722161343) do
+ActiveRecord::Schema.define(version: 20150726013137) do
 
-  create_table "properties", force: true do |t|
-    t.string   "address"
-    t.string   "neighborhood"
-    t.integer  "bedrooms"
-    t.integer  "bathrooms"
-    t.integer  "sqft"
-    t.string   "source"
-    t.string   "origin_url"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  create_table "rental_diffs", force: true do |t|
+  create_table "import_diffs", force: true do |t|
     t.string   "address"
     t.string   "neighborhood"
     t.integer  "bedrooms"
@@ -41,14 +29,14 @@ ActiveRecord::Schema.define(version: 20150722161343) do
     t.datetime "updated_at"
     t.integer  "old_log_id"
     t.integer  "new_log_id"
-    t.integer  "rental_import_job_id"
+    t.integer  "import_job_id"
   end
 
-  create_table "rental_import_jobs", force: true do |t|
+  create_table "import_jobs", force: true do |t|
     t.string "source"
   end
 
-  create_table "rental_logs", force: true do |t|
+  create_table "import_logs", force: true do |t|
     t.string   "address"
     t.string   "neighborhood"
     t.integer  "bedrooms"
@@ -61,20 +49,41 @@ ActiveRecord::Schema.define(version: 20150722161343) do
     t.string   "origin_url"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "rental_import_job_id"
+    t.integer  "import_job_id"
   end
 
-  create_table "rental_transactions", force: true do |t|
+  create_table "properties", force: true do |t|
+    t.string   "address"
+    t.string   "neighborhood"
+    t.integer  "bedrooms"
+    t.integer  "bathrooms"
+    t.integer  "sqft"
+    t.string   "source"
+    t.string   "origin_url"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.float    "latitude"
+    t.float    "longitude"
+  end
+
+  create_table "property_transaction_logs", force: true do |t|
     t.integer  "price"
     t.string   "transaction_status"
     t.date     "date_listed"
     t.date     "date_rented"
     t.integer  "days_on_market"
-    t.boolean  "is_latest"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "property_id"
     t.string   "transaction_type"
+  end
+
+  create_table "property_transactions", force: true do |t|
+    t.integer  "property_id"
+    t.integer  "transaction_log_id"
+    t.string   "transaction_type"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
 end

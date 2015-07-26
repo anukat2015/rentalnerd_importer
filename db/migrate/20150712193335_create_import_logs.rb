@@ -1,6 +1,6 @@
-class CreateRentalLogs < ActiveRecord::Migration
+class CreateImportLogs < ActiveRecord::Migration
   def change
-    create_table :rental_logs do |t|
+    create_table :import_logs do |t|
       t.string :address      
       t.string :neighborhood      
       t.integer :bedrooms      

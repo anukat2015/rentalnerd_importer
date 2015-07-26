@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class RentalTransactionTest < ActiveSupport::TestCase
+class PropertyTransactionLogTest < ActiveSupport::TestCase
   # test "the truth" do
   #   assert true
   # end

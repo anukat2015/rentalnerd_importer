@@ -1,6 +1,6 @@
-class CreateRentalTransactions < ActiveRecord::Migration
+class CreatePropertyTransactionLogs < ActiveRecord::Migration
   def change
-    create_table :rental_transactions do |t|
+    create_table :property_transaction_logs do |t|
       t.integer :price
       t.string :transaction_status
       t.date :date_listed
