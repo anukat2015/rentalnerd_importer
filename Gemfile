@@ -28,7 +28,8 @@ gem 'spring',        group: :development
 
 gem 'mysql2'
 gem 'pry'
-
+gem 'sidekiq'
+gem 'sinatra', require: false # required for sidekiq
 gem 'guard'
 gem 'geocoder'
 gem 'awesome_print'
@@ -48,18 +49,29 @@ group :development, :test do
   gem 'rspec-rails'
   gem 'guard-rspec'
   gem 'factory_girl_rails'
-  gem 'pry-byebug'
-  gem 'pry-stack_explorer'
-  gem 'jasminerice', git: 'https://github.com/bradphelan/jasminerice.git'
+  gem 'pry-debugger'
+  gem 'pry-stack_explorer'  
+  gem 'jasminerice', :git => 'https://github.com/bradphelan/jasminerice.git'
   gem 'guard-jasmine'
   gem 'fuubar'
   gem 'activerecord-import'
 end
 
 group :development do
+  gem 'capistrano'
+  gem 'capistrano-ext'
+  gem 'rvm-capistrano', require: false
   gem 'quiet_assets'
   gem 'foreman'
   gem 'bullet'
   gem 'active_record_query_trace'
-  gem 'ruby-prof'
+  gem 'pry-rails'
+end
+
+group :test do
+  gem 'selenium-webdriver'
+  gem 'capybara'
+  gem 'webmock'
+  gem 'timecop'
+  gem 'test_after_commit'
 end

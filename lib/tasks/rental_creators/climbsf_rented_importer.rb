@@ -3,7 +3,7 @@ require './lib/tasks/rental_creators/rental_creator'
 class ClimbsfRentedImporter
   include RentalCreator  
 
-  DEFAULT_TRANSACTION_TYPE = PropertyTransactionLog::TRANSACTION_TYPES["rental"]
+  DEFAULT_TRANSACTION_TYPE = "rental"
 
   def is_changed? old_log, new_log
 
