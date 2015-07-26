@@ -1,0 +1,22 @@
+# Options here can still be overridden by cmd line args.
+#   sidekiq -C config.yml
+---
+:verbose: false
+:namespace: rni
+:concurrency:  25
+:strict: false
+:pidfile: tmp/pids/sidekiq.pid
+:poll_interval: 10
+:queues:
+  - [critical, 9]
+  - [high, 7]
+  - [medium, 5]
+  - [low, 3]
+  - [default, 3]
+development:
+  :verbose: true
+  :concurrency:  15
+staging:
+  :poll_interval: 10
+production:
+  :poll_interval: 10

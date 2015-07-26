@@ -28,7 +28,7 @@ gem 'spring',        group: :development
 
 gem 'mysql2'
 gem 'pry'
-
+gem 'sidekiq'
 gem 'guard'
 gem 'geocoder'
 gem 'awesome_print'
