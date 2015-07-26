@@ -4,18 +4,22 @@ class PropertyTransactionLog < ActiveRecord::Base
   after_validation :set_transaction_status
   after_commit :update_property_transaction
 
+  TRANSACTION_TYPES = {
+    rental: "rental",
+    sales: "sales"
+  }
 
   class << self
 
     # Returns the closest transaction for a property that matches the criteria
-    def guess property_id, rented_date = nil , listed_date = nil, transaction_type = "rental"
+    def guess property_id, rented_date = nil , listed_date = nil, transaction_type = AVAILABLE_TRANSACTION_TYPES[:sales]
       match = guess_matching_transaction property_id, rented_date , listed_date, transaction_type
       return match unless match.nil?
       match = get_exact_matching_transaction property_id, rented_date , listed_date, transaction_type
     end
 
     # Returns the closest transaction for a property that matches the criteria
-    def guess_matching_transaction property_id, rented_date = nil , listed_date = nil, transaction_type = "rental"
+    def guess_matching_transaction property_id, rented_date = nil , listed_date = nil, transaction_type = AVAILABLE_TRANSACTION_TYPES[:sales]
 
       # When no dates are provided avoiding wild guesses
       if rented_date.nil? && listed_date.nil?
@@ -48,7 +52,7 @@ class PropertyTransactionLog < ActiveRecord::Base
     end    
 
     # Gets exact matching transaction
-    def get_exact_matching_transaction property_id, rented_date = nil, listed_date = nil, transaction_type = "rental"
+    def get_exact_matching_transaction property_id, rented_date = nil, listed_date = nil, transaction_type = AVAILABLE_TRANSACTION_TYPES[:sales]
 
       query = PropertyTransactionLog.where( property_id: property_id )
       query = query.where( transaction_type: transaction_type )

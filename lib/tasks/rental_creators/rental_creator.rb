@@ -2,6 +2,7 @@ require './lib/tasks/import_formatter'
 
 module RentalCreator
 
+  # Supports rental or sales
   DEFAULT_TRANSACTION_TYPE = "rental"
 
   def get_source_from_job job_id
