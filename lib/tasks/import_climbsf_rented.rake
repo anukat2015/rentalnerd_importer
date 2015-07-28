@@ -10,7 +10,7 @@ namespace :db do
   desc "imports ClimbSF data for those that have already been listed"  
   task :import_climbsf_rented => :environment do 
     counter = 0
-    datasource_url = "http://data.getdata.io/n19_485a52895ca152c9f9f74554627048e2eses/csv"
+    datasource_url = "http://data.getdata.io/n34_d7704e8247e565c7d2bd6705148bd338eses/csv"
 
     puts "Processing import_logs"
     job = ImportJob.create!(
