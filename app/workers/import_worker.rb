@@ -10,11 +10,11 @@ class ImportWorker
 
     case repository_handle
     # climbsf rented
-    when "n19_485a52895ca152c9f9f74554627048e2eses" 
+    when "n34_d7704e8247e565c7d2bd6705148bd338eses" 
       Rake::Task['db:import_climbsf_rented'].invoke
 
     # climbsf renting
-    when "n4_46fae6367035ff1e0e869e80d4fccc71eses" 
+    when "n33_f22b4acef257bfa904d548ef21050ca1eses" 
       Rake::Task['db:import_climbsf_renting'].invoke
     end
     
