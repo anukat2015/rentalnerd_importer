@@ -1,3 +1,4 @@
+git checkout master -f
 git pull origin master
 
 bundle install
