@@ -15,12 +15,14 @@ class Property < ActiveRecord::Base
   end
 
   def set_elevation
+    puts "setting elevation for property #{id}"
     url_string = "https://maps.googleapis.com/maps/api/elevation/json?locations=#{latitude},#{longitude}"
     url = URI.parse URI.encode(url_string)
     api_response = HTTParty.get(url)
 
-    unless api_response["results"].nil? && api_response["results"].size == 0
-      self.elevation = api_response["results"][0]["elevation"]
+    unless api_response["results"].nil? || api_response["results"].size == 0
+      result = api_response["results"][0]
+      self.elevation = result["elevation"]
     end
   end
 
