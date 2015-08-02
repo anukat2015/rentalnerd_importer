@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150802221621) do
+ActiveRecord::Schema.define(version: 20150802233426) do
 
   create_table "import_diffs", force: true do |t|
     t.string   "address"
@@ -78,6 +78,8 @@ ActiveRecord::Schema.define(version: 20150802221621) do
     t.float    "predicted_rent"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.float    "error_level"
+    t.float    "listed_rent"
   end
 
   create_table "properties", force: true do |t|

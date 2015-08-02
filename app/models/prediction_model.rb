@@ -1,5 +1,6 @@
 class PredictionModel < ActiveRecord::Base
-  has_many  :prediction_neighborhoods
+  has_many  :prediction_neighborhoods, dependent: :destroy
+  has_many  :prediction_results, dependent: :destroy
 
   def predicted_rent property_id
     property = Property.find property_id
@@ -17,7 +18,7 @@ class PredictionModel < ActiveRecord::Base
   def neighborhood_coefficient property
     pn = prediction_neighborhoods.where( prediction_neighborhood_name: property.neighborhood ).first
     if pn.nil?
-      puts " could not file neighborhood for #{property.id} "
+      puts " could not find neighborhood for #{property.id}, #{property.neighborhood} "
       return 0
     end
     pn.prediction_neighborhood_coefficient
