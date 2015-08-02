@@ -1,14 +1,14 @@
 class Property < ActiveRecord::Base
   # attr_accessible :address, :latitude, :longitude
   
-  geocoded_by :full_street_address 
+  geocoded_by :lookup_address 
 
   after_validation :cleanup_address
-  after_validation :geocode, if: ->(obj){ obj.address.present? and obj.address_changed? }
+  after_validation :geocode, if: ->(obj){ obj.lookup_address.present? and obj.lookup_address_changed? }
   after_validation :set_elevation, if: ->(obj) { 
     obj.latitude.present? and obj.longitude.present? and (
       obj.elevation.nil? or
-      obj.address_changed?
+      obj.lookup_address_changed?
     )
   }
 
@@ -17,18 +17,18 @@ class Property < ActiveRecord::Base
     "(Van Ness-Civic Center)",
     "(Candlestick Point)",
     "(North Waterfront)",
-    "(Pacifica)"
+    "(Pacifica)",
+    "East Bay",
+    "Peninsula"
   ]
 
   def cleanup_address
-    CONFUSING_TERMS.each do |term|
-      address = address.gsub( term, "" ) unless address.nil?
-      neighborhood = neighborhood.gsub( term, "" ) unless neighborhood.nil?
-    end
-  end
-
-  def full_street_address
-    "#{address}, #{neighborhood}"
+    puts "setting lookup_address"
+    temp_neig = neighborhood
+    CONFUSING_TERMS.each do |term|    
+      temp_neig = temp_neig.gsub( term, "" ) unless temp_neig.nil?      
+    end        
+    self.lookup_address = "#{address}, #{temp_neig}"    
   end
 
   def set_elevation

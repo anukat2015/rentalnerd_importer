@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150802155106) do
+ActiveRecord::Schema.define(version: 20150802161336) do
 
   create_table "import_diffs", force: true do |t|
     t.string   "address"
@@ -67,6 +67,7 @@ ActiveRecord::Schema.define(version: 20150802155106) do
     t.float    "latitude"
     t.float    "longitude"
     t.float    "elevation"
+    t.string   "lookup_address"
   end
 
   create_table "property_transaction_logs", force: true do |t|
