@@ -11,6 +11,7 @@ class Property < ActiveRecord::Base
       obj.lookup_address_changed?
     )
   }
+  after_commit :generate_prediction_results  
 
   has_one :property_transaction
 
@@ -43,6 +44,29 @@ class Property < ActiveRecord::Base
       result = api_response["results"][0]
       self.elevation = result["elevation"]
     end
+  end
+
+  def generate_prediction_results
+    PredictionModel.all.each do |pm|
+      pr = PredictionResult.where(
+        property_id: id,
+        prediction_model_id: pm.id,
+      ).first
+      
+      if pr.nil?
+        pr = PredictionResult.create!(
+          property_id: id,
+          prediction_model_id: pm.id,
+          predicted_rent: pm.predicted_rent(id)
+        )
+
+      # When predicted rent is not the same as 
+      elsif pr.predicted_rent != pm.predicted_rent(id)
+        pr.predicted_rent = pm.predicted_rent(id)
+        pr.save!
+      end
+    end
+
   end
 
 end
