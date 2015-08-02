@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150802161336) do
+ActiveRecord::Schema.define(version: 20150802215441) do
 
   create_table "import_diffs", force: true do |t|
     t.string   "address"
@@ -54,6 +54,24 @@ ActiveRecord::Schema.define(version: 20150802161336) do
     t.integer  "import_job_id"
   end
 
+  create_table "prediction_models", force: true do |t|
+    t.float    "base_rent"
+    t.float    "bedroom_coefficient"
+    t.float    "bathroom_coefficient"
+    t.float    "sqft_coefficient"
+    t.float    "elevation_coefficient"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "prediction_neighborhoods", force: true do |t|
+    t.integer  "prediction_model_id"
+    t.string   "prediction_neighborhood_name"
+    t.float    "prediction_neighborhood_coefficient"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "properties", force: true do |t|
     t.string   "address"
     t.string   "neighborhood"
@@ -84,8 +102,8 @@ ActiveRecord::Schema.define(version: 20150802161336) do
 
   create_table "property_transactions", force: true do |t|
     t.integer  "property_id"
-    t.integer  "transaction_log_id"
-    t.string   "transaction_type",   limit: 8
+    t.integer  "property_transaction_log_id"
+    t.string   "transaction_type",            limit: 8
     t.datetime "created_at"
     t.datetime "updated_at"
   end

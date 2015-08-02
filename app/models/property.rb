@@ -12,6 +12,8 @@ class Property < ActiveRecord::Base
     )
   }
 
+  has_one :property_transaction
+
   CONFUSING_TERMS = [
     "(Inner Mission)",
     "(Van Ness-Civic Center)",

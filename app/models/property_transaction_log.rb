@@ -2,7 +2,7 @@ class PropertyTransactionLog < ActiveRecord::Base
 
   after_validation :set_days_on_market
   after_validation :set_transaction_status
-  after_commit :update_property_transaction
+  after_commit :update_property_transaction  
 
   TRANSACTION_TYPES = {
     rental: "rental",
@@ -90,7 +90,7 @@ class PropertyTransactionLog < ActiveRecord::Base
         property_id: property_id,
         transaction_type: transaction_type
       ).first_or_create 
-      pt.transaction_log_id = self.id
+      pt.property_transaction_log_id = self.id
       pt.save!
       
     end
