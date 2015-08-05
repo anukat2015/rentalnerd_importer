@@ -63,6 +63,7 @@ class Property < ActiveRecord::Base
           error_level: curr_predicted_rent - most_recent_rental_price,
           listed_rent: most_recent_rental_price
         )
+        SlackPublisher.perform_async pr.id
 
       # When predicted rent is not the same as 
       elsif pr.predicted_rent != predicted_rent
@@ -70,6 +71,7 @@ class Property < ActiveRecord::Base
         pr.error_level = curr_predicted_rent - most_recent_rental_price
         pr.listed_rent = most_recent_rental_price
         pr.save!
+        SlackPublisher.perform_async pr.id
       end
     end
 
