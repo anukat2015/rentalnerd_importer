@@ -3,7 +3,7 @@ FactoryGirl.define do
     price 100
     transaction_status "closed"
     date_listed Time.now
-    date_rented Time.now
+    date_closed Time.now
     days_on_market 10
 
     factory :property_transaction_log_rental do

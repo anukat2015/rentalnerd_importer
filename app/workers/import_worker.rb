@@ -20,6 +20,12 @@ class ImportWorker
       Rake::Task['db:import_climbsf_renting'].invoke
     end
     
+    # Zillow SF 
+    when "n46_b5aee320718b31d44407ddde5ed62909eses" 
+      logger.debug "Performing task db:import_zillow_sf"
+      Rake::Task['db:import_zillow_sf'].invoke
+    end
+
   end  
 
 end

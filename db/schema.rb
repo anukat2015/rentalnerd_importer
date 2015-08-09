@@ -11,16 +11,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150802233426) do
+ActiveRecord::Schema.define(version: 20150809220248) do
 
   create_table "import_diffs", force: true do |t|
-    t.string   "address"
+    t.text     "address"
     t.string   "neighborhood"
     t.integer  "bedrooms"
     t.integer  "bathrooms"
     t.integer  "price"
     t.integer  "sqft"
-    t.date     "date_rented"
+    t.date     "date_closed"
     t.date     "date_listed"
     t.string   "source"
     t.string   "origin_url"
@@ -30,6 +30,7 @@ ActiveRecord::Schema.define(version: 20150802233426) do
     t.integer  "old_log_id"
     t.integer  "new_log_id"
     t.integer  "import_job_id"
+    t.string   "transaction_type", default: "rental"
   end
 
   create_table "import_jobs", force: true do |t|
@@ -39,19 +40,20 @@ ActiveRecord::Schema.define(version: 20150802233426) do
   end
 
   create_table "import_logs", force: true do |t|
-    t.string   "address"
+    t.text     "address"
     t.string   "neighborhood"
     t.integer  "bedrooms"
     t.integer  "bathrooms"
     t.integer  "price"
     t.integer  "sqft"
-    t.date     "date_rented"
+    t.date     "date_closed"
     t.date     "date_listed"
     t.string   "source"
     t.string   "origin_url"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "import_job_id"
+    t.string   "transaction_type", default: "rental"
   end
 
   create_table "prediction_models", force: true do |t|
@@ -83,7 +85,7 @@ ActiveRecord::Schema.define(version: 20150802233426) do
   end
 
   create_table "properties", force: true do |t|
-    t.string   "address"
+    t.text     "address"
     t.string   "neighborhood"
     t.integer  "bedrooms"
     t.integer  "bathrooms"
@@ -95,14 +97,14 @@ ActiveRecord::Schema.define(version: 20150802233426) do
     t.float    "latitude"
     t.float    "longitude"
     t.float    "elevation"
-    t.string   "lookup_address"
+    t.text     "lookup_address"
   end
 
   create_table "property_transaction_logs", force: true do |t|
     t.integer  "price"
     t.string   "transaction_status"
     t.date     "date_listed"
-    t.date     "date_rented"
+    t.date     "date_closed"
     t.integer  "days_on_market"
     t.datetime "created_at"
     t.datetime "updated_at"

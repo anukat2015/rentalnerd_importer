@@ -13,8 +13,6 @@ class Property < ActiveRecord::Base
   }
   after_commit :generate_prediction_results  
 
-  has_many :property_transactions
-
   CONFUSING_TERMS = [
     "(Inner Mission)",
     "(Van Ness-Civic Center)",
@@ -43,46 +41,6 @@ class Property < ActiveRecord::Base
     unless api_response["results"].nil? || api_response["results"].size == 0
       result = api_response["results"][0]
       self.elevation = result["elevation"]
-    end
-  end
-
-  def generate_prediction_results
-    PredictionModel.all.each do |pm|
-      pr = PredictionResult.where(
-        property_id: id,
-        prediction_model_id: pm.id,
-      ).first
-
-      curr_predicted_rent = pm.predicted_rent(id)      
-      
-      if pr.nil?
-        pr = PredictionResult.create!(
-          property_id: id,
-          prediction_model_id: pm.id,
-          predicted_rent: curr_predicted_rent,
-          error_level: curr_predicted_rent - most_recent_rental_price,
-          listed_rent: most_recent_rental_price
-        )
-        SlackPublisher.perform_async pr.id
-
-      # When predicted rent is not the same as 
-      elsif pr.predicted_rent != predicted_rent
-        pr.predicted_rent = curr_predicted_rent
-        pr.error_level = curr_predicted_rent - most_recent_rental_price
-        pr.listed_rent = most_recent_rental_price
-        pr.save!
-        SlackPublisher.perform_async pr.id
-      end
-    end
-
-  end
-
-  def most_recent_rental_price
-    pt = property_transactions.where(transaction_type: "rental").first
-    if pt.nil?
-      return 0
-    else
-      return pt.property_transaction_log.price
     end
   end
 

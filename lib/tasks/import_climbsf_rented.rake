@@ -21,6 +21,7 @@ namespace :db do
     CSV.new( open(datasource_url), :headers => :first_row ).each do |row|
       row["source"] = "climbsf_rented"
       row["origin_url"] = row["apartment page"]
+      row["date_closed"] = row["date_rented"]
       row["import_job_id"] = job.id
       cri.create_import_log row
     end

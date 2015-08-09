@@ -11,11 +11,12 @@ module ImportFormatter
     def to_float(value_string)
       return_float = 0
       if !value_string.nil? && value_string != "N/A" && value_string !="-"
+
+        # Convert to negative
         if value_string.include?("(") && value_string.include?(")") 
           value_string = value_string.delete("(").delete(")")
           value_string = "-" + value_string
         end
-
         return_float = value_string.delete(",").to_f 
       end
       return_float
@@ -31,7 +32,15 @@ module ImportFormatter
     # Given a String of the format DD/MM/YYYY returns the actual date object
     # If nil returns nil
     def to_date(raw_string)
-      issue_date = Date.strptime(raw_string,"%m/%d/%Y") unless raw_string.nil?
+      return nil if raw_string.nil?
+      issue_date = Date.strptime(raw_string,"%m/%d/%Y")
+    end
+
+    # Given a String of the format DD/MM/YYYY returns the actual date object
+    # If nil returns nil
+    def to_date_short_year(raw_string)
+      return nil if raw_string.nil?
+      issue_date = Date.strptime(raw_string,"%m/%d/%y")
     end
 
   end

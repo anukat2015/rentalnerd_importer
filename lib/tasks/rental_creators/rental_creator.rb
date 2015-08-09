@@ -12,20 +12,20 @@ module RentalCreator
   def create_import_log(row)
     puts "\tcreating new import_log: " + row["origin_url"]
     import_log = ImportLog.create
-    import_log[:address]      = row["address"]
-    import_log[:neighborhood] = row["neighborhood"]
-    import_log[:bedrooms]     = ImportFormatter.to_float row["bedrooms"]
-    import_log[:bathrooms]    = ImportFormatter.to_float row["bathrooms"]
-    import_log[:price]        = ImportFormatter.to_float row["price"]
-    import_log[:sqft]         = ImportFormatter.to_float row["sqft"]
-    import_log[:date_rented]  = ImportFormatter.to_date row["date_rented"]
-    import_log[:date_listed]  = ImportFormatter.to_date row["date_listed"]
-    import_log[:source]       = row["source"]
-    import_log[:origin_url]   = row["origin_url"]
-    import_log[:import_job_id]       = row["import_job_id"]
+    import_log[:address]          = row["address"]
+    import_log[:neighborhood]     = row["neighborhood"]
+    import_log[:bedrooms]         = ImportFormatter.to_float row["bedrooms"]
+    import_log[:bathrooms]        = ImportFormatter.to_float row["bathrooms"]
+    import_log[:price]            = ImportFormatter.to_float row["price"]
+    import_log[:sqft]             = ImportFormatter.to_float row["sqft"]
+    import_log[:date_closed]      = ImportFormatter.to_date row["date_closed"]
+    import_log[:date_listed]      = ImportFormatter.to_date row["date_listed"]
+    import_log[:source]           = row["source"]
+    import_log[:origin_url]       = row["origin_url"]
+    import_log[:import_job_id]    = row["import_job_id"]
+    import_log[:transaction_type] = row["transaction_type"] || DEFAULT_TRANSACTION_TYPE
     import_log.save!
     import_log
-
   end
 
   def generate_import_diffs( curr_import_job_id )
@@ -110,11 +110,12 @@ module RentalCreator
       import_diff[:bathrooms]    = import_log[:bathrooms]
       import_diff[:price]        = import_log[:price]
       import_diff[:sqft]         = import_log[:sqft]
-      import_diff[:date_rented]  = import_log[:date_rented]
+      import_diff[:date_closed]  = import_log[:date_closed]
       import_diff[:date_listed]  = import_log[:date_listed]
       import_diff[:source]       = import_log[:source]
       import_diff[:origin_url]   = import_log[:origin_url]
       import_diff[:import_job_id]        = import_log[:import_job_id]
+      import_diff[:transaction_type] = import_log[:transaction_type]
       import_diff[:diff_type]    = diff_type
       import_diff[:old_log_id]    = old_log_id
       import_diff[:new_log_id]    = new_log_id
@@ -162,9 +163,10 @@ module RentalCreator
 
   # Method to be overwritten
   # Creates the transaction
-  def create_transaction import_diff, transaction_type = "rental"
+  def create_transaction import_diff
+    transaction_type = import_diff["transaction_type"] || DEFAULT_TRANSACTION_TYPE
     property = get_matching_property import_diff[:origin_url]
-    transaction = PropertyTransactionLog.guess property[:id], import_diff[:date_rented], import_diff[:date_listed], DEFAULT_TRANSACTION_TYPE
+    transaction = PropertyTransactionLog.guess property[:id], import_diff[:date_closed], import_diff[:date_listed], transaction_type
     date_listed = import_diff[:date_listed] || get_default_date_listed
 
     # This transaction was never priorly captured
@@ -173,13 +175,13 @@ module RentalCreator
         property_id: property[:id],
         price: import_diff[:price],
         date_listed: date_listed,
-        date_rented: import_diff[:date_rented],
-        transaction_type: DEFAULT_TRANSACTION_TYPE
+        date_closed: import_diff[:date_closed],
+        transaction_type: transaction_type
       )  
 
     # This transaction was priorly captured
     else
-      transaction.date_rented = import_diff[:date_rented]
+      transaction.date_closed = import_diff[:date_closed]
       transaction.save!
     end
   end  
