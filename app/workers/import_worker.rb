@@ -18,7 +18,6 @@ class ImportWorker
     when "n33_f22b4acef257bfa904d548ef21050ca1eses" 
       logger.debug "Performing task db:import_climbsf_renting"
       Rake::Task['db:import_climbsf_renting'].invoke
-    end
     
     # Zillow SF 
     when "n46_b5aee320718b31d44407ddde5ed62909eses" 
