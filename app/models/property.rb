@@ -11,7 +11,10 @@ class Property < ActiveRecord::Base
       obj.lookup_address_changed?
     )
   }
-  after_commit :generate_prediction_results  
+  after_commit :generate_prediction_results
+  has_many :prediction_results, dependent: :destroy
+  has_many :property_transaction_logs, dependent: :destroy
+  has_many :property_transactions, dependent: :destroy
 
   CONFUSING_TERMS = [
     "(Inner Mission)",
