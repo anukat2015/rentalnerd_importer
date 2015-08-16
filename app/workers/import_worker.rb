@@ -23,6 +23,12 @@ class ImportWorker
     when "n46_b5aee320718b31d44407ddde5ed62909eses" 
       logger.debug "Performing task db:import_zillow_sf"
       Rake::Task['db:import_zillow_sf'].invoke
+
+    # Zillow Phoenix
+    when "n53_70da17e3370067399d5095287282d302eses"
+      logger.debug "Performing task db:import_zillow_ph"
+      Rake::Task['db:import_zillow_ph'].invoke
+
     end
 
   end  
