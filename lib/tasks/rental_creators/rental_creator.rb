@@ -148,6 +148,13 @@ module RentalCreator
         source:         import_diff[:source],
         origin_url:     import_diff[:origin_url]
       )
+    else
+      property.address      = import_diff[:address]
+      property.neighborhood = import_diff[:neighborhood]
+      property.bedrooms     = import_diff[:bedrooms]
+      property.bathrooms    = import_diff[:bathrooms]
+      property.sqft         = import_diff[:sqft]
+      property.save!
     end
 
   end

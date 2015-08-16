@@ -28,7 +28,7 @@ class Property < ActiveRecord::Base
     temp_neig = neighborhood
     CONFUSING_TERMS.each do |term|    
       temp_neig = temp_neig.gsub( term, "" ) unless temp_neig.nil?      
-    end        
+    end
     self.lookup_address = "#{address}, #{temp_neig}"    
   end
 
