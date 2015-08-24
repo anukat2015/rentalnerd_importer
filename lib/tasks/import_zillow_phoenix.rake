@@ -24,7 +24,7 @@ namespace :db do
 
     CSV.new( open(datasource_url), :headers => :first_row ).each do |row|
       row["address"] = row["address"].gsub("Incomplete address or missing price?Sometimes listing partners send Zillow listings that do not include a full address or price.To get more details on this property, please contact the listing agent, brokerage, or listing provider.", "")
-      row["source"] = "zillow_sf"
+      row["source"] = "zillow_ph"
       row["origin_url"] = row["apartment page"]
       row["import_job_id"] = job.id
       row["sqft"] = row["size"]
