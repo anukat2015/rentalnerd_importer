@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150831000652) do
+ActiveRecord::Schema.define(version: 20150907231525) do
 
   create_table "import_diffs", force: true do |t|
     t.text     "address"
@@ -54,6 +54,26 @@ ActiveRecord::Schema.define(version: 20150831000652) do
     t.datetime "updated_at"
     t.integer  "import_job_id"
     t.string   "transaction_type", default: "rental"
+  end
+
+  create_table "neighborhood_vertices", force: true do |t|
+    t.integer  "neighborhood_id"
+    t.integer  "vertex_order"
+    t.float    "latitude"
+    t.float    "longitude"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "neighborhoods", force: true do |t|
+    t.string   "name"
+    t.string   "source"
+    t.float    "max_latitude"
+    t.float    "min_latitude"
+    t.float    "max_longitude"
+    t.float    "min_longitude"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "prediction_models", force: true do |t|
@@ -101,6 +121,16 @@ ActiveRecord::Schema.define(version: 20150831000652) do
     t.float    "elevation"
     t.text     "lookup_address"
   end
+
+  create_table "property_neighborhoods", force: true do |t|
+    t.integer  "property_id",     limit: 8, null: false
+    t.integer  "neighborhood_id",           null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "property_neighborhoods", ["neighborhood_id"], name: "index_property_neighborhoods_on_neighborhood_id", using: :btree
+  add_index "property_neighborhoods", ["property_id", "neighborhood_id"], name: "index_property_neighborhoods_on_property_id_and_neighborhood_id", unique: true, using: :btree
 
   create_table "property_transaction_logs", force: true do |t|
     t.integer  "price"

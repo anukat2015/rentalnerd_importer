@@ -3,6 +3,8 @@ require './lib/tasks/import_formatter'
 namespace :db do
   desc "imports ClimbSF data for those that have already been listed"  
   task :import_prediction_model => :environment do   
+    puts "Importing prediction model data"
+
     pm = PredictionModel.new
 
     CSV.new( open("./lib/tasks/model_files/model_features.csv"), :headers => :first_row ).each do |row|

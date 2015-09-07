@@ -5,3 +5,18 @@
 #
 #   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
+
+# Version 1:
+# Rake::Task["db:reseed_standards"].execute
+# Rake::Task["db:reseed_curriculum_maps"].execute
+# Rake::Task["db:reseed_questions"].execute
+# Rake::Task["db:reseed_question_standards"].execute
+# Rake::Task["db:reseed_users_schools_districts"].execute
+
+# Version 2:
+Rake::Task["db:import_prediction_model"].execute
+
+# Miscellaneous
+Rake::Task["db:import_neighborhoods"].execute
+
+Rails.cache.clear
