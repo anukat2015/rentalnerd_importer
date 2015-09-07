@@ -2,6 +2,7 @@ require 'spec_helper'
 
 RSpec.describe PredictionResult, type: :model do
 
+  let(:property) { create(:property) }
   let(:pn) { create(:prediction_neighborhood) }
   let(:prediction_model) { 
     prediction_model = create(:prediction_model,
@@ -19,11 +20,13 @@ RSpec.describe PredictionResult, type: :model do
   end  
 
   it "creates a new prediction for each model when a new property is created" do
-    ppt = create(:property_transaction_rental)
-    generated_rental_price = prediction_model.predicted_rent ppt.property.id
-    ppt.property.save!
+    pptlr = create(:property_transaction_log_rental, property_id: property.id)
+    ppt = property.property_transactions.first
+    generated_rental_price = prediction_model.predicted_rent property.id
+    ppt.save!
 
-    prediction = PredictionResult.where( prediction_model_id: prediction_model.id, property_id: ppt.property.id ).first
+    prediction = PredictionResult.where( prediction_model_id: prediction_model.id, property_id: property.id ).first
+
     prediction.nil?.should == false
     prediction.predicted_rent.round.should == generated_rental_price.round
 

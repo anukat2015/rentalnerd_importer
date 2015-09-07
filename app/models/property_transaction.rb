@@ -13,6 +13,7 @@ class PropertyTransaction < ActiveRecord::Base
         prediction_model_id: pm.id,
         transaction_type: transaction_type
       ).first
+
       
       curr_predicted_rent = pm.predicted_rent(property.id)
       curr_transaction_type = transaction_type
