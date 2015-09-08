@@ -11,6 +11,8 @@ class Property < ActiveRecord::Base
       obj.lookup_address_changed?
     )
   }
+  after_commit :associate_with_neighborhoods
+
   has_many :prediction_results, dependent: :destroy
   has_many :property_transaction_logs, dependent: :destroy
   has_many :property_transactions, dependent: :destroy
@@ -43,6 +45,19 @@ class Property < ActiveRecord::Base
     unless api_response["results"].nil? || api_response["results"].size == 0
       result = api_response["results"][0]
       self.elevation = result["elevation"]
+    end
+  end
+
+  def associate_with_neighborhoods
+    possible_nbs = Neighborhood.guess self
+    possible_nbs.each do |nb|
+      if nb.belongs_here? self
+        puts "associating property #{id} with neighborhood #{nb.id}, #{nb.name}"
+        PropertyNeighborhood.where(
+          property_id: id, 
+          neighborhood_id: nb.id 
+        ).first_or_create
+      end
     end
   end
 

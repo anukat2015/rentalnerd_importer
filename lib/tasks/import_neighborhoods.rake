@@ -4,7 +4,7 @@ namespace :db do
   desc "imports the neighborhoods provided in the shapefile called shape_file.json"  
   task :import_neighborhoods => :environment do 
     puts "Importing neighborhoods data"
-    file = File.read('./lib/tasks/shape_file.json')
+    file = File.read('./lib/tasks/model_files/shape_file.json')
     data = JSON.parse(file)
 
     data["features"].each do |row|
