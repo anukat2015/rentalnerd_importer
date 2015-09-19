@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150907231525) do
+ActiveRecord::Schema.define(version: 20150919184617) do
 
   create_table "import_diffs", force: true do |t|
     t.text     "address"
@@ -67,7 +67,7 @@ ActiveRecord::Schema.define(version: 20150907231525) do
 
   create_table "neighborhoods", force: true do |t|
     t.string   "name"
-    t.string   "source"
+    t.string   "shapefile_source"
     t.float    "max_latitude"
     t.float    "min_latitude"
     t.float    "max_longitude"
