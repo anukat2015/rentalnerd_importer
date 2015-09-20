@@ -20,13 +20,13 @@ class SlackPublisher
                         "Error Level: #{pr.error_level}\n"
         
     elsif pr.transaction_type == "sales"
-      cap = pr.predicted_rent * 12 / pr.listed_sale
+      cap = ( pr.predicted_rent * 12 / pr.listed_sale * 100 ).round(2)
       payload[:text] =  "Property Id: #{pp.id},\n" +
                         "Address: #{pp.address},\n" +
                         "Neighborhood: #{pp.neighborhood},\n" + 
                         "Listed Sale Price: #{pr.listed_sale},\n" + 
                         "Predicted Rent: #{pr.predicted_rent},\n" + 
-                        "CAP rate: #{cap}\n"
+                        "CAP rate: #{cap}%\n"
 
     end
     
