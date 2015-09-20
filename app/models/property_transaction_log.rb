@@ -69,8 +69,8 @@ class PropertyTransactionLog < ActiveRecord::Base
     if !date_listed.nil? && !date_closed.nil?
       self.days_on_market = (
         date_closed - date_listed
-      ).to_i / 1.day
-    end    
+      ).to_i
+    end
   end
 
   def set_transaction_status
