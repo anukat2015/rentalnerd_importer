@@ -15,6 +15,7 @@ class PredictionModel < ActiveRecord::Base
     
   end
 
+  # TODO: modify this method to use coefficient of new neighborhoods in the table
   def neighborhood_coefficient property
     pn = prediction_neighborhoods.where( prediction_neighborhood_name: property.neighborhood ).first
     if pn.nil?

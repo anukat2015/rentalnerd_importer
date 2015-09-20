@@ -174,7 +174,11 @@ module RentalCreator
     transaction_type = import_diff["transaction_type"] || DEFAULT_TRANSACTION_TYPE
     property = get_matching_property import_diff[:origin_url]
     transaction = PropertyTransactionLog.guess property[:id], import_diff[:date_closed], import_diff[:date_listed], transaction_type
-    date_listed = import_diff[:date_listed] || get_default_date_listed
+
+    date_listed = nil
+    if import_diff[:date_closed].nil?
+      date_listed = import_diff[:date_listed] || get_default_date_listed
+    end
 
     # This transaction was never priorly captured
     if transaction.nil?
@@ -188,7 +192,8 @@ module RentalCreator
 
     # This transaction was priorly captured
     else
-      transaction.date_closed = import_diff[:date_closed]
+      transaction.date_closed = import_diff[:date_closed] unless import_diff[:date_closed].nil?
+      transaction.date_listed = date_listed unless date_listed.nil?
       transaction.save!
     end
   end  
