@@ -93,5 +93,27 @@ RSpec.describe RentalCreator do
       pp.property_transaction_logs.size.should == 1
     end
 
+    it 'does not override price with 0 if there was a prior price already' do
+      list_date = 1.year.ago
+      imd = create(:import_diff, address: pp.address, neighborhood: pp.neighborhood, date_listed: list_date, price: 100)
+      ic.create_transaction imd      
+      imd = create(:import_diff, address: pp.address, neighborhood: pp.neighborhood, date_listed: list_date, price: 0)
+      ic.create_transaction imd
+      pp.property_transaction_logs.size.should == 1
+      ptl = pp.property_transaction_logs.first
+      ptl.price.should == 100
+    end
+
+    it 'does not override price with 0 if there was a prior price already' do
+      list_date = 1.year.ago
+      imd = create(:import_diff, address: pp.address, neighborhood: pp.neighborhood, date_listed: list_date, price: 100)
+      ic.create_transaction imd      
+      imd = create(:import_diff, address: pp.address, neighborhood: pp.neighborhood, date_listed: list_date, price: nil)
+      ic.create_transaction imd
+      pp.property_transaction_logs.size.should == 1
+      ptl = pp.property_transaction_logs.first
+      ptl.price.should == 100
+    end
+
   end
 end

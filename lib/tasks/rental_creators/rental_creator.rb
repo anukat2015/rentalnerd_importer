@@ -188,7 +188,7 @@ module RentalCreator
         date_listed: date_listed,
         date_closed: import_diff[:date_closed],
         transaction_type: transaction_type
-      )  
+      )
 
     # This transaction was priorly captured
     else
