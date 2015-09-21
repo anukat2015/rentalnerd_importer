@@ -6,8 +6,11 @@ class Includer
 end
 
 RSpec.describe RentalCreator do
+
   let(:ic) { Includer.new }
   let(:pp) { create(:property) }
+  let(:listed_date) { 1.year.ago }
+  let(:closed_date) { Time.now }
   let(:default_time) { Time.now }
 
   def google_map_request
@@ -15,9 +18,68 @@ RSpec.describe RentalCreator do
     stub_request(:get, /.*maps.googleapis.com.*elevation.*/).to_return(:status => 200, :body => rni_fixture("google_elevation.json"), :headers => {})
   end
 
+  def csv_headers
+    headers = ["address", "neighborhood", "bedrooms", "bathrooms", "price", "sqft", "source", "origin_url", "import_job_id", "transaction_type", "date_closed", "date_listed"]    
+  end
+
+  def default_attributes
+    default_attrs = {
+      "address" => "some address", 
+      "neighborhood" => "some neighborhood", 
+      "bedrooms" => "5", 
+      "bathrooms" => "5", 
+      "price" => "100", 
+      "sqft" => "50", 
+      "source" => "lalaland", 
+      "origin_url" => "http://google.com", 
+      "import_job_id" => "1",
+      "transaction_type" => "rental", 
+      "date_closed" => nil, 
+      "date_listed" => nil
+    }.with_indifferent_access
+  end
+
+  def generate_row attrs
+    combined_attrs = attrs.reverse_merge default_attributes
+    row_array = csv_headers.map { |key| combined_attrs[key] }
+    row = CSV::Row.new(csv_headers, row_array)
+  end
+
   before do
     ic.stub(:get_default_date_listed) { default_time }
     google_map_request
+  end
+
+  describe '#create_import_log' do
+    it 'creates a new import_log and sets date_transacted with date_listed if only date_listed is provided' do
+      listed_date.strftime("%m/%d/%y")
+      row = generate_row date_listed: listed_date.strftime("%m/%d/%Y")
+      ic.create_import_log row
+      il = ImportLog.all.first
+      il.date_listed.should == listed_date.to_date
+      il.date_transacted.should == listed_date.to_date
+      il.date_closed.nil?.should == true
+    end
+
+    it 'creates a new import_log and sets date_transacted with date_closed if only date_closed is provided' do
+      listed_date.strftime("%m/%d/%y")
+      row = generate_row date_closed: closed_date.strftime("%m/%d/%Y")
+      ic.create_import_log row
+      il = ImportLog.all.first
+      il.date_closed.should == closed_date.to_date
+      il.date_transacted.should == closed_date.to_date
+      il.date_listed.nil?.should == true
+    end
+
+    it 'creates a new import_log and sets date_transacted with date_closed if both date_closed and date_listed are provided' do
+      listed_date.strftime("%m/%d/%y")
+      row = generate_row date_closed: closed_date.strftime("%m/%d/%Y"), date_listed: listed_date.strftime("%m/%d/%Y")
+      ic.create_import_log row
+      il = ImportLog.all.first
+      il.date_closed.should == closed_date.to_date
+      il.date_transacted.should == closed_date.to_date
+      il.date_listed.nil?.should == false
+    end
   end
 
   describe '#create_transaction' do

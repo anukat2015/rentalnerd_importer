@@ -1,4 +1,4 @@
 FactoryGirl.define do
-  factory :import_diff do
+  factory :import_log do
   end
 end

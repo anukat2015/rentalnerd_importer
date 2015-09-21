@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150919184617) do
+ActiveRecord::Schema.define(version: 20150921033400) do
 
   create_table "import_diffs", force: true do |t|
     t.text     "address"
@@ -31,6 +31,7 @@ ActiveRecord::Schema.define(version: 20150919184617) do
     t.integer  "new_log_id"
     t.integer  "import_job_id"
     t.string   "transaction_type", default: "rental"
+    t.date     "date_transacted"
   end
 
   create_table "import_jobs", force: true do |t|
@@ -54,6 +55,7 @@ ActiveRecord::Schema.define(version: 20150919184617) do
     t.datetime "updated_at"
     t.integer  "import_job_id"
     t.string   "transaction_type", default: "rental"
+    t.date     "date_transacted"
   end
 
   create_table "neighborhood_vertices", force: true do |t|

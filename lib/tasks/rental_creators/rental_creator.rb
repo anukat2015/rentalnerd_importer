@@ -20,6 +20,7 @@ module RentalCreator
     import_log[:sqft]             = ImportFormatter.to_float row["sqft"]
     import_log[:date_closed]      = ImportFormatter.to_date row["date_closed"]
     import_log[:date_listed]      = ImportFormatter.to_date row["date_listed"]
+    import_log[:date_transacted]  = import_log[:date_closed] || import_log[:date_listed]
     import_log[:source]           = row["source"]
     import_log[:origin_url]       = row["origin_url"]
     import_log[:import_job_id]    = row["import_job_id"]
@@ -38,7 +39,7 @@ module RentalCreator
     puts "\tProcessing created, updated import_diffs"
     previous_import_job_id = self.get_previous_batch_id curr_import_job_id
     
-    ImportLog.where( import_job_id: curr_import_job_id ).each do |import_log|
+    get_sorted_import_logs.each do |import_log|
       
       # There was no previous batch ever imported
       if previous_import_job_id.nil? == 1
@@ -46,7 +47,7 @@ module RentalCreator
 
       # There was a previous batch ever imported
       else
-        previous_log = self.get_matching_record_from_batch import_log, previous_import_job_id
+        previous_log = self.get_matching_import_log_from_batch import_log, previous_import_job_id
 
         if previous_log.nil?
           # binding.pry
@@ -68,16 +69,20 @@ module RentalCreator
 
     return if previous_import_job_id.nil?
 
-    deleted_import_logs = []
-    ImportLog.where( import_job_id: previous_import_job_id ).each do |prev_log|
-      current_log = self.get_matching_record_from_batch prev_log, curr_import_job_id
-
+    get_sorted_import_logs.each do |prev_log|
+      current_log = self.get_matching_import_log_from_batch prev_log, curr_import_job_id
       if current_log.nil?
+
         self.create_import_diff( prev_log, "deleted", nil, prev_log[:id] )
       end
 
     end
 
+  end
+
+  # Returns the import_logs belonging to an import job in ascending order
+  def get_sorted_import_logs
+    ImportLog.where( import_job_id: previous_import_job_id ).order( date_transacted: :asc)
   end
 
   def get_previous_batch_id job_id
@@ -95,11 +100,7 @@ module RentalCreator
   #     - deleted
   #
   def create_import_diff(import_log, diff_type, new_log_id, old_log_id=nil)
-    import_diff = ImportDiff.where( 
-      origin_url: import_log[:origin_url], 
-      import_job_id: import_log[:import_job_id],
-      source: import_log[:source]
-    ).first
+    import_diff = get_import_diff import_log
 
     if import_diff.nil?
       puts "\trecord was #{diff_type} : " + import_log[:origin_url]
@@ -112,6 +113,7 @@ module RentalCreator
       import_diff[:sqft]         = import_log[:sqft]
       import_diff[:date_closed]  = import_log[:date_closed]
       import_diff[:date_listed]  = import_log[:date_listed]
+      import_diff[:date_transacted]  = import_log[:date_transacted]
       import_diff[:source]       = import_log[:source]
       import_diff[:origin_url]   = import_log[:origin_url]
       import_diff[:import_job_id]        = import_log[:import_job_id]
@@ -218,7 +220,7 @@ module RentalCreator
 
   # Method to be overwritten
   # Returns the matching record from the previous batch
-  def get_matching_record_from_batch import_log, job_id
+  def get_matching_import_log_from_batch import_log, job_id
     ImportLog.where( 
       origin_url: import_log[:origin_url], 
       import_job_id: job_id,
@@ -233,5 +235,14 @@ module RentalCreator
     true
   end
 
+  # Method to be overwritten
+  # Gets the corresponding import_diff given an import log
+  def get_import_diff import_log
+    import_diff = ImportDiff.where( 
+      origin_url: import_log[:origin_url], 
+      import_job_id: import_log[:import_job_id],
+      source: import_log[:source]
+    ).first    
+  end
 
 end

@@ -60,21 +60,9 @@ namespace :db do
       row["event_date"]       = ImportFormatter.to_date_short_year row["event_date"]      
       
       unless row["event_date"].nil?
-        rows << row 
+        zi.create_import_log row
       end
       
-    end
-
-    sorted_rows = rows.sort do |row_1, row_2|
-      row_1["event_date"] <=> row_2["event_date"]
-    end
-
-    sorted_rows.each do |row|
-      begin
-        zi.create_import_log row
-      rescue Exception => e
-        binding.pry
-      end      
     end
 
     zi.generate_import_diffs job.id    
