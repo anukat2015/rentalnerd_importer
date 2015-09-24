@@ -39,7 +39,7 @@ module RentalCreator
     puts "\tProcessing created, updated import_diffs"
     previous_import_job_id = self.get_previous_batch_id curr_import_job_id
     
-    get_sorted_import_logs.each do |import_log|
+    get_sorted_import_logs( previous_import_job_id ).each do |import_log|
       
       # There was no previous batch ever imported
       if previous_import_job_id.nil? == 1
@@ -69,7 +69,7 @@ module RentalCreator
 
     return if previous_import_job_id.nil?
 
-    get_sorted_import_logs.each do |prev_log|
+    get_sorted_import_logs( previous_import_job_id ).each do |prev_log|
       current_log = self.get_matching_import_log_from_batch prev_log, curr_import_job_id
       if current_log.nil?
 
@@ -81,7 +81,7 @@ module RentalCreator
   end
 
   # Returns the import_logs belonging to an import job in ascending order
-  def get_sorted_import_logs
+  def get_sorted_import_logs previous_import_job_id
     ImportLog.where( import_job_id: previous_import_job_id ).order( date_transacted: :asc)
   end
 

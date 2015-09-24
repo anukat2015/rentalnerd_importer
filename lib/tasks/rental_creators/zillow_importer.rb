@@ -58,31 +58,36 @@ class ZillowImporter
     Date.today
   end
 
-  # Returns the matching ImportLog from the for a corresponding batch
+  # Returns the matching ImportLog belonging to an indicated Import Job 
+  #
+  # Assumption each source can only have one transaction per date
   def get_matching_import_log_from_batch import_log, job_id
     ImportLog.where( 
       source: import_log[:source],      
       import_job_id: job_id,
       origin_url: import_log[:origin_url],
       transaction_type: import_log[:transaction_type],
-      date_transacted: import_log[:date_transacted],
-      price: import_log[:price]
+      date_transacted: import_log[:date_transacted]
     ).first      
   end
 
-  # TO BE OVERWRITTEN
+  # Gets the corresponding import_diff given an import_log
+  #
+  # Assumption each source can only have one transaction per date
   def get_import_diff import_log
     import_diff = ImportDiff.where( 
       source: import_log[:source],      
       import_job_id: import_log[:import_job_id],
       origin_url: import_log[:origin_url],
       transaction_type: import_log[:transaction_type],
-      date_transacted: import_log[:date_transacted],
-      price: import_log[:price]
+      date_transacted: import_log[:date_transacted]
     ).first    
   end
 
-  
+  # Creates an import diff given an import_log
+  #
+  # Assumption: if diff_type = deleted and if current import_log does not correspond to the most recent transaction 
+  #   of indicated property, returns without creating an import_diff
   def create_import_diff(import_log, diff_type, new_log_id, old_log_id=nil)
     super
   end
