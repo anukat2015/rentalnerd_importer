@@ -17,7 +17,8 @@ class SlackPublisher
                         "Neighborhood: #{pp.neighborhood},\n" + 
                         "Listed Rent: #{pr.listed_rent},\n" + 
                         "Predicted Rent: #{pr.predicted_rent},\n" +  
-                        "Error Level: #{pr.error_level}\n"
+                        "Error Level: #{pr.error_level},\n" +
+                        "URL: #{pp.origin_url}%\n"
         
     elsif pr.transaction_type == "sales"
       cap = ( pr.predicted_rent * 12 / pr.listed_sale * 100 ).round(2)
@@ -26,7 +27,8 @@ class SlackPublisher
                         "Neighborhood: #{pp.neighborhood},\n" + 
                         "Listed Sale Price: #{pr.listed_sale},\n" + 
                         "Predicted Rent: #{pr.predicted_rent},\n" + 
-                        "CAP rate: #{cap}%\n"
+                        "CAP rate: #{cap}%,\n" + 
+                        "URL: #{pp.origin_url}%\n"
 
     end
     
