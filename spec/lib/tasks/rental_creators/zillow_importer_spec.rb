@@ -23,7 +23,7 @@ RSpec.describe ZillowImporter do
       found_il.should == il
     end
 
-    it 'returns nil date_transacted does not match' do
+    it 'returns nil when date_transacted does not match' do
       transacted_date = Time.now
       il = create(:import_log, 
         source: "some source",        
@@ -38,7 +38,10 @@ RSpec.describe ZillowImporter do
 
       found_il = zi.get_matching_import_log_from_batch il, ij.id
       found_il.nil?.should == true
-    end    
+    end
+
+    it 'returns nil when price does not match'
+    it 'returns nil when transaction_type does not match'
   end
 
   describe '#get_import_diff', :found do
@@ -71,6 +74,9 @@ RSpec.describe ZillowImporter do
       found_idiff = zi.get_import_diff il
       found_idiff.nil?.should == true
     end
+
+    it 'returns nil when price does not match'
+    it 'returns nil when transaction_type does not match'    
   end
 
   describe '#create_import_diff' do
