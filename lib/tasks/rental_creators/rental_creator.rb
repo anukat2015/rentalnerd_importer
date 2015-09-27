@@ -36,7 +36,7 @@ module RentalCreator
   end
 
   def generate_created_and_modified_diffs( curr_import_job_id )
-    puts "\tProcessing created, updated import_diffs"
+    puts "\n\tProcessing created, updated import_diffs"
     previous_import_job_id = self.get_previous_batch_id curr_import_job_id 
 
     # There was no previous batch ever imported
@@ -65,7 +65,7 @@ module RentalCreator
 
   # To Be Completed
   def generate_deleted_diffs( curr_import_job_id )
-    puts "\tProcessing deleted import_diffs"
+    puts "\n\tProcessing deleted import_diffs"
     previous_import_job_id = self.get_previous_batch_id curr_import_job_id
 
     return if previous_import_job_id.nil?
@@ -106,7 +106,7 @@ module RentalCreator
     import_diff = get_import_diff curr_job_id, import_log
 
     if import_diff.nil?
-      puts "\trecord was #{diff_type} : " + import_log[:origin_url]
+      puts "\t\trecord was #{diff_type} : " + import_log[:origin_url]
       import_diff = ImportDiff.create
       import_diff[:address]           = import_log[:address]
       import_diff[:neighborhood]      = import_log[:neighborhood]
@@ -179,7 +179,7 @@ module RentalCreator
     transaction_type = import_diff["transaction_type"] || DEFAULT_TRANSACTION_TYPE
     property = get_matching_property import_diff[:origin_url]
     transaction = PropertyTransactionLog.guess property[:id], import_diff[:date_closed], import_diff[:date_listed], transaction_type
-    
+
     date_listed = nil
     if import_diff[:date_closed].nil?
       date_listed = import_diff[:date_listed] || get_default_date_listed
