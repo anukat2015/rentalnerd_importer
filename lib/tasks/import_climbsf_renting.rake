@@ -18,7 +18,7 @@ namespace :db do
     )
     cri = ClimbsfRentingImporter.new
 
-    CSV.foreach( open(datasource_url), :headers => :first_row ).each do |row|      
+    CSV.foreach( open(datasource_url).read, :headers => :first_row ).each do |row|      
       row["source"] = "climbsf_renting"
       row["origin_url"] = row["apartment page"]
       row["import_job_id"] = job.id
