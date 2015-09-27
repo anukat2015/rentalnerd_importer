@@ -7,6 +7,7 @@ class SlackPinger
 
   def perform( import_job_id )
       ij = ImportJob.find import_job_id
+      payload = {}
       payload[:text] =  "Import Job started\n" +
                         "ID: #{ij.id},\n" +
                         "Source: #{ij.source},\n"
