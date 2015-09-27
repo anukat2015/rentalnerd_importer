@@ -194,10 +194,10 @@ RSpec.describe RentalCreator do
             price: 1000
           )
           ic.generate_import_diffs ij.id
-          idiff = ic.get_import_diff il
+          idiff = ic.get_import_diff ij.id, il
           idiff.nil?.should == false
           idiff.diff_type.should == "created"
-        end
+        end    
       end
 
       context 'has previous import job' do
@@ -215,7 +215,7 @@ RSpec.describe RentalCreator do
           ic.generate_import_diffs nij.id
           pid = ic.get_previous_batch_id nij.id
           pid.should == ij.id
-          idiff = ic.get_import_diff il
+          idiff = ic.get_import_diff nij.id, il
           idiff.nil?.should == false
           idiff.diff_type.should == "created"
         end
@@ -248,7 +248,7 @@ RSpec.describe RentalCreator do
 
           pid = ic.get_previous_batch_id nij.id
           pid.should == ij.id
-          idiff = ic.get_import_diff il2
+          idiff = ic.get_import_diff nij.id, il2
           idiff.nil?.should == true
         end
       end      
@@ -256,21 +256,91 @@ RSpec.describe RentalCreator do
 
     context 'deleted' do
       it 'creates deleted import_diff if import_log ' do
-          il1 = create(:import_log, 
-            source: "some source",        
-            import_job_id: ij.id,
-            origin_url: "some url", 
-            transaction_type: "rental",
-            date_transacted: transacted_date,
-            price: 1000
-          )
+        il1 = create(:import_log, 
+          source: "some source",        
+          import_job_id: ij.id,
+          origin_url: "some url", 
+          transaction_type: "rental",
+          date_transacted: transacted_date,
+          price: 1000
+        )
 
-          nij = create(:import_job)
-          ic.generate_import_diffs nij.id
-          nij.import_diffs.size.should == 1
-          nij.import_diffs.first.diff_type.should == "deleted"
+        nij = create(:import_job)
+        ic.generate_import_diffs nij.id
+        nij.import_diffs.size.should == 1
+        nij.import_diffs.first.diff_type.should == "deleted"
           
       end
     end
+  end
+
+  describe '#generate_transactions' do
+    it 'creates a new transaction when given a fresh import_diff with date_listed that does not map to any transactions' do
+      il1 = create(:import_log, 
+        source: "some source",        
+        import_job_id: ij.id,
+        origin_url: "some url", 
+        transaction_type: "rental",
+        date_transacted: transacted_date,
+        date_listed: transacted_date,
+        price: 1000
+      )
+      ic.generate_import_diffs ij.id
+      ic.generate_properties ij.id
+      ic.generate_transactions ij.id
+
+      PropertyTransactionLog.all.size.should == 1
+      ptt = PropertyTransactionLog.all.first
+      ptt.date_listed.should == transacted_date.to_date
+      ptt.transaction_status.should == "open"
+      ptt.price.should == 1000
+    end
+
+    it 'creates a new transaction when given a fresh import_diff with date_closed that does not map to any transactions' do
+      il1 = create(:import_log,
+        source: "some source",
+        import_job_id: ij.id,
+        origin_url: "some url", 
+        transaction_type: "rental",
+        date_transacted: transacted_date,
+        date_closed: transacted_date,
+        price: 1000
+      )
+      ic.generate_import_diffs ij.id
+      ic.generate_properties ij.id
+      ic.generate_transactions ij.id
+
+      PropertyTransactionLog.all.size.should == 1
+      ptt = PropertyTransactionLog.all.first
+      ptt.date_closed.should == transacted_date.to_date
+      ptt.transaction_status.should == "closed"
+      ptt.price.should == 1000
+    end
+
+    it 'closes an existing transaction if corresponding import_log is not found in new batch' do
+      il1 = create(:import_log, 
+        source: "some source",        
+        import_job_id: ij.id,
+        origin_url: "some url", 
+        transaction_type: "rental",
+        date_transacted: transacted_date,
+        price: 1000
+      )
+      ic.generate_import_diffs ij.id
+      ic.generate_properties ij.id
+      ic.generate_transactions ij.id      
+
+      nij = create(:import_job)
+      ic.generate_import_diffs nij.id
+      ic.generate_properties nij.id
+      ic.generate_transactions nij.id
+
+      PropertyTransactionLog.all.size.should == 1
+      ptt = PropertyTransactionLog.all.first
+      ptt.date_closed.should == transacted_date.to_date
+      ptt.transaction_status.should == "closed"
+      ptt.price.should == 1000
+
+    end    
   end
 end

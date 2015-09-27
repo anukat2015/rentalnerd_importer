@@ -52,7 +52,6 @@ module RentalCreator
         previous_log = self.get_matching_import_log_from_batch import_log, previous_import_job_id
 
         if previous_log.nil?
-          # binding.pry
           puts "\t\tcould not find "+ import_log[:origin_url] +" in Job: " + previous_import_job_id.to_s
           self.create_import_diff( curr_import_job_id, import_log, "created", import_log[:id], nil )
 
@@ -74,8 +73,10 @@ module RentalCreator
     get_sorted_import_logs( previous_import_job_id ).each do |prev_log|
       current_log = self.get_matching_import_log_from_batch prev_log, curr_import_job_id
       if current_log.nil?
-
-        self.create_import_diff( curr_import_job_id, prev_log, "deleted", nil, prev_log[:id] )
+        temp_log = prev_log.dup
+        temp_log[:date_listed] = nil
+        temp_log[:date_closed] = Time.now
+        self.create_import_diff( curr_import_job_id, temp_log, "deleted", nil, prev_log[:id] )
       end
 
     end
@@ -102,7 +103,7 @@ module RentalCreator
   #     - deleted
   #
   def create_import_diff(curr_job_id, import_log, diff_type, new_log_id, old_log_id=nil)
-    import_diff = get_import_diff import_log
+    import_diff = get_import_diff curr_job_id, import_log
 
     if import_diff.nil?
       puts "\trecord was #{diff_type} : " + import_log[:origin_url]
@@ -178,7 +179,7 @@ module RentalCreator
     transaction_type = import_diff["transaction_type"] || DEFAULT_TRANSACTION_TYPE
     property = get_matching_property import_diff[:origin_url]
     transaction = PropertyTransactionLog.guess property[:id], import_diff[:date_closed], import_diff[:date_listed], transaction_type
-
+    
     date_listed = nil
     if import_diff[:date_closed].nil?
       date_listed = import_diff[:date_listed] || get_default_date_listed
@@ -238,10 +239,10 @@ module RentalCreator
 
   # Method to be overwritten
   # Gets the corresponding import_diff given an import log
-  def get_import_diff import_log
+  def get_import_diff curr_job_id, import_log
     import_diff = ImportDiff.where( 
       origin_url: import_log[:origin_url], 
-      import_job_id: import_log[:import_job_id],
+      import_job_id: curr_job_id,
       source: import_log[:source]
     ).first    
   end

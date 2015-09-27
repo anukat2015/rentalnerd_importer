@@ -75,10 +75,10 @@ class ZillowImporter
   # Gets the corresponding import_diff given an import_log
   #
   # Assumption each source can only have one transaction per date with the same exact price
-  def get_import_diff import_log
+  def get_import_diff curr_job_id, import_log
     import_diff = ImportDiff.where( 
       source: import_log[:source],      
-      import_job_id: import_log[:import_job_id],
+      import_job_id: curr_job_id,
       origin_url: import_log[:origin_url],
       transaction_type: import_log[:transaction_type],
       date_transacted: import_log[:date_transacted],

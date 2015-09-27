@@ -1,12 +1,21 @@
 require 'spec_helper'
 require './lib/tasks/rental_creators/zillow_importer'
 
-
-
 RSpec.describe ZillowImporter do
   let(:zi) { ZillowImporter.new }
   let(:ij) { create(:import_job) }
   let(:transacted_date) { Time.now }
+
+
+  def google_map_request
+    stub_request(:get, /.*maps.googleapis.com.*address.*/).to_return(:status => 200, :body => rni_fixture("google_map_location.json"), :headers => {})
+    stub_request(:get, /.*maps.googleapis.com.*elevation.*/).to_return(:status => 200, :body => rni_fixture("google_elevation.json"), :headers => {})
+  end
+
+  before do
+    zi.stub(:get_default_date_listed) { default_time }
+    google_map_request
+  end  
   
   describe '#get_matching_import_log_from_batch' do
     it 'returns a matching import log' do
@@ -86,7 +95,7 @@ RSpec.describe ZillowImporter do
         price: 1000
       )
       idiff = zi.create_import_diff(ij.id, il, "rental", il.id, nil)
-      found_idiff = zi.get_import_diff il
+      found_idiff = zi.get_import_diff ij.id, il
       found_idiff.should == idiff
     end
 
@@ -102,7 +111,7 @@ RSpec.describe ZillowImporter do
       idiff = zi.create_import_diff(ij.id, il, "rental", il.id, nil)
 
       il[:date_transacted] = 1.year.ago
-      found_idiff = zi.get_import_diff il
+      found_idiff = zi.get_import_diff ij.id, il
       found_idiff.nil?.should == true
     end
 
@@ -118,7 +127,7 @@ RSpec.describe ZillowImporter do
       idiff = zi.create_import_diff(ij.id, il, "rental", il.id, nil)
 
       il[:price] = 2000
-      found_idiff = zi.get_import_diff il
+      found_idiff = zi.get_import_diff ij.id, il
       found_idiff.nil?.should == true      
     end
 
@@ -134,7 +143,7 @@ RSpec.describe ZillowImporter do
       idiff = zi.create_import_diff(ij.id, il, "rental", il.id, nil)
 
       il[:transaction_type] = "sale"
-      found_idiff = zi.get_import_diff il
+      found_idiff = zi.get_import_diff ij.id, il
       found_idiff.nil?.should == true      
     end
   end
@@ -152,9 +161,44 @@ RSpec.describe ZillowImporter do
             price: 1000
           )
           zi.generate_import_diffs ij.id
-          idiff = zi.get_import_diff il
+          idiff = zi.get_import_diff ij.id, il
           idiff.nil?.should == false
           idiff.diff_type.should == "created"
+        end
+
+        it 'creates 2 new created import diff' do
+          il1 = create(:import_log, 
+            source: "some source",        
+            import_job_id: ij.id,
+            origin_url: "some url", 
+            transaction_type: "rental",
+            date_listed: transacted_date,
+            date_transacted: transacted_date,
+            price: 1000
+          )
+          closed_date = transacted_date + 1.day
+          il2 = create(:import_log, 
+            source: "some source",        
+            import_job_id: ij.id,
+            origin_url: "some url", 
+            transaction_type: "rental",
+            date_closed: closed_date,
+            date_transacted: closed_date,
+            price: 1000
+          )          
+          zi.generate_import_diffs ij.id
+
+          ij.import_diffs.size.should == 2
+
+          idiff1 = zi.get_import_diff ij.id, il1
+          idiff1.nil?.should == false
+          idiff1.date_listed.should == transacted_date.to_date
+          idiff1.diff_type.should == "created"
+
+          idiff2 = zi.get_import_diff ij.id, il2
+          idiff2.nil?.should == false
+          idiff2.date_closed.should == closed_date.to_date
+          idiff2.diff_type.should == "created"          
         end
       end
 
@@ -173,7 +217,7 @@ RSpec.describe ZillowImporter do
           zi.generate_import_diffs nij.id
           pid = zi.get_previous_batch_id nij.id
           pid.should == ij.id
-          idiff = zi.get_import_diff il
+          idiff = zi.get_import_diff nij.id, il
           idiff.nil?.should == false
           idiff.diff_type.should == "created"
         end
@@ -207,7 +251,7 @@ RSpec.describe ZillowImporter do
           pid = zi.get_previous_batch_id nij.id
           pid.should == ij.id
 
-          idiff = zi.get_import_diff il2
+          idiff = zi.get_import_diff nij.id, il2
           idiff.nil?.should == true
         end
       end      
@@ -362,31 +406,124 @@ RSpec.describe ZillowImporter do
       most_recent.should == true            
     end
   end
+
+  describe '#generate_transactions' do
+    it 'creates a new transaction when given a fresh import_diff with date_listed that does not map to any transactions' do
+      il1 = create(:import_log, 
+        source: "some source",        
+        import_job_id: ij.id,
+        origin_url: "some url", 
+        transaction_type: "rental",
+        date_transacted: transacted_date,
+        date_listed: transacted_date,
+        price: 1000
+      )
+      zi.generate_import_diffs ij.id
+      zi.generate_properties ij.id
+      zi.generate_transactions ij.id
+
+      PropertyTransactionLog.all.size.should == 1
+      ptt = PropertyTransactionLog.all.first
+      ptt.date_listed.should == transacted_date.to_date
+      ptt.transaction_status.should == "open"
+      ptt.price.should == 1000
+    end
+
+    it 'creates a new transaction when given a fresh import_diff with date_closed that does not map to any transactions' do
+      il1 = create(:import_log,
+        source: "some source",
+        import_job_id: ij.id,
+        origin_url: "some url", 
+        transaction_type: "rental",
+        date_transacted: transacted_date,
+        date_closed: transacted_date,
+        price: 1000
+      )
+      zi.generate_import_diffs ij.id
+      zi.generate_properties ij.id
+      zi.generate_transactions ij.id
+
+      PropertyTransactionLog.all.size.should == 1
+      ptt = PropertyTransactionLog.all.first
+      ptt.date_closed.should == transacted_date.to_date
+      ptt.transaction_status.should == "closed"
+      ptt.price.should == 1000
+    end
+
+    it 'closes an existing transaction when closed on the same date but on different batches' do
+      il1 = create(:import_log,
+        source: "some source",
+        import_job_id: ij.id,
+        origin_url: "some url", 
+        transaction_type: "rental",
+        date_transacted: transacted_date,
+        date_listed: transacted_date,
+        price: 1000
+      )
+      zi.generate_import_diffs ij.id
+      zi.generate_properties ij.id
+      zi.generate_transactions ij.id
+
+      closed_date = transacted_date + 1.day
+      nij = create(:import_job)
+      il2 = create(:import_log,
+        source: "some source",
+        import_job_id: nij.id,
+        origin_url: "some url", 
+        transaction_type: "rental",
+        date_transacted: transacted_date,
+        date_listed: transacted_date,
+        price: 1000
+      )      
+      il3 = create(:import_log,
+        source: "some source",
+        import_job_id: nij.id,
+        origin_url: "some url", 
+        transaction_type: "rental",
+        date_transacted: closed_date,
+        date_closed: closed_date,
+        price: 1000
+      )
+      zi.generate_import_diffs nij.id
+      zi.generate_properties nij.id
+      zi.generate_transactions nij.id      
+
+      PropertyTransactionLog.all.size.should == 1
+      ptt = PropertyTransactionLog.all.first
+      ptt.date_listed.should == transacted_date.to_date
+      ptt.date_closed.should == closed_date.to_date
+      ptt.transaction_status.should == "closed"
+      ptt.price.should == 1000
+    end    
+
+    it 'closes an existing transaction when deletion was detected in a subsequent batch' do
+      il1 = create(:import_log,
+        source: "some source",
+        import_job_id: ij.id,
+        origin_url: "some url", 
+        transaction_type: "rental",
+        date_transacted: transacted_date,
+        date_listed: transacted_date,
+        price: 1000
+      )
+      zi.generate_import_diffs ij.id
+      zi.generate_properties ij.id
+      zi.generate_transactions ij.id
+
+      nij = create(:import_job)
+      zi.generate_import_diffs nij.id
+      zi.generate_properties nij.id
+      zi.generate_transactions nij.id      
+
+      PropertyTransactionLog.all.size.should == 1
+      ptt = PropertyTransactionLog.all.first
+      ptt.date_listed.should == transacted_date.to_date
+      ptt.date_closed.nil?.should == false
+      ptt.transaction_status.should == "closed"
+      ptt.price.should == 1000
+    end    
+
+  end
+
 end 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

@@ -62,7 +62,7 @@ RSpec.describe ClimbsfRentingImporter do
             price: 1000
           )
           ic.generate_import_diffs ij.id
-          idiff = ic.get_import_diff il
+          idiff = ic.get_import_diff ij.id, il
           idiff.nil?.should == false
           idiff.diff_type.should == "created"
         end
@@ -83,7 +83,7 @@ RSpec.describe ClimbsfRentingImporter do
           ic.generate_import_diffs nij.id
           pid = ic.get_previous_batch_id nij.id
           pid.should == ij.id
-          idiff = ic.get_import_diff il
+          idiff = ic.get_import_diff nij.id, il
           idiff.nil?.should == false
           idiff.diff_type.should == "created"
         end
@@ -116,7 +116,7 @@ RSpec.describe ClimbsfRentingImporter do
 
           pid = ic.get_previous_batch_id nij.id
           pid.should == ij.id
-          idiff = ic.get_import_diff il2
+          idiff = ic.get_import_diff nij.id, il2
           idiff.nil?.should == true
         end
       end      
