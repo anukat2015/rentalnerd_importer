@@ -5,12 +5,14 @@
 require 'csv'
 require 'open-uri'
 require './lib/tasks/rental_creators/climbsf_rented_importer'
+require './lib/tasks/getdata_downloader'
 
 namespace :db do
   desc "imports ClimbSF data for those that have already been listed"  
   task :import_climbsf_rented => :environment do 
     counter = 0
     datasource_url = "http://data.getdata.io/n34_d7704e8247e565c7d2bd6705148bd338eses/csv"
+    temp_file = GetdataDownloader.get_file datasource_url
 
     puts "Processing import_logs"
     job = ImportJob.create!(
@@ -18,7 +20,7 @@ namespace :db do
     )
     cri = ClimbsfRentedImporter.new
 
-    CSV.foreach( open(datasource_url), :headers => :first_row ).each do |row|
+    CSV.foreach( open(temp_file), :headers => :first_row ).each do |row|
       row["source"] = "climbsf_rented"
       row["origin_url"] = row["apartment page"]
       row["date_closed"] = row["date_rented"]
@@ -30,6 +32,7 @@ namespace :db do
     cri.generate_import_diffs job.id
     cri.generate_properties job.id
     cri.generate_transactions job.id
+    temp_file.close!
   end
 
 end

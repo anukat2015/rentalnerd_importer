@@ -2,9 +2,9 @@ require 'json'
 
 namespace :db do
   desc "imports the neighborhoods provided in the shapefile called shape_file.json"  
-  task :import_neighborhoods => :environment do 
+  task :import_neighborhoods_ph => :environment do 
     puts "Importing neighborhoods data"
-    file = File.read('./lib/tasks/model_files/shape_file.json')
+    file = File.read('./lib/tasks/model_files/shape_file_ph.json')
     data = JSON.parse(file)
 
     data["features"].each do |row|
@@ -12,7 +12,7 @@ namespace :db do
       if row["geometry"]["type"] == "MultiPolygon"
         row["geometry"]["coordinates"].each_index do |index|
           sub_area = row["geometry"]["coordinates"][index][0]
-          n_name = row["properties"]["nbrhood"]
+          n_name = row["properties"]["NAME"]
           n_name = "#{n_name} #{index}"
           puts "\t#{n_name}"
           nb = Neighborhood.where(name: n_name).first
@@ -26,8 +26,8 @@ namespace :db do
 
         end
 
-      else row["geometry"]["type"] == "Polygon"
-        n_name = row["properties"]["nbrhood"]  
+      elsif row["geometry"]["type"] == "Polygon"
+        n_name = row["properties"]["NAME"]
         puts "\t#{n_name}"
         nb = Neighborhood.where(name: n_name).first
         nb = Neighborhood.create!( name: n_name ) if nb.nil?

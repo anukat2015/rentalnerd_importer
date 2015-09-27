@@ -34,7 +34,7 @@ class PropertyTransactionLog < ActiveRecord::Base
         PropertyTransactionLog.where( property_id: property_id )
           .where(transaction_type: transaction_type)        
           .where(" date_closed is NULL ")
-          .where(" date_listed < ? ", rented_date)
+          .where(" date_listed <= ? ", rented_date)
           .order(" date_listed desc ")
           .limit(1)
           .first
@@ -43,7 +43,7 @@ class PropertyTransactionLog < ActiveRecord::Base
         PropertyTransactionLog.where( property_id: property_id )
           .where(transaction_type: transaction_type)
           .where(" date_listed is NULL ")
-          .where(" date_closed > ? ", listed_date)
+          .where(" date_closed >= ? ", listed_date)
           .order(" date_closed asc ")
           .limit(1)
           .first

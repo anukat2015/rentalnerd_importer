@@ -6,12 +6,14 @@ require 'csv'
 require 'open-uri'
 require './lib/tasks/import_formatter'
 require './lib/tasks/rental_creators/zillow_importer'
+require './lib/tasks/getdata_downloader'
 
 namespace :db do
   desc "imports ClimbSF data for those that have already been listed"  
   task :import_zillow_ph => :environment do 
     counter = 0
     datasource_url = "http://data.getdata.io/n53_70da17e3370067399d5095287282d302eses/csv"
+    temp_file = GetdataDownloader.get_file datasource_url
 
     puts "Processing import_logs"
     job = ImportJob.create!(
@@ -19,10 +21,9 @@ namespace :db do
     )
 
     zi = ZillowImporter.new
-
     rows = []
 
-    CSV.foreach( open(datasource_url), :headers => :first_row ).each do |row|      
+    CSV.foreach( open(temp_file), :headers => :first_row ).each do |row|      
       row["address"] = row["address"].gsub("Incomplete address or missing price?Sometimes listing partners send Zillow listings that do not include a full address or price.To get more details on this property, please contact the listing agent, brokerage, or listing provider.", "")
       row["source"] = "zillow_ph"
       row["origin_url"] = row["apartment page"]
@@ -60,7 +61,7 @@ namespace :db do
       row["event_date"]       = ImportFormatter.to_date_short_year row["event_date"]      
       
       unless row["event_date"].nil?
-        rows << row 
+        rows << row
       end
       
     end
@@ -69,18 +70,14 @@ namespace :db do
       row_1["event_date"] <=> row_2["event_date"]
     end
 
-    sorted_rows.each do |row|
-      begin
-        zi.create_import_log row
-      rescue Exception => e
-        binding.pry
-      end      
+    sorted_rows.foreach do |row|
+      zi.create_import_log row      
     end
 
     zi.generate_import_diffs job.id    
     zi.generate_properties job.id
     zi.generate_transactions job.id
-
+    temp_file.close!
   end
 
 end
