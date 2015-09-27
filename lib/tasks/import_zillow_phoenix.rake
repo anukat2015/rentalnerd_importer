@@ -6,12 +6,14 @@ require 'csv'
 require 'open-uri'
 require './lib/tasks/import_formatter'
 require './lib/tasks/rental_creators/zillow_importer'
+require './lib/tasks/getdata_downloader'
 
 namespace :db do
   desc "imports ClimbSF data for those that have already been listed"  
   task :import_zillow_ph => :environment do 
     counter = 0
     datasource_url = "http://data.getdata.io/n53_70da17e3370067399d5095287282d302eses/csv"
+    temp_file = GetdataDownloader.get_file datasource_url
 
     puts "Processing import_logs"
     job = ImportJob.create!(
@@ -20,9 +22,7 @@ namespace :db do
 
     zi = ZillowImporter.new
 
-    rows = []
-
-    CSV.foreach( open(datasource_url).read, :headers => :first_row ).each do |row|      
+    CSV.foreach( open(temp_file), :headers => :first_row ).each do |row|      
       row["address"] = row["address"].gsub("Incomplete address or missing price?Sometimes listing partners send Zillow listings that do not include a full address or price.To get more details on this property, please contact the listing agent, brokerage, or listing provider.", "")
       row["source"] = "zillow_ph"
       row["origin_url"] = row["apartment page"]
@@ -68,7 +68,7 @@ namespace :db do
     zi.generate_import_diffs job.id    
     zi.generate_properties job.id
     zi.generate_transactions job.id
-
+    temp_file.close!
   end
 
 end
