@@ -6,6 +6,33 @@ RSpec.describe ZillowImporter do
   let(:ij) { create(:import_job) }
   let(:transacted_date) { Time.now }
 
+  def csv_headers
+    headers = ["address", "neighborhood", "bedrooms", "bathrooms", "price", "sqft", "source", "origin_url", "import_job_id", "transaction_type", "date_closed", "date_listed"]    
+  end
+
+  def default_attributes
+    default_attrs = {
+      "address" => "some address", 
+      "neighborhood" => "some neighborhood", 
+      "bedrooms" => "5", 
+      "bathrooms" => "5", 
+      "price" => "100", 
+      "sqft" => "50", 
+      "source" => "lalaland", 
+      "origin_url" => "http://google.com", 
+      "import_job_id" => "1",
+      "transaction_type" => "rental", 
+      "date_closed" => nil, 
+      "date_listed" => nil,
+      "event_date"  => "12/30/15"
+    }.with_indifferent_access
+  end
+
+  def generate_row attrs={}
+    combined_attrs = attrs.reverse_merge default_attributes
+    row_array = csv_headers.map { |key| combined_attrs[key] }
+    row = CSV::Row.new(csv_headers, row_array)
+  end
 
   def google_map_request
     stub_request(:get, /.*maps.googleapis.com.*address.*/).to_return(:status => 200, :body => rni_fixture("google_map_location.json"), :headers => {})
@@ -15,6 +42,49 @@ RSpec.describe ZillowImporter do
   before do
     zi.stub(:get_default_date_listed) { default_time }
     google_map_request
+  end  
+
+  describe '#create_import_log' do
+    it 'creates an import log using transaction_type indicated' do
+      event_date = Time.now.strftime("%m/%d/%y")
+      row = generate_row event_date: event_date, date_listed: event_date, date_transacted: event_date, transaction_type: "sale"
+      zi.create_import_log row
+      ImportLog.all.size.should == 1
+      ImportLog.all.first.transaction_type.should == "sale"
+    end
+
+    it 'creates an import log using transaction_type indicated in previous log if it does not have a transaction_type' do
+      event_date = ( Time.now - 1.year ).strftime("%m/%d/%y")
+      row1 = generate_row event_date: event_date, date_listed: event_date, date_transacted: event_date, transaction_type: "sale"
+      zi.create_import_log row1
+
+      event_date = ( Time.now ).strftime("%m/%d/%y")
+      row2 = generate_row event_date: event_date, date_listed: event_date, date_transacted: event_date
+      row2["transaction_type"] = nil
+      zi.create_import_log row2
+      ImportLog.all.size.should == 2
+      ImportLog.all.first.transaction_type.should == "sale"
+      ImportLog.all.second.transaction_type.should == "sale"
+    end
+
+    it 'creates an import log using transaction_type indicated in previous log if it does not have a transaction_type' do
+      event_date = ( Time.now - 1.year ).strftime("%m/%d/%y")
+      row1 = generate_row event_date: event_date, date_listed: event_date, date_transacted: event_date, transaction_type: "rental"
+      zi.create_import_log row1
+
+      event_date = ( Time.now - 6.months ).strftime("%m/%d/%y")
+      row2 = generate_row event_date: event_date, date_listed: event_date, date_transacted: event_date, transaction_type: "sale"
+      zi.create_import_log row2    
+
+      event_date = ( Time.now ).strftime("%m/%d/%y")
+      row3 = generate_row event_date: event_date, date_listed: event_date, date_transacted: event_date, price: "666"
+      row3["transaction_type"] = nil
+      zi.create_import_log row3
+      ImportLog.all.size.should == 3
+      ImportLog.all.last.transaction_type.should == "sale"
+      ImportLog.all.last.price.should == 666
+    end
+
   end  
   
   describe '#get_matching_import_log_from_batch' do
@@ -84,7 +154,7 @@ RSpec.describe ZillowImporter do
     end
   end
 
-  describe '#get_import_diff', :found do
+  describe '#get_import_diff' do
     it 'returns corresponding import_diff' do
       il = create(:import_log, 
         source: "some source",
