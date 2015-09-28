@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150921033400) do
+ActiveRecord::Schema.define(version: 20150928061700) do
 
   create_table "import_diffs", force: true do |t|
     t.text     "address"
@@ -86,14 +86,17 @@ ActiveRecord::Schema.define(version: 20150921033400) do
     t.float    "elevation_coefficient"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "area_name"
+    t.boolean  "active"
   end
 
   create_table "prediction_neighborhoods", force: true do |t|
     t.integer  "prediction_model_id"
-    t.string   "prediction_neighborhood_name"
-    t.float    "prediction_neighborhood_coefficient"
+    t.string   "name"
+    t.float    "coefficient"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "neighborhood_id"
   end
 
   create_table "prediction_results", force: true do |t|
@@ -104,8 +107,10 @@ ActiveRecord::Schema.define(version: 20150921033400) do
     t.datetime "updated_at"
     t.float    "error_level"
     t.float    "listed_rent"
-    t.string   "transaction_type",    default: "rental"
+    t.string   "transaction_type",            default: "rental"
     t.float    "listed_sale"
+    t.integer  "property_transaction_log_id"
+    t.float    "cap_rate"
   end
 
   create_table "properties", force: true do |t|

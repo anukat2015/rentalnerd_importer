@@ -23,7 +23,7 @@ namespace :db do
             nv = NeighborhoodVertex.create(longitude: coord[0], latitude: coord[1])
             nb.add_vertice nv            
           end
-
+          nb.update(shapefile_source: "SF")
         end
 
       elsif row["geometry"]["type"] == "Polygon"
@@ -38,6 +38,7 @@ namespace :db do
           nv = NeighborhoodVertex.create(longitude: coord[0], latitude: coord[1])
           nb.add_vertice nv
         end
+        nb.update(shapefile_source: "SF")
       end
 
     end

@@ -23,6 +23,7 @@ namespace :db do
             nv = NeighborhoodVertex.create(longitude: coord[0], latitude: coord[1])
             nb.add_vertice nv            
           end
+          nb.update(shapefile_source: "PH")
 
         end
 
@@ -38,6 +39,7 @@ namespace :db do
           nv = NeighborhoodVertex.create(longitude: coord[0], latitude: coord[1])
           nb.add_vertice nv
         end
+        nb.update(shapefile_source: "PH")
       end
 
     end

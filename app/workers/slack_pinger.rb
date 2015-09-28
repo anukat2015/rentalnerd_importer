@@ -1,5 +1,3 @@
-require 'rake'
-
 class SlackPinger
   include Sidekiq::Worker
 

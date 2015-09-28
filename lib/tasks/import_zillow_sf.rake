@@ -71,7 +71,7 @@ namespace :db do
       row_1["event_date"] <=> row_2["event_date"]
     end
 
-    sorted_rows.foreach do |row|
+    sorted_rows.each do |row|
       zi.create_import_log row
     end
     

@@ -1,5 +1,6 @@
 class Neighborhood < ActiveRecord::Base
   has_many :neighborhood_vertices, dependent: :destroy, after_add: :recompute_max_min
+  has_many :prediction_neighborhoods, dependent: :destroy
 
   # Given a property returns a list of neighborhoods it might potentiall belong to
   def self.guess property
