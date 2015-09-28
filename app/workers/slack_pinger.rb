@@ -10,7 +10,7 @@ class SlackPinger
                         "ID: #{ij.id},\n" +
                         "Source: #{ij.source},\n"
 
-    HTTParty.post( ENV['SLACK_CHANNEL'], 
+    HTTParty.post( ENV['SLACK_ALERTS_CHANNEL'], 
       :body => payload.to_json,
       :headers => { 'Content-Type' => 'application/json' } )    
   end

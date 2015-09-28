@@ -31,7 +31,7 @@ class SlackPublisher
 
     end
     
-    HTTParty.post( ENV['SLACK_CHANNEL'], 
+    HTTParty.post( ENV['SLACK_PREDICTIONS_CHANNEL'], 
       :body => payload.to_json,
       :headers => { 'Content-Type' => 'application/json' } )    
   end

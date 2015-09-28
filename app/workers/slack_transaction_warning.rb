@@ -11,7 +11,7 @@ class SlackTransactionWarning
                         "address: #{pt.address},\n" +
                         "URL: #{pt.origin_url}\n"
 
-    HTTParty.post( ENV['SLACK_CHANNEL'], 
+    HTTParty.post( ENV['SLACK_ALERTS_CHANNEL'], 
       :body => payload.to_json,
       :headers => { 'Content-Type' => 'application/json' } )    
   end
