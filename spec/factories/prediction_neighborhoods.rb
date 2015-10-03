@@ -3,6 +3,7 @@ FactoryGirl.define do
     prediction_model
     name "East Bay (Walnut Creek)"
     coefficient 0.926041
+    active true
   end
 
 end

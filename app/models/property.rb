@@ -69,4 +69,8 @@ class Property < ActiveRecord::Base
     prediction_neighborhoods.where( prediction_model_id: prediction_model_id ).first
   end
 
+  def get_active_prediction_neighborhoods
+    prediction_neighborhoods.where( active: true )
+  end
+
 end

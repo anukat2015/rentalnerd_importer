@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150928061700) do
+ActiveRecord::Schema.define(version: 20151003201252) do
 
   create_table "import_diffs", force: true do |t|
     t.text     "address"
@@ -97,6 +97,7 @@ ActiveRecord::Schema.define(version: 20150928061700) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "neighborhood_id"
+    t.boolean  "active",              default: true
   end
 
   create_table "prediction_results", force: true do |t|

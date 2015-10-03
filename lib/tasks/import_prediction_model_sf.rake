@@ -1,7 +1,7 @@
 require './lib/tasks/import_formatter'
 
 namespace :db do
-  desc "imports ClimbSF data for those that have already been listed"  
+  desc "imports Prediction Model for Phoenix those that have already been listed"  
   task :import_prediction_model_sf => :environment do   
     puts "Importing prediction model data"
 

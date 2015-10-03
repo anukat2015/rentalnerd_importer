@@ -111,14 +111,6 @@ class PropertyTransactionLog < ActiveRecord::Base
     return false      
   end
 
-  def get_prediction_models
-    property.prediction_models
-  end
-
-  def get_prediction_neighborhoods
-    property.prediction_neighborhoods
-  end  
-  
   def get_most_recent_date
     most_recent_date = date_closed || date_listed
     if date_listed.present? && date_closed.present?
@@ -128,7 +120,7 @@ class PropertyTransactionLog < ActiveRecord::Base
   end
 
   def generate_prediction_results
-    pns = get_prediction_neighborhoods
+    pns = property.get_active_prediction_neighborhoods
 
     if pns.size == 0
       SlackPropertyWarning.perform_async property.id
