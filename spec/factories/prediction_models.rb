@@ -5,6 +5,7 @@ FactoryGirl.define do
     bathroom_coefficient 222.826018
     sqft_coefficient 2.004296
     elevation_coefficient 6
+    active true
   end
 
 end

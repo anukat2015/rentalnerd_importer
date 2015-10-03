@@ -47,15 +47,15 @@ RSpec.describe ZillowImporter do
   describe '#create_import_log' do
     it 'creates an import log using transaction_type indicated' do
       event_date = Time.now.strftime("%m/%d/%y")
-      row = generate_row event_date: event_date, date_listed: event_date, date_transacted: event_date, transaction_type: "sale"
+      row = generate_row event_date: event_date, date_listed: event_date, date_transacted: event_date, transaction_type: "sales"
       zi.create_import_log row
       ImportLog.all.size.should == 1
-      ImportLog.all.first.transaction_type.should == "sale"
+      ImportLog.all.first.transaction_type.should == "sales"
     end
 
     it 'creates an import log using transaction_type indicated in previous log if it does not have a transaction_type' do
       event_date = ( Time.now - 1.year ).strftime("%m/%d/%y")
-      row1 = generate_row event_date: event_date, date_listed: event_date, date_transacted: event_date, transaction_type: "sale"
+      row1 = generate_row event_date: event_date, date_listed: event_date, date_transacted: event_date, transaction_type: "sales"
       zi.create_import_log row1
 
       event_date = ( Time.now ).strftime("%m/%d/%y")
@@ -63,8 +63,8 @@ RSpec.describe ZillowImporter do
       row2["transaction_type"] = nil
       zi.create_import_log row2
       ImportLog.all.size.should == 2
-      ImportLog.all.first.transaction_type.should == "sale"
-      ImportLog.all.second.transaction_type.should == "sale"
+      ImportLog.all.first.transaction_type.should == "sales"
+      ImportLog.all.second.transaction_type.should == "sales"
     end
 
     it 'creates an import log using transaction_type indicated in previous log if it does not have a transaction_type' do
@@ -73,7 +73,7 @@ RSpec.describe ZillowImporter do
       zi.create_import_log row1
 
       event_date = ( Time.now - 6.months ).strftime("%m/%d/%y")
-      row2 = generate_row event_date: event_date, date_listed: event_date, date_transacted: event_date, transaction_type: "sale"
+      row2 = generate_row event_date: event_date, date_listed: event_date, date_transacted: event_date, transaction_type: "sales"
       zi.create_import_log row2    
 
       event_date = ( Time.now ).strftime("%m/%d/%y")
@@ -81,7 +81,7 @@ RSpec.describe ZillowImporter do
       row3["transaction_type"] = nil
       zi.create_import_log row3
       ImportLog.all.size.should == 3
-      ImportLog.all.last.transaction_type.should == "sale"
+      ImportLog.all.last.transaction_type.should == "sales"
       ImportLog.all.last.price.should == 666
     end
 
@@ -212,7 +212,7 @@ RSpec.describe ZillowImporter do
       )
       idiff = zi.create_import_diff(ij.id, il, "rental", il.id, nil)
 
-      il[:transaction_type] = "sale"
+      il[:transaction_type] = "sales"
       found_idiff = zi.get_import_diff ij.id, il
       found_idiff.nil?.should == true      
     end

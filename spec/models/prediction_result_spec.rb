@@ -19,14 +19,16 @@ RSpec.describe PredictionResult, type: :model do
     google_map_request
   end  
 
-  it "creates a new prediction for each model when a new property is created" do
-    pptlr = create(:property_transaction_log_rental, property_id: property.id)
-    ppt = property.property_transactions.first
-    generated_rental_price = prediction_model.predicted_rent property.id
-    ppt.save!
+  it "creates a new prediction for each model when a property transaction is saved" do
 
-    prediction = PredictionResult.where( prediction_model_id: prediction_model.id, property_id: property.id ).first
+    nb = create(:neighborhood)
+    pn = create(:property_neighborhood, property: property, neighborhood: nb)
 
+    pm = create(:prediction_model)    
+    pdn = create(:prediction_neighborhood, prediction_model: pm, neighborhood: nb)
+    ptl = create(:property_transaction_log, transaction_type: "sales", property: property )
+    generated_rental_price = pm.predicted_rent property.id
+    prediction = PredictionResult.where( prediction_model_id: pm.id, property_id: property.id ).first
     prediction.nil?.should == false
     prediction.predicted_rent.round.should == generated_rental_price.round
 

@@ -16,6 +16,10 @@ class Property < ActiveRecord::Base
   has_many :prediction_results, dependent: :destroy
   has_many :property_transaction_logs, dependent: :destroy
   has_many :property_transactions, dependent: :destroy
+  has_many :property_neighborhoods, dependent: :destroy
+  has_many :neighborhoods, through: :property_neighborhoods
+  has_many :prediction_neighborhoods, through: :neighborhoods
+  has_many :prediction_models, through: :prediction_neighborhoods
 
   CONFUSING_TERMS = [
     "(Inner Mission)",
@@ -59,6 +63,14 @@ class Property < ActiveRecord::Base
         ).first_or_create
       end
     end
+  end
+  
+  def get_prediction_neighborhood_for_model prediction_model_id
+    prediction_neighborhoods.where( prediction_model_id: prediction_model_id ).first
+  end
+
+  def get_active_prediction_neighborhoods
+    prediction_neighborhoods.where( active: true )
   end
 
 end

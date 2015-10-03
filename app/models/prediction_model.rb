@@ -17,12 +17,12 @@ class PredictionModel < ActiveRecord::Base
 
   # TODO: modify this method to use coefficient of new neighborhoods in the table
   def neighborhood_coefficient property
-    pn = prediction_neighborhoods.where( prediction_neighborhood_name: property.neighborhood ).first
+    pn = property.get_prediction_neighborhood_for_model id
     if pn.nil?
       puts " could not find neighborhood for #{property.id}, #{property.neighborhood} "
       return 0
     end
-    pn.prediction_neighborhood_coefficient
+    pn.coefficient
   end  
 
 end
