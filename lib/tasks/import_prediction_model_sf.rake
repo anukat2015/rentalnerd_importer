@@ -5,11 +5,14 @@ namespace :db do
   task :import_prediction_model_sf => :environment do   
     puts "Importing prediction model data"
 
+    features_file = "model_features_sf_20151003.csv"
+    hood_file = "model_hoods_sf_20151003.csv"
+
     # Deactivates all prior prediction models for the area 
     PredictionModel.deactivate_area! "SF"
     pm = PredictionModel.new(area_name: "SF", active: true)
 
-    CSV.new( open("./lib/tasks/model_files/model_features_sf_20150920.csv"), :headers => :first_row ).each do |row|
+    CSV.new( open("./lib/tasks/model_files/#{features_file}"), :headers => :first_row ).each do |row|
       case row["Effect"]
       when "adj_sqft"
         pm.sqft_coefficient = ImportFormatter.to_float row["Coefficient"]
@@ -27,7 +30,7 @@ namespace :db do
     pm.save!
 
     # For each neighborhood coefficient
-    CSV.new( open("./lib/tasks/model_files/model_hoods_sf_20150920.csv"), :headers => :first_row ).each do |row|
+    CSV.new( open("./lib/tasks/model_files/#{hood_file}"), :headers => :first_row ).each do |row|
       curr_name = row["Neighborhood"].gsub("neighborhood_", "")
 
       # For each matching neighborhood in our database
