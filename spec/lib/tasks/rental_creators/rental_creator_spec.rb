@@ -343,4 +343,23 @@ RSpec.describe RentalCreator do
 
     end    
   end
+
+  describe '#discard?' do
+    it 'returns false if price is not set properyly' do
+      row = generate_row price: "0"
+      ic.create_import_log row
+      ImportLog.all.size.should == 0
+    end
+
+    it 'returns false if price is zero' do
+      row = generate_row price: "NA"
+      ic.create_import_log row
+      ImportLog.all.size.should == 0
+    end
+    it 'returns true if price is set properyly' do
+      row = generate_row price: "666"
+      ImportLog.all.size.should == 0
+      ic.create_import_log row
+    end
+  end
 end

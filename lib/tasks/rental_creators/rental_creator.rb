@@ -10,6 +10,12 @@ module RentalCreator
   end
 
   def create_import_log(row)
+
+    if discard? row
+      puts "\tdiscarding record for: " + row["origin_url"]      
+      return 
+    end
+
     puts "\tcreating new import_log: " + row["origin_url"]
     import_log = ImportLog.create
     import_log[:address]          = row["address"]
@@ -27,6 +33,11 @@ module RentalCreator
     import_log[:transaction_type] = row["transaction_type"] || DEFAULT_TRANSACTION_TYPE
     import_log.save!
     import_log
+  end
+
+  def discard? row
+    return true if ImportFormatter.to_float(row["price"]) == 0
+    return false
   end
 
   def generate_import_diffs( curr_import_job_id )
