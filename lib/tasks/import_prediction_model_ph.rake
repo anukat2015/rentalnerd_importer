@@ -6,7 +6,7 @@ namespace :db do
     puts "Importing prediction model data"
 
     # Deactivates all prior prediction models for the area 
-    PredictionModel.where(area_name: "PH").update_all(active: false)    
+    PredictionModel.deactivate_area! "PH"
     pm = PredictionModel.new(area_name: "PH", active: true)
 
     CSV.new( open("./lib/tasks/model_files/model_features_ph_20150920.csv"), :headers => :first_row ).each do |row|

@@ -146,6 +146,7 @@ class PropertyTransactionLog < ActiveRecord::Base
         transaction_type: transaction_type,
         property_transaction_log_id: self.id
       ).first
+      
       curr_predicted_rent = pm.predicted_rent(property.id)
       curr_transaction_type = transaction_type
 

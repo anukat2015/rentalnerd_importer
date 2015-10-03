@@ -2,6 +2,18 @@ class PredictionModel < ActiveRecord::Base
   has_many  :prediction_neighborhoods, dependent: :destroy
   has_many  :prediction_results, dependent: :destroy
 
+  class << self
+    def deactivate_area! area_name
+      PredictionModel.where(area_name: area_name).each do |pm|
+        pm.deactivate!
+      end
+    end
+
+    def most_recent_deactivated_model area_name
+      PredictionModel.where(area_name: area_name, active: false).order(id: :desc).limit(1).first
+    end    
+  end
+
   def predicted_rent property_id
     property = Property.find property_id
     predicted_rent =  base_rent + 
@@ -24,5 +36,16 @@ class PredictionModel < ActiveRecord::Base
     end
     pn.coefficient
   end  
+
+  def deactivate!
+    update(active: false)
+    prediction_neighborhoods.update_all(active: false)
+  end
+
+  def regenerate_predictions_for_corresponding_transaction
+    prediction_results.each do |pr|
+      pr.property_transaction_log.generate_prediction_results unless pr.property_transaction_log.nil?
+    end
+  end
 
 end

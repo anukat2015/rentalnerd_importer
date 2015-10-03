@@ -1,13 +1,12 @@
 require './lib/tasks/import_formatter'
 
 namespace :db do
-  desc "imports Prediction Model for Phoenix those that have already been listed"  
+  desc "imports Prediction Model for San Francisco those that have already been listed"  
   task :import_prediction_model_sf => :environment do   
     puts "Importing prediction model data"
 
     # Deactivates all prior prediction models for the area 
-    PredictionModel.where(area_name: "SF").update_all(active: false)
-
+    PredictionModel.deactivate_area! "SF"
     pm = PredictionModel.new(area_name: "SF", active: true)
 
     CSV.new( open("./lib/tasks/model_files/model_features_sf_20150920.csv"), :headers => :first_row ).each do |row|
