@@ -64,5 +64,9 @@ class Property < ActiveRecord::Base
       end
     end
   end
+  
+  def get_prediction_neighborhood_for_model prediction_model_id
+    prediction_neighborhoods.where( prediction_model_id: prediction_model_id ).first
+  end
 
 end

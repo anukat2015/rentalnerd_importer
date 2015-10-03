@@ -128,7 +128,6 @@ class PropertyTransactionLog < ActiveRecord::Base
   end
 
   def generate_prediction_results
-
     pns = get_prediction_neighborhoods
 
     if pns.size == 0
