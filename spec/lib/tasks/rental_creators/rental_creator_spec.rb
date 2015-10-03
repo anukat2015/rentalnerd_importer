@@ -358,8 +358,20 @@ RSpec.describe RentalCreator do
     end
     it 'returns true if price is set properyly' do
       row = generate_row price: "666"
-      ImportLog.all.size.should == 0
       ic.create_import_log row
+      ImportLog.all.size.should == 1      
+    end
+
+    it 'returns true if sqft is not set properyly' do
+      row = generate_row sqft: "NA"
+      ic.create_import_log row
+      ImportLog.all.size.should == 0      
+    end
+
+    it 'returns true if price is set properyly' do
+      row = generate_row sqft: "1,000"
+      ic.create_import_log row
+      ImportLog.all.size.should == 1      
     end
   end
 end

@@ -36,8 +36,14 @@ module RentalCreator
   end
 
   def discard? row
-    return true if ImportFormatter.to_float(row["price"]) == 0
-    return false
+    if ImportFormatter.to_float(row["sqft"]) == 0
+      return true       
+    elsif ImportFormatter.to_float(row["price"]) == 0
+      return true 
+    else
+      return false      
+    end
+
   end
 
   def generate_import_diffs( curr_import_job_id )
