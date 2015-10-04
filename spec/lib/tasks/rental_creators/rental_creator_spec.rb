@@ -26,7 +26,7 @@ RSpec.describe RentalCreator do
 
   def default_attributes
     default_attrs = {
-      "address" => "some address", 
+      "address" => "111 some address", 
       "neighborhood" => "some neighborhood", 
       "bedrooms" => "5", 
       "bathrooms" => "5", 
@@ -379,5 +379,17 @@ RSpec.describe RentalCreator do
       ic.create_import_log row
       ImportLog.all.size.should == 0
     end
+
+    it 'returns true if address does not start with a number' do
+      row = generate_row address: "San Francisco, CA 94114"
+      ic.create_import_log row
+      ImportLog.all.size.should == 0
+    end    
+
+    it 'returns false if address starts with a number' do
+      row = generate_row address: "111 San Francisco, CA 94114"
+      ic.create_import_log row
+      ImportLog.all.size.should == 1
+    end        
   end
 end

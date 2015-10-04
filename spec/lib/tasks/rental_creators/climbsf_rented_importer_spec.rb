@@ -22,7 +22,7 @@ RSpec.describe ClimbsfRentedImporter do
 
   def default_attributes
     default_attrs = {
-      "address" => "some address", 
+      "address" => "111 some address", 
       "neighborhood" => "some neighborhood", 
       "bedrooms" => "5", 
       "bathrooms" => "5", 

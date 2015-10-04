@@ -41,7 +41,9 @@ module RentalCreator
     elsif ImportFormatter.to_float(row["price"]) == 0
       return true 
     elsif row["address"].include? "Undisclosed Address"
-      return true       
+      return true 
+    elsif ![*0..9].map { |n| n.to_s}.include? row["address"][0]
+      return true 
     else
       return false      
     end
