@@ -1,3 +1,4 @@
+require 'net/http'
 require './lib/tasks/rental_creators/rental_creator'
 
 class ZillowImporter
@@ -97,6 +98,11 @@ class ZillowImporter
     to_proceed = true
     if diff_type == "deleted"
       to_proceed = most_recent_transaction_for_property_in_batch? import_log
+
+      is_scam = scam?( import_log["origin_url"] )
+      purge_scam_records( import_log["origin_url"] ) if is_scam
+
+      to_proceed = to_proceed && !is_scam
     end
     return unless to_proceed
     super( curr_import_job_id, import_log, diff_type, new_log_id, old_log_id=nil )
@@ -126,6 +132,21 @@ class ZillowImporter
     return true if !import_log[:date_listed].nil?
     return false
     
+  end
+
+  def scam? url
+    uri = URI( url)
+    res = Net::HTTP.get_response(uri)
+    if res.code == "200"
+      return false
+    elsif res.code == "301"
+      return true
+    end
+    return false
+  end
+
+  def purge_scam_records scam_url
+    Property.destroy_all( origin_url: scam_url )
   end
 
 end

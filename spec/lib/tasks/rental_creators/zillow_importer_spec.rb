@@ -39,9 +39,25 @@ RSpec.describe ZillowImporter do
     stub_request(:get, /.*maps.googleapis.com.*elevation.*/).to_return(:status => 200, :body => rni_fixture("google_elevation.json"), :headers => {})
   end
 
+  def scam_check_request
+    stub_request(:get, "http://scam.com/this-is-bad").
+      with(:headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Host'=>'scam.com', 'User-Agent'=>'Ruby'}).
+      to_return(:status => 301, :body => "", :headers => {})
+
+    stub_request(:get, "http://legit.com/this-is-good").
+      with(:headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Host'=>'legit.com', 'User-Agent'=>'Ruby'}).
+      to_return(:status => 200, :body => "", :headers => {})
+
+    stub_request(:get, "http://legit.com/it-crashed").
+      with(:headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Host'=>'legit.com', 'User-Agent'=>'Ruby'}).
+      to_return(:status => 500, :body => "", :headers => {})
+
+  end
+
   before do
     zi.stub(:get_default_date_listed) { default_time }
     google_map_request
+    scam_check_request
   end  
 
   describe '#create_import_log' do
@@ -92,7 +108,7 @@ RSpec.describe ZillowImporter do
       il = create(:import_log, 
         source: "some source",        
         import_job_id: ij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_transacted: transacted_date,
         price: 1000
@@ -107,7 +123,7 @@ RSpec.describe ZillowImporter do
       il = create(:import_log, 
         source: "some source",        
         import_job_id: ij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_transacted: transacted_date,
         price: 1000
@@ -124,7 +140,7 @@ RSpec.describe ZillowImporter do
       il = create(:import_log, 
         source: "some source",        
         import_job_id: ij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_transacted: transacted_date,
         price: 1000
@@ -141,7 +157,7 @@ RSpec.describe ZillowImporter do
       il = create(:import_log, 
         source: "some source",        
         import_job_id: ij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_transacted: transacted_date,
         price: 1000
@@ -159,7 +175,7 @@ RSpec.describe ZillowImporter do
       il = create(:import_log, 
         source: "some source",
         import_job_id: ij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_transacted: transacted_date,
         price: 1000
@@ -173,7 +189,7 @@ RSpec.describe ZillowImporter do
       il = create(:import_log, 
         source: "some source",
         import_job_id: ij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_transacted: transacted_date,
         price: 1000
@@ -189,7 +205,7 @@ RSpec.describe ZillowImporter do
       il = create(:import_log, 
         source: "some source",
         import_job_id: ij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_transacted: transacted_date,
         price: 1000
@@ -205,7 +221,7 @@ RSpec.describe ZillowImporter do
       il = create(:import_log, 
         source: "some source",
         import_job_id: ij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_transacted: transacted_date,
         price: 1000
@@ -225,7 +241,7 @@ RSpec.describe ZillowImporter do
           il = create(:import_log, 
             source: "some source",        
             import_job_id: ij.id,
-            origin_url: "some url", 
+            origin_url: "http://legit.com/this-is-good", 
             transaction_type: "rental",
             date_transacted: transacted_date,
             price: 1000
@@ -240,7 +256,7 @@ RSpec.describe ZillowImporter do
           il1 = create(:import_log, 
             source: "some source",        
             import_job_id: ij.id,
-            origin_url: "some url", 
+            origin_url: "http://legit.com/this-is-good", 
             transaction_type: "rental",
             date_listed: transacted_date,
             date_transacted: transacted_date,
@@ -250,7 +266,7 @@ RSpec.describe ZillowImporter do
           il2 = create(:import_log, 
             source: "some source",        
             import_job_id: ij.id,
-            origin_url: "some url", 
+            origin_url: "http://legit.com/this-is-good", 
             transaction_type: "rental",
             date_closed: closed_date,
             date_transacted: closed_date,
@@ -279,7 +295,7 @@ RSpec.describe ZillowImporter do
           il = create(:import_log, 
             source: "some source",        
             import_job_id: nij.id,
-            origin_url: "some url", 
+            origin_url: "http://legit.com/this-is-good", 
             transaction_type: "rental",
             date_transacted: transacted_date,
             price: 1000
@@ -300,7 +316,7 @@ RSpec.describe ZillowImporter do
           il1 = create(:import_log, 
             source: "some source",        
             import_job_id: ij.id,
-            origin_url: "some url", 
+            origin_url: "http://legit.com/this-is-good", 
             transaction_type: "rental",
             date_transacted: transacted_date,
             price: 1000
@@ -310,7 +326,7 @@ RSpec.describe ZillowImporter do
           il2 = create(:import_log, 
             source: "some source",        
             import_job_id: nij.id,
-            origin_url: "some url", 
+            origin_url: "http://legit.com/this-is-good", 
             transaction_type: "rental",
             date_transacted: transacted_date,
             price: 1000
@@ -332,7 +348,7 @@ RSpec.describe ZillowImporter do
         il1 = create(:import_log, 
           source: "some source",        
           import_job_id: ij.id,
-          origin_url: "some url", 
+          origin_url: "http://legit.com/this-is-good", 
           transaction_type: "rental",
           date_transacted: transacted_date,
           price: 1000
@@ -348,7 +364,7 @@ RSpec.describe ZillowImporter do
         il1 = create(:import_log, 
           source: "some source",        
           import_job_id: ij.id,
-          origin_url: "some url", 
+          origin_url: "http://legit.com/this-is-good", 
           transaction_type: "rental",
           date_transacted: transacted_date,
           price: 1000
@@ -357,7 +373,7 @@ RSpec.describe ZillowImporter do
         il2 = create(:import_log, 
           source: "some source",        
           import_job_id: ij.id,
-          origin_url: "some url", 
+          origin_url: "http://legit.com/this-is-good", 
           transaction_type: "rental",
           date_transacted: transacted_date + 1.day,
           price: 2000
@@ -377,7 +393,7 @@ RSpec.describe ZillowImporter do
       il1 = create(:import_log, 
         source: "some source",        
         import_job_id: ij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_transacted: transacted_date,
         price: 1000
@@ -390,7 +406,7 @@ RSpec.describe ZillowImporter do
       il1 = create(:import_log, 
         source: "some source",        
         import_job_id: ij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_transacted: transacted_date,
         price: 1000
@@ -399,7 +415,7 @@ RSpec.describe ZillowImporter do
       il2 = create(:import_log, 
         source: "some source",        
         import_job_id: ij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_transacted: transacted_date + 1.day,
         price: 1000
@@ -412,7 +428,7 @@ RSpec.describe ZillowImporter do
       il1 = create(:import_log, 
         source: "some source",        
         import_job_id: ij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_transacted: transacted_date,
         price: 1000
@@ -421,7 +437,7 @@ RSpec.describe ZillowImporter do
       il2 = create(:import_log, 
         source: "some source",        
         import_job_id: ij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_transacted: transacted_date + 1.day,
         price: 1000
@@ -434,7 +450,7 @@ RSpec.describe ZillowImporter do
       il1 = create(:import_log, 
         source: "some source",        
         import_job_id: ij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_transacted: transacted_date,
         price: 1000
@@ -456,7 +472,7 @@ RSpec.describe ZillowImporter do
       il1 = create(:import_log, 
         source: "some source",        
         import_job_id: ij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_listed: transacted_date,
         date_transacted: transacted_date,
@@ -466,7 +482,7 @@ RSpec.describe ZillowImporter do
       il2 = create(:import_log, 
         source: "some source",        
         import_job_id: ij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_closed: transacted_date,
         date_transacted: transacted_date,
@@ -482,7 +498,7 @@ RSpec.describe ZillowImporter do
       il1 = create(:import_log, 
         source: "some source",        
         import_job_id: ij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_transacted: transacted_date,
         date_listed: transacted_date,
@@ -503,7 +519,7 @@ RSpec.describe ZillowImporter do
       il1 = create(:import_log,
         source: "some source",
         import_job_id: ij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_transacted: transacted_date,
         date_closed: transacted_date,
@@ -524,7 +540,7 @@ RSpec.describe ZillowImporter do
       il1 = create(:import_log,
         source: "some source",
         import_job_id: ij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_transacted: transacted_date,
         date_listed: transacted_date,
@@ -539,7 +555,7 @@ RSpec.describe ZillowImporter do
       il2 = create(:import_log,
         source: "some source",
         import_job_id: nij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_transacted: transacted_date,
         date_listed: transacted_date,
@@ -548,7 +564,7 @@ RSpec.describe ZillowImporter do
       il3 = create(:import_log,
         source: "some source",
         import_job_id: nij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_transacted: closed_date,
         date_closed: closed_date,
@@ -570,7 +586,7 @@ RSpec.describe ZillowImporter do
       il1 = create(:import_log,
         source: "some source",
         import_job_id: ij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_transacted: transacted_date,
         date_listed: transacted_date,
@@ -592,6 +608,36 @@ RSpec.describe ZillowImporter do
       ptt.transaction_status.should == "closed"
       ptt.price.should == 1000
     end    
+
+  end
+
+  describe '#scam?' do
+    it 'returns true if response header is 301' do
+      zi.scam?('http://scam.com/this-is-bad').should == true
+    end
+    it 'returns false if response header is 200' do
+      zi.scam?('http://legit.com/this-is-good').should == false
+    end
+    it 'returns false if response header is 500' do
+      zi.scam?('http://legit.com/it-crashed').should == false
+    end    
+
+  end
+
+  describe '#purge_scam_records' do
+    it 'remove all corresponding properties that match url that is marked as scam' do
+      create( :property, origin_url: 'http://scam.com/this-is-bad' )
+      Property.where( origin_url: 'http://scam.com/this-is-bad' ).size.should == 1
+      zi.purge_scam_records 'http://scam.com/this-is-bad'
+      Property.where( origin_url: 'http://scam.com/this-is-bad' ).size.should == 0          
+    end
+
+    it 'does not remove any properties that match url that is good' do
+      create( :property, origin_url: 'http://legit.com/this-is-good' )
+      Property.where( origin_url: 'http://legit.com/this-is-good' ).size.should == 1
+      zi.purge_scam_records 'http://scam.com/this-is-bad'
+      Property.where( origin_url: 'http://legit.com/this-is-good' ).size.should == 1
+    end
 
   end
 

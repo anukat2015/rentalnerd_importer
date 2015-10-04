@@ -188,7 +188,7 @@ RSpec.describe RentalCreator do
           il = create(:import_log, 
             source: "some source",        
             import_job_id: ij.id,
-            origin_url: "some url", 
+            origin_url: "http://legit.com/this-is-good", 
             transaction_type: "rental",
             date_transacted: transacted_date,
             price: 1000
@@ -207,7 +207,7 @@ RSpec.describe RentalCreator do
           il = create(:import_log, 
             source: "some source",        
             import_job_id: nij.id,
-            origin_url: "some url", 
+            origin_url: "http://legit.com/this-is-good", 
             transaction_type: "rental",
             date_transacted: transacted_date,
             price: 1000
@@ -228,7 +228,7 @@ RSpec.describe RentalCreator do
           il1 = create(:import_log, 
             source: "some source",        
             import_job_id: ij.id,
-            origin_url: "some url", 
+            origin_url: "http://legit.com/this-is-good", 
             transaction_type: "rental",
             date_transacted: transacted_date,
             price: 1000
@@ -238,7 +238,7 @@ RSpec.describe RentalCreator do
           il2 = create(:import_log, 
             source: "some source",        
             import_job_id: nij.id,
-            origin_url: "some url", 
+            origin_url: "http://legit.com/this-is-good", 
             transaction_type: "rental",
             date_transacted: transacted_date,
             price: 1000
@@ -259,7 +259,7 @@ RSpec.describe RentalCreator do
         il1 = create(:import_log, 
           source: "some source",        
           import_job_id: ij.id,
-          origin_url: "some url", 
+          origin_url: "http://legit.com/this-is-good", 
           transaction_type: "rental",
           date_transacted: transacted_date,
           price: 1000
@@ -279,7 +279,7 @@ RSpec.describe RentalCreator do
       il1 = create(:import_log, 
         source: "some source",        
         import_job_id: ij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_transacted: transacted_date,
         date_listed: transacted_date,
@@ -300,7 +300,7 @@ RSpec.describe RentalCreator do
       il1 = create(:import_log,
         source: "some source",
         import_job_id: ij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_transacted: transacted_date,
         date_closed: transacted_date,
@@ -321,7 +321,7 @@ RSpec.describe RentalCreator do
       il1 = create(:import_log, 
         source: "some source",        
         import_job_id: ij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_transacted: transacted_date,
         price: 1000

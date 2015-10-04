@@ -55,7 +55,7 @@ RSpec.describe ClimbsfRentedImporter do
           il = create(:import_log, 
             source: "some source",        
             import_job_id: ij.id,
-            origin_url: "some url", 
+            origin_url: "http://legit.com/this-is-good", 
             transaction_type: "rental",
             date_transacted: transacted_date,
             price: 1000
@@ -74,7 +74,7 @@ RSpec.describe ClimbsfRentedImporter do
           il = create(:import_log, 
             source: "some source",        
             import_job_id: nij.id,
-            origin_url: "some url", 
+            origin_url: "http://legit.com/this-is-good", 
             transaction_type: "rental",
             date_transacted: transacted_date,
             price: 1000
@@ -95,7 +95,7 @@ RSpec.describe ClimbsfRentedImporter do
           il1 = create(:import_log, 
             source: "some source",        
             import_job_id: ij.id,
-            origin_url: "some url", 
+            origin_url: "http://legit.com/this-is-good", 
             transaction_type: "rental",
             date_transacted: transacted_date,
             price: 1000
@@ -105,7 +105,7 @@ RSpec.describe ClimbsfRentedImporter do
           il2 = create(:import_log, 
             source: "some source",        
             import_job_id: nij.id,
-            origin_url: "some url", 
+            origin_url: "http://legit.com/this-is-good", 
             transaction_type: "rental",
             date_transacted: transacted_date,
             price: 1000
@@ -126,7 +126,7 @@ RSpec.describe ClimbsfRentedImporter do
           il1 = create(:import_log, 
             source: "some source",        
             import_job_id: ij.id,
-            origin_url: "some url", 
+            origin_url: "http://legit.com/this-is-good", 
             transaction_type: "rental",
             date_transacted: transacted_date,
             price: 1000
