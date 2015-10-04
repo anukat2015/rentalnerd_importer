@@ -373,5 +373,11 @@ RSpec.describe RentalCreator do
       ic.create_import_log row
       ImportLog.all.size.should == 1      
     end
+
+    it 'returns true if address is undisclosed' do
+      row = generate_row address: "(Undisclosed Address) San Francisco, CA 94114"
+      ic.create_import_log row
+      ImportLog.all.size.should == 0
+    end
   end
 end

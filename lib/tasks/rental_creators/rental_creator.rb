@@ -40,6 +40,8 @@ module RentalCreator
       return true       
     elsif ImportFormatter.to_float(row["price"]) == 0
       return true 
+    elsif row["address"].include? "Undisclosed Address"
+      return true       
     else
       return false      
     end
