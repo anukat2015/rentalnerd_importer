@@ -157,6 +157,7 @@ module RentalCreator
     ImportDiff.where( import_job_id: job_id ).each do |import_diff|
       create_property import_diff
     end
+    LuxuryAddress.set_property_grades    
 
   end
 
