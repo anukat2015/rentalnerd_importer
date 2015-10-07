@@ -75,4 +75,114 @@ describe PredictionModel, type: :model do
     PredictionModel.most_recent_deactivated_model("AREA 51").should == prediction_model_2
   end
 
+  describe '#get_sqft_component' do
+    it 'returns value if sqft_coefficient is set' do
+      prediction_model.update!( sqft_coefficient: 100)
+      pn.update!( coefficient: 100 )
+      property = create(:property, sqft: 100, neighborhoods: [pn.neighborhood])
+
+      result = prediction_model.get_sqft_component property
+      result.should == 1000000
+    end
+
+    it 'returns 0 if sqft_coefficient is not set' do
+      prediction_model.update!( sqft_coefficient: nil)
+      pn.update!( coefficient: 100 )
+      property = create(:property, sqft: 100, neighborhoods: [pn.neighborhood])
+
+      result = prediction_model.get_sqft_component property
+      result.should == 0
+    end
+
+    it 'returns value if prediction_neighborhood.coefficient is set' do
+      prediction_model.update!( sqft_coefficient: 100)
+      pn.update!( coefficient: 100 )
+      property = create(:property, sqft: 100, neighborhoods: [pn.neighborhood])
+
+      result = prediction_model.get_sqft_component property
+      result.should == 1000000      
+    end
+
+    it 'returns zero if prediction_neighborhood.coefficient is not set' do
+      prediction_model.update!( sqft_coefficient: 100)
+      pn.update!( coefficient: nil )
+      property = create(:property, sqft: 100, neighborhoods: [pn.neighborhood])
+
+      result = prediction_model.get_sqft_component property
+      result.should == 0      
+    end    
+
+  end
+
+  describe '#get_regular_component' do
+
+    it 'returns value if prediction_neighborhood.regular_coefficient is set' do
+      prediction_model.update!( sqft_coefficient: nil)
+      pn.update!( coefficient: nil, regular_coefficient: 100 )
+      property = create(:property, sqft: 100, neighborhoods: [pn.neighborhood], luxurious: false)
+
+      result = prediction_model.get_regular_component property
+      result.should == 10000
+    end
+
+    it 'returns zero if prediction_neighborhood.regular_coefficient is set' do
+      prediction_model.update!( sqft_coefficient: nil)
+      pn.update!( coefficient: nil, regular_coefficient: nil )
+      property = create(:property, sqft: 100, neighborhoods: [pn.neighborhood], luxurious: false)
+
+      result = prediction_model.get_regular_component property
+      result.should == 0      
+    end
+
+    it 'returns zero if property is not regular' do
+      prediction_model.update!( sqft_coefficient: nil)
+      pn.update!( coefficient: nil, regular_coefficient: 100 )
+      property = create(:property, sqft: 100, neighborhoods: [pn.neighborhood], luxurious: false)
+
+      result = prediction_model.get_regular_component property
+      result.should == 10000
+    end
+
+  end
+
+  describe '#get_luxury_component' do
+    it 'returns value if prediction_neighborhood.luxury_coefficient is set' do
+      prediction_model.update!( sqft_coefficient: nil)
+      pn.update!( coefficient: nil, luxury_coefficient: 100 )
+      property = create(:property, sqft: 100, neighborhoods: [pn.neighborhood], luxurious: true)
+
+      result = prediction_model.get_luxury_component property
+      result.should == 10000
+    end
+
+    it 'returns zero if prediction_neighborhood.luxury_coefficient is set' do
+      prediction_model.update!( sqft_coefficient: nil)
+      pn.update!( coefficient: nil, luxury_coefficient: nil )
+      property = create(:property, sqft: 100, neighborhoods: [pn.neighborhood], luxurious: true)
+
+      result = prediction_model.get_luxury_component property
+      result.should == 0      
+    end
+
+    it 'returns zero if property is not luxurious' do
+      prediction_model.update!( sqft_coefficient: nil)
+      pn.update!( coefficient: nil, luxury_coefficient: 100 )
+      property = create(:property, sqft: 100, neighborhoods: [pn.neighborhood], luxurious: false)
+
+      result = prediction_model.get_luxury_component property
+      result.should == 0
+    end    
+  end
+
+  describe '#get_elevation_component' do
+    it 'returns elevation component if elevation component is set' do
+      prediction_model.update!( sqft_coefficient: nil, elevation_coefficient: 100)
+      pn.update!( coefficient: nil, luxury_coefficient: 100 )
+      property = create(:property, sqft: nil, neighborhoods: [pn.neighborhood], luxurious: false, elevation: 100)
+
+      result = prediction_model.get_elevation_component property
+      result.should == 0      
+    end
+  end
+
 end

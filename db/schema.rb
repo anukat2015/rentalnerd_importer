@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151006231256) do
+ActiveRecord::Schema.define(version: 20151006235210) do
 
   create_table "import_diffs", force: true do |t|
     t.text     "address"
@@ -94,6 +94,7 @@ ActiveRecord::Schema.define(version: 20151006231256) do
     t.datetime "updated_at"
     t.string   "area_name"
     t.boolean  "active"
+    t.float    "dist_to_park_coefficient"
   end
 
   create_table "prediction_neighborhoods", force: true do |t|
@@ -104,6 +105,8 @@ ActiveRecord::Schema.define(version: 20151006231256) do
     t.datetime "updated_at"
     t.integer  "neighborhood_id"
     t.boolean  "active",              default: true
+    t.float    "regular_coefficient"
+    t.float    "luxury_coefficient"
   end
 
   create_table "prediction_results", force: true do |t|
