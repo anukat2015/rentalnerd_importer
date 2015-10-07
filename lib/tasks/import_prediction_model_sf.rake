@@ -13,10 +13,7 @@ namespace :db do
     pm = PredictionModel.new(area_name: "SF", active: true)
 
     CSV.new( open("./lib/tasks/model_files/#{features_file}"), :headers => :first_row ).each do |row|
-      case row["Effect"]
-      when "adj_sqft"
-        pm.sqft_coefficient = ImportFormatter.to_float row["Coefficient"]
-        
+      case row["Effect"]        
       when "bedrooms"
         pm.bedroom_coefficient = ImportFormatter.to_float row["Coefficient"]
 
@@ -25,13 +22,25 @@ namespace :db do
 
       when "base_rent"
         pm.base_rent = ImportFormatter.to_float row["Coefficient"]
+
+      # Used in the new model
+      when "dist_to_park"
+        pm.dist_to_park_coefficient = ImportFormatter.to_float row["Coefficient"]
+
+      # Used in the new model
+      when "elevation"
+        pm.elevation_coefficient = ImportFormatter.to_float row["Coefficient"]
+
+      # Used in the old model
+      when "adj_sqft"
+        pm.sqft_coefficient = ImportFormatter.to_float row["Coefficient"]        
       end
     end
     pm.save!
 
     # For each neighborhood coefficient
     CSV.new( open("./lib/tasks/model_files/#{hood_file}"), :headers => :first_row ).each do |row|
-      curr_name = row["Neighborhood"].gsub("neighborhood_", "")
+      curr_name = row["neighborhood"]
 
       # For each matching neighborhood in our database
       #   for neighborhoods that have multiple areas
@@ -41,7 +50,13 @@ namespace :db do
         pn = PredictionNeighborhood.new
         pn.prediction_model_id  = pm.id
         pn.name                 = nb.name
+
+        # Old model
         pn.coefficient          = ImportFormatter.to_float row["Multiplier"]
+
+        #New Model
+        pn.regular_coefficient  = ImportFormatter.to_float row["regular"]
+        pn.luxury_coefficient   = ImportFormatter.to_float row["luxury"]
 
         if nb.nil?
           binding.pry

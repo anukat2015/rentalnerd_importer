@@ -16,15 +16,71 @@ class PredictionModel < ActiveRecord::Base
 
   def predicted_rent property_id
     property = Property.find property_id
-    predicted_rent =  base_rent + 
-                      adjusted_sqft(property) * sqft_coefficient + 
-                      property.bedrooms * bedroom_coefficient +
-                      property.bathrooms * bathroom_coefficient
+    predicted_rent =  base_rent 
+    predicted_rent += property.bedrooms * bedroom_coefficient
+    predicted_rent += property.bathrooms * bathroom_coefficient
+
+    # Old model
+    predicted_rent += get_sqft_component property
+
+    # New model
+    predicted_rent += get_regular_component property
+    predicted_rent += get_luxury_component property
+    predicted_rent += get_elevation_component property
+
+  end
+
+  def get_regular_component(property)
+    pn = property.get_prediction_neighborhood_for_model id
+    if pn.nil?
+      puts " could not find neighborhood for #{property.id}, #{property.neighborhood} "
+      return 0
+    end
+
+    if !property.luxurious && pn.regular_coefficient.present?
+      return property.sqft * pn.regular_coefficient 
+    else
+      return 0
+    end
+
+  end
+
+  def get_luxury_component(property)
+    pn = property.get_prediction_neighborhood_for_model id
+    if pn.nil?
+      puts " could not find neighborhood for #{property.id}, #{property.neighborhood} "
+      return 0
+    end
+
+    if property.luxurious && pn.luxury_coefficient.present?
+      return property.sqft * pn.luxury_coefficient
+    else
+      return 0
+    end
+    
+  end  
+
+  def get_elevation_component(property)
+    if property.elevation.present? && elevation_coefficient.present?
+      property.elevation * elevation_coefficient
+    else
+      0
+    end
+  end
+
+  # Uses the old model if the old model is still active
+  def get_sqft_component( property )
+
+    if sqft_coefficient.present? 
+      return adjusted_sqft(property) * sqft_coefficient
+    else
+      return 0
+    end
+    
   end
 
   def adjusted_sqft property
     property.sqft * neighborhood_coefficient(property)
-    
   end
 
   # TODO: modify this method to use coefficient of new neighborhoods in the table
@@ -34,7 +90,10 @@ class PredictionModel < ActiveRecord::Base
       puts " could not find neighborhood for #{property.id}, #{property.neighborhood} "
       return 0
     end
-    pn.coefficient
+
+    # Uses the old model if the old model is still ActiveRecord
+    return pn.coefficient unless pn.coefficient.nil?
+    return 0
   end  
 
   def deactivate!
