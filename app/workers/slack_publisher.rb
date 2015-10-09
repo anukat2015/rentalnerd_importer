@@ -10,6 +10,7 @@ class SlackPublisher
     pp = Property.find pr.property_id
 
     payload = {}
+    slack_end_point = nil
 
     if pr.transaction_type == "rental"
       payload[:text] =  "Property Id: #{pp.id},\n" +
@@ -19,6 +20,8 @@ class SlackPublisher
                         "Predicted Rent: #{pr.predicted_rent},\n" +  
                         "Error Level: #{pr.error_level},\n" +
                         "URL: #{pp.origin_url}%\n"
+
+      slack_end_point = ENV['SLACK_RENTAL_PREDICTIONS_CHANNEL']
         
     elsif pr.transaction_type == "sales"
       payload[:text] =  "Property Id: #{pp.id},\n" +
@@ -29,10 +32,13 @@ class SlackPublisher
                         "CAP rate: #{pr.cap_rate}%,\n" + 
                         "URL: #{pp.origin_url}%\n"
 
+      slack_end_point = ENV['SLACK_CAP_PREDICTIONS_CHANNEL']
+
     end
     
-    HTTParty.post( ENV['SLACK_PREDICTIONS_CHANNEL'], 
+    HTTParty.post( slack_end_point,
       :body => payload.to_json,
-      :headers => { 'Content-Type' => 'application/json' } )    
+      :headers => { 'Content-Type' => 'application/json' } 
+    )
   end
 end
