@@ -1,5 +1,10 @@
 module ImportFormatter
   class << self
+
+    def to_integer(value_string)
+      return_int = nil
+    end
+
     # Given the following value returns a float value
     #
     #   Params:

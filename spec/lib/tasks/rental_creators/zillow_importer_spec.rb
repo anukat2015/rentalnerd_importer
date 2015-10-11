@@ -7,7 +7,22 @@ RSpec.describe ZillowImporter do
   let(:transacted_date) { Time.now }
 
   def csv_headers
-    headers = ["address", "neighborhood", "bedrooms", "bathrooms", "price", "sqft", "source", "origin_url", "import_job_id", "transaction_type", "date_closed", "date_listed"]    
+    headers = [
+      "address", 
+      "neighborhood", 
+      "bedrooms", 
+      "bathrooms", 
+      "price", 
+      "sqft", 
+      "parking",
+      "year built",      
+      "source", 
+      "origin_url", 
+      "import_job_id", 
+      "transaction_type", 
+      "date_closed", 
+      "date_listed"
+    ]
   end
 
   def default_attributes
@@ -18,6 +33,8 @@ RSpec.describe ZillowImporter do
       "bathrooms" => "5", 
       "price" => "100", 
       "sqft" => "50", 
+      "parking" => nil, 
+      "year built" => nil,
       "source" => "lalaland", 
       "origin_url" => "http://google.com", 
       "import_job_id" => "1",
@@ -99,6 +116,34 @@ RSpec.describe ZillowImporter do
       ImportLog.all.size.should == 3
       ImportLog.all.last.transaction_type.should == "sales"
       ImportLog.all.last.price.should == 666
+    end
+
+    it 'sets year built to actual value if it exist' do
+      row = generate_row "year built" => "1995"
+      zi.create_import_log row
+      il = ImportLog.all.first
+      il.year_built.should == 1995
+    end
+
+    it 'sets year built to null if it is null' do
+      row = generate_row "year built" => nil
+      zi.create_import_log row
+      il = ImportLog.all.first
+      il.year_built.should == nil
+    end
+
+    it 'sets garage to actual value if it exist' do
+      row = generate_row parking: "Garage - Attached, On street, 1 space"
+      zi.create_import_log row
+      il = ImportLog.all.first
+      il.garage.should == true
+    end
+
+    it 'sets garage to null if it is null' do
+      row = generate_row parking: nil
+      zi.create_import_log row
+      il = ImportLog.all.first
+      il.garage.should == false
     end
 
   end  
@@ -232,7 +277,36 @@ RSpec.describe ZillowImporter do
       found_idiff = zi.get_import_diff ij.id, il
       found_idiff.nil?.should == true      
     end
+
+    it 'sets garage to garage of import_log if that was set' do
+      il = create(:import_log, garage: true)
+      zi.create_import_diff( 666, il, "created", 555)
+      idiff = ImportDiff.all.first
+      idiff.garage.should == true
+    end
+
+    it 'sets garage to nil if import_log.garage was not set' do
+      il = create(:import_log, garage: nil)
+      zi.create_import_diff( 666, il, "created", 555)
+      idiff = ImportDiff.all.first
+      idiff.garage.should == nil      
+    end
+
+    it 'sets year_built to year_built of import_log if that was set' do
+      il = create(:import_log, year_built: 1995)
+      zi.create_import_diff( 666, il, "created", 555)
+      idiff = ImportDiff.all.first
+      idiff.year_built.should == 1995
+    end
+
+    it 'sets year_built to nil if import_log.year_built was not set' do
+      il = create(:import_log, year_built: nil)
+      zi.create_import_diff( 666, il, "created", 555)
+      idiff = ImportDiff.all.first
+      idiff.year_built.should == nil
+    end    
   end
+
 
   describe '#generate_import_diffs' do
     context 'created' do
@@ -639,6 +713,36 @@ RSpec.describe ZillowImporter do
       Property.where( origin_url: 'http://legit.com/this-is-good' ).size.should == 1
     end
 
+  end
+
+  describe '#create_property' do
+    it 'sets the year_built from import_diff - 1995' do
+      idiff = create(:import_diff, year_built: 1995)
+      zi.create_property idiff
+      pp = Property.all.first
+      pp.year_built.should == 1995
+    end
+
+    it 'sets the year_built from import_diff - nil' do
+      idiff = create(:import_diff, year_built: nil)
+      zi.create_property idiff
+      pp = Property.all.first
+      pp.year_built.should == nil
+    end    
+
+    it 'sets the garage from import_diff - true' do
+      idiff = create(:import_diff, garage: true)
+      zi.create_property idiff
+      pp = Property.all.first
+      pp.garage.should == true
+    end
+
+    it 'sets the garage from import_diff - false' do
+      idiff = create(:import_diff, garage: false)
+      zi.create_property idiff
+      pp = Property.all.first
+      pp.garage.should == false
+    end    
   end
 
 end 

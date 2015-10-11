@@ -8,6 +8,9 @@ class ZillowImporter
 
   def create_import_log_with_zillow_special(row)
     return if is_diry? row
+    row["garage"] = false
+    row["garage"] = row["parking"].include? "Garage" unless row["parking"].nil?
+    row["year_built"] = row["year built"].to_i unless row["year built"].to_i == 0
 
     row["price"] = /[0-9,]+/.match(row["price"]).to_s
     if row["transaction_type"].nil?
