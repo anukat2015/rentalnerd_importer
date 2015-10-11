@@ -126,6 +126,10 @@ class DataImporter
         row["price"]        = row["event_price"]
         row["date_listed"]  = row["event_date"]
 
+      when "Back on market"
+        row["price"]        = row["event_price"]
+        row["date_listed"]  = row["event_date"]        
+
       when /sold/i
         puts  row["event_name"]
         row["price"]            = row["event_price"] 
@@ -142,6 +146,7 @@ class DataImporter
         row["price"]        = row["event_price"] 
         row["date_closed"]  = row["event_date"]
         row["date_listed"]  = row["event_date"]
+
       end
 
       row["event_date"]       = ImportFormatter.to_date_short_year row["event_date"]      
@@ -159,6 +164,8 @@ class DataImporter
     sorted_rows.each do |row|
       zi.create_import_log row
     end
+
+
     
     zi.generate_import_diffs job.id    
     zi.generate_properties job.id
