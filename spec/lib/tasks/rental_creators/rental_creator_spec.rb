@@ -21,7 +21,22 @@ RSpec.describe RentalCreator do
   end
 
   def csv_headers
-    headers = ["address", "neighborhood", "bedrooms", "bathrooms", "price", "sqft", "source", "origin_url", "import_job_id", "transaction_type", "date_closed", "date_listed"]    
+    headers = [
+      "address", 
+      "neighborhood", 
+      "bedrooms", 
+      "bathrooms", 
+      "price", 
+      "sqft", 
+      "parking",
+      "year built",
+      "source", 
+      "origin_url", 
+      "import_job_id", 
+      "transaction_type", 
+      "date_closed", 
+      "date_listed"
+    ]
   end
 
   def default_attributes
@@ -32,6 +47,8 @@ RSpec.describe RentalCreator do
       "bathrooms" => "5", 
       "price" => "100", 
       "sqft" => "50", 
+      "parking" => nil, 
+      "year built" => nil,
       "source" => "lalaland", 
       "origin_url" => "http://google.com", 
       "import_job_id" => "1",

@@ -24,6 +24,8 @@ module RentalCreator
     import_log[:bathrooms]        = ImportFormatter.to_float row["bathrooms"]
     import_log[:price]            = ImportFormatter.to_float row["price"]
     import_log[:sqft]             = ImportFormatter.to_float row["sqft"]
+    import_log[:garage]           = row["garage"]
+    import_log[:year_built]       = row["year_built"]
     import_log[:date_closed]      = ImportFormatter.to_date row["date_closed"]
     import_log[:date_listed]      = ImportFormatter.to_date row["date_listed"]
     import_log[:date_transacted]  = import_log[:date_closed] || import_log[:date_listed]
@@ -135,6 +137,8 @@ module RentalCreator
       import_diff[:bathrooms]         = import_log[:bathrooms]
       import_diff[:price]             = import_log[:price]
       import_diff[:sqft]              = import_log[:sqft]
+      import_diff[:garage]            = import_log[:garage]
+      import_diff[:year_built]        = import_log[:year_built]
       import_diff[:date_closed]       = import_log[:date_closed]
       import_diff[:date_listed]       = import_log[:date_listed]
       import_diff[:date_transacted]   = import_log[:date_transacted]
@@ -172,6 +176,8 @@ module RentalCreator
         bedrooms:       import_diff[:bedrooms],
         bathrooms:      import_diff[:bathrooms],
         sqft:           import_diff[:sqft],
+        year_built:     import_diff[:year_built],
+        garage:         import_diff[:garage],
         source:         import_diff[:source],
         origin_url:     import_diff[:origin_url]
       )
@@ -181,6 +187,8 @@ module RentalCreator
       property.bedrooms     = import_diff[:bedrooms]
       property.bathrooms    = import_diff[:bathrooms]
       property.sqft         = import_diff[:sqft]
+      property.year_built   = import_diff[:year_built]
+      property.garage       = import_diff[:garage]
       property.save!
     end
 

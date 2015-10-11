@@ -73,6 +73,28 @@ class DataImporter
     import_zillow source_name, source_url
   end
 
+  def set_zillow_garage source_url
+    puts "Processing #{source_url}"
+    temp_file = GetdataDownloader.get_file source_url
+    CSV.foreach( open(temp_file), :headers => :first_row ).each do |row|
+      puts "\tProcessing #{row['apartment page']}"
+      has_garage = false
+      has_garage = row["parking"].include? "Garage" unless row["parking"].nil?
+      Property.where( origin_url: row["apartment page"] ).update_all( garage: has_garage )
+    end
+  end
+
+  def set_zillow_year_built source_url
+    puts "Processing #{source_url}"
+    temp_file = GetdataDownloader.get_file source_url
+    CSV.foreach( open(temp_file), :headers => :first_row ).each do |row|
+      puts "\tProcessing #{row['apartment page']}"
+      year_built = nil
+      year_built = row["year built"].to_i unless row["year built"].to_i == 0
+      Property.where( origin_url: row["apartment page"] ).update_all( year_built: year_built )
+    end
+  end  
+
   def import_zillow source_name, source_url
     counter = 0
     datasource_url = source_url
