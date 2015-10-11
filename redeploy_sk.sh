@@ -7,7 +7,7 @@ rake db:migrate
 
 RAILS_ENV=production bundle exec rake assets:precompile
 
-ps aux | awk '/sidekiq(.*)krake_ror/ { print $2 }' | xargs kill
+ps aux | awk '/sidekiq(.*)/ { print $2 }' | xargs kill
 bundle exec sidekiq -e production -C config/sidekiq.yml -P tmp/pids/sidekiq.pid  -d
 
 # To be restart manually if and when required
