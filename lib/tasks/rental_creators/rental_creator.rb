@@ -139,6 +139,7 @@ module RentalCreator
       import_diff[:sqft]              = import_log[:sqft]
       import_diff[:garage]            = import_log[:garage]
       import_diff[:year_built]        = import_log[:year_built]
+      import_diff[:level]             = import_log[:level]
       import_diff[:date_closed]       = import_log[:date_closed]
       import_diff[:date_listed]       = import_log[:date_listed]
       import_diff[:date_transacted]   = import_log[:date_transacted]
@@ -179,7 +180,8 @@ module RentalCreator
         year_built:     import_diff[:year_built],
         garage:         import_diff[:garage],
         source:         import_diff[:source],
-        origin_url:     import_diff[:origin_url]
+        origin_url:     import_diff[:origin_url],
+        level:          import_diff[:level]
       )
     else
       property.address      = import_diff[:address]
@@ -189,6 +191,7 @@ module RentalCreator
       property.sqft         = import_diff[:sqft]
       property.year_built   = import_diff[:year_built]
       property.garage       = import_diff[:garage]
+      property.level        = import_diff[:level]
       property.save!
     end
 

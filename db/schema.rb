@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151011185236) do
+ActiveRecord::Schema.define(version: 20151011214525) do
 
   create_table "import_diffs", force: true do |t|
     t.text     "address"
@@ -32,8 +32,9 @@ ActiveRecord::Schema.define(version: 20151011185236) do
     t.integer  "import_job_id"
     t.string   "transaction_type", default: "rental"
     t.date     "date_transacted"
-    t.boolean   "garage"
+    t.boolean  "garage"
     t.integer  "year_built"
+    t.integer  "level",            default: 1
   end
 
   create_table "import_jobs", force: true do |t|
@@ -58,8 +59,9 @@ ActiveRecord::Schema.define(version: 20151011185236) do
     t.integer  "import_job_id"
     t.string   "transaction_type", default: "rental"
     t.date     "date_transacted"
-    t.boolean   "garage"
+    t.boolean  "garage"
     t.integer  "year_built"
+    t.integer  "level",            default: 1
   end
 
   create_table "luxury_addresses", force: true do |t|
@@ -144,6 +146,7 @@ ActiveRecord::Schema.define(version: 20151011185236) do
     t.boolean  "luxurious"
     t.boolean  "garage"
     t.integer  "year_built"
+    t.integer  "level",          default: 1
   end
 
   create_table "property_neighborhoods", force: true do |t|

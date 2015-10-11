@@ -409,4 +409,5 @@ RSpec.describe RentalCreator do
       ImportLog.all.size.should == 1
     end        
   end
+
 end
