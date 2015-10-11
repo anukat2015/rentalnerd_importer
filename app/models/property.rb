@@ -11,6 +11,7 @@ class Property < ActiveRecord::Base
       obj.lookup_address_changed?
     )
   }
+  after_validation :set_level
   after_commit :associate_with_neighborhoods
 
   has_many :prediction_results, dependent: :destroy
@@ -71,6 +72,29 @@ class Property < ActiveRecord::Base
 
   def get_active_prediction_neighborhoods
     prediction_neighborhoods.where( active: true )
+  end
+
+  def set_level 
+    if address =~ /APT ([0-9]{4})/
+      # Take first 2 as level
+      self.level = address.scan( /APT ([0-9]{2})/).first.first.to_i
+
+    elsif address =~ /APT ([0-9]{3})[A-Z]/
+      # Take first 2 as level
+      self.level = address.scan( /APT ([0-9]{2})/).first.first.to_i            
+
+    elsif address =~ /APT ([0-9]{3})/
+      # Take first as level
+      self.level = address.scan( /APT ([0-9]{1})/).first.first.to_i      
+
+    elsif address =~ /APT ([0-9]{2})[A-Z]/
+      # Take first 2 as level
+      self.level = address.scan( /APT ([0-9]{2})/).first.first.to_i
+
+    elsif address =~ /APT ([0-9])[A-Z]/
+      # Take first as level
+      self.level = address.scan( /APT ([0-9])/).first.first.to_i
+    end
   end
 
 end

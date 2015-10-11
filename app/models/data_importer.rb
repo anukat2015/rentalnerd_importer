@@ -93,7 +93,7 @@ class DataImporter
       year_built = row["year built"].to_i unless row["year built"].to_i == 0
       Property.where( origin_url: row["apartment page"] ).update_all( year_built: year_built )
     end
-  end  
+  end
 
   def import_zillow source_name, source_url
     counter = 0
