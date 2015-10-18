@@ -5,8 +5,8 @@ namespace :db do
   task :import_prediction_model_sf => :environment do   
     puts "Importing prediction model data"
 
-    features_file = "model_features_sf_20151003.csv"
-    hood_file = "model_hoods_sf_20151003.csv"
+    features_file = "model_features_sf_20151011.csv"
+    hood_file = "model_hoods_sf_20151011.csv"
 
     # Deactivates all prior prediction models for the area 
     PredictionModel.deactivate_area! "SF"
@@ -14,6 +14,7 @@ namespace :db do
 
     CSV.new( open("./lib/tasks/model_files/#{features_file}"), :headers => :first_row ).each do |row|
       case row["Effect"]        
+
       when "bedrooms"
         pm.bedroom_coefficient = ImportFormatter.to_float row["Coefficient"]
 
@@ -23,17 +24,25 @@ namespace :db do
       when "base_rent"
         pm.base_rent = ImportFormatter.to_float row["Coefficient"]
 
-      # Used in the new model
-      when "dist_to_park"
-        pm.dist_to_park_coefficient = ImportFormatter.to_float row["Coefficient"]
-
-      # Used in the new model
-      when "elevation"
-        pm.elevation_coefficient = ImportFormatter.to_float row["Coefficient"]
-
       # Used in the old model
       when "adj_sqft"
         pm.sqft_coefficient = ImportFormatter.to_float row["Coefficient"]        
+
+      when "dist_to_park"
+        pm.dist_to_park_coefficient = ImportFormatter.to_float row["Coefficient"]
+
+      when "elevation"
+        pm.elevation_coefficient = ImportFormatter.to_float row["Coefficient"]
+
+      when "floor"
+        pm.floor_coefficient = ImportFormatter.to_float row["Coefficient"]
+
+      when "age"
+        pm.age_coefficient = ImportFormatter.to_float row["Coefficient"]
+
+      when "garage"
+        pm.garage_coefficient = ImportFormatter.to_float row["Coefficient"]
+
       end
     end
     pm.save!

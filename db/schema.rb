@@ -10,7 +10,6 @@
 # you'll amass, the slower it'll run and the greater likelihood for issues).
 #
 # It's strongly recommended that you check this file into your version control system.
-
 ActiveRecord::Schema.define(version: 20151011214525) do
 
   create_table "import_diffs", force: true do |t|
@@ -101,6 +100,9 @@ ActiveRecord::Schema.define(version: 20151011214525) do
     t.string   "area_name"
     t.boolean  "active"
     t.float    "dist_to_park_coefficient"
+    t.float    "floor_coefficient"
+    t.float    "age_coefficient"
+    t.float    "garage_coefficient"
   end
 
   create_table "prediction_neighborhoods", force: true do |t|
