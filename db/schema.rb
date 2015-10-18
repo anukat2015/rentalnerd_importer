@@ -100,7 +100,7 @@ ActiveRecord::Schema.define(version: 20151011214525) do
     t.string   "area_name"
     t.boolean  "active"
     t.float    "dist_to_park_coefficient"
-    t.float    "floor_coefficient"
+    t.float    "level_coefficient"
     t.float    "age_coefficient"
     t.float    "garage_coefficient"
   end

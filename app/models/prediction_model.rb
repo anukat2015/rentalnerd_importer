@@ -23,10 +23,17 @@ class PredictionModel < ActiveRecord::Base
     # Old model
     predicted_rent += get_sqft_component property
 
-    # New model
+    # New model - Neighborhood
     predicted_rent += get_regular_component property
     predicted_rent += get_luxury_component property
+
+    # New model - property specific features
     predicted_rent += get_elevation_component property
+    predicted_rent += get_distance_to_park_component property
+    predicted_rent += get_level_component property
+    predicted_rent += get_age_component property
+    predicted_rent += get_garage_component property
+    
 
   end
 
@@ -66,6 +73,38 @@ class PredictionModel < ActiveRecord::Base
     else
       0
     end
+  end
+
+  # To be implemented
+  def get_distance_to_park_component(property)
+    0
+  end  
+
+  # Component of level impact on price
+  def get_level_component(property)
+    if property.level.present? && level_coefficient.present?
+      property.level * level_coefficient
+    else
+      0
+    end
+  end
+
+  # Component of level impact on price
+  def get_age_component(property)
+    if property.year_built.present? && age_coefficient.present?
+      ( Time.now.year - property.year_built ) * age_coefficient
+    else
+      0
+    end
+  end
+
+  # Component of level impact on price
+  def get_garage_component(property)
+    if property.garage.present? && garage_coefficient.present?
+      garage_coefficient
+    else
+      0
+    end    
   end
 
   # Uses the old model if the old model is still active

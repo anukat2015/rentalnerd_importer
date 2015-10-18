@@ -35,7 +35,7 @@ namespace :db do
         pm.elevation_coefficient = ImportFormatter.to_float row["Coefficient"]
 
       when "floor"
-        pm.floor_coefficient = ImportFormatter.to_float row["Coefficient"]
+        pm.level_coefficient = ImportFormatter.to_float row["Coefficient"]
 
       when "age"
         pm.age_coefficient = ImportFormatter.to_float row["Coefficient"]
