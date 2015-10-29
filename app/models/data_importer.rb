@@ -149,6 +149,8 @@ class DataImporter
         row["date_listed"]  = row["event_date"]
 
       end
+
+      row["event_date"]       = ImportFormatter.to_date_short_year row["event_date"]      
       
       unless row["event_date"].nil?
         rows << row
