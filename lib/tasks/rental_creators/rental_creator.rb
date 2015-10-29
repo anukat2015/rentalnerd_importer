@@ -28,7 +28,9 @@ module RentalCreator
     import_log[:year_built]       = row["year_built"]
     import_log[:date_closed]      = ImportFormatter.to_date row["date_closed"]
     import_log[:date_listed]      = ImportFormatter.to_date row["date_listed"]
-    import_log[:date_transacted]  = import_log[:date_closed] || import_log[:date_listed]
+
+    row["date_transacted"] = row["date_closed"] || row["date_listed"]
+    import_log[:date_transacted]  = ImportFormatter.to_date row["date_transacted"]
     import_log[:source]           = row["source"]
     import_log[:origin_url]       = row["origin_url"]
     import_log[:import_job_id]    = row["import_job_id"]
