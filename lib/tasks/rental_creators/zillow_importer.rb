@@ -34,6 +34,7 @@ class ZillowImporter
     unless new_import_log.nil?
       new_import_log[:date_closed]  = ImportFormatter.to_date_short_year row["date_closed"]
       new_import_log[:date_listed]  = ImportFormatter.to_date_short_year row["date_listed"]
+      new_import_log[:date_transacted]  = new_import_log[:date_closed] || new_import_log[:date_listed]
       new_import_log.save!
     end
 
