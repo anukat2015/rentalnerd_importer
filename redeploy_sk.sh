@@ -5,8 +5,6 @@ bundle install
 
 rake db:migrate
 
-RAILS_ENV=production bundle exec rake assets:precompile
-
 ps aux | awk '/sidekiq(.*)/ { print $2 }' | xargs kill
 bundle exec sidekiq -e production -C config/sidekiq.yml -P tmp/pids/sidekiq.pid  -d
 
