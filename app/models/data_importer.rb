@@ -115,7 +115,6 @@ class DataImporter
       row["origin_url"] = row["apartment page"]
       row["import_job_id"] = job.id
       row["sqft"] = row["size"]
-      row["event_date"]       = ImportFormatter.to_date_short_year row["event_date"]      
 
       case row["event_name"]
       when "Listed for rent"
