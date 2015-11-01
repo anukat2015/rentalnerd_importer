@@ -3,6 +3,7 @@ class PropertyTransactionLog < ActiveRecord::Base
   belongs_to :property
   has_one :property_transaction
   has_one :prediction_result
+  has_one :neighborhoods, through: :property
 
   after_validation :set_days_on_market
   after_validation :set_transaction_status
@@ -146,6 +147,7 @@ class PropertyTransactionLog < ActiveRecord::Base
         transaction_type: transaction_type,
         property_transaction_log_id: self.id
       ).first
+      
       curr_predicted_rent = pm.predicted_rent(property.id)
       curr_transaction_type = transaction_type
 

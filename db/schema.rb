@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151003201252) do
+ActiveRecord::Schema.define(version: 20151018072310) do
 
   create_table "import_diffs", force: true do |t|
     t.text     "address"
@@ -32,6 +32,9 @@ ActiveRecord::Schema.define(version: 20151003201252) do
     t.integer  "import_job_id"
     t.string   "transaction_type", default: "rental"
     t.date     "date_transacted"
+    t.boolean  "garage"
+    t.integer  "year_built"
+    t.integer  "level",            default: 1
   end
 
   create_table "import_jobs", force: true do |t|
@@ -56,6 +59,15 @@ ActiveRecord::Schema.define(version: 20151003201252) do
     t.integer  "import_job_id"
     t.string   "transaction_type", default: "rental"
     t.date     "date_transacted"
+    t.boolean  "garage"
+    t.integer  "year_built"
+    t.integer  "level",            default: 1
+  end
+
+  create_table "luxury_addresses", force: true do |t|
+    t.string   "address"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "neighborhood_vertices", force: true do |t|
@@ -88,6 +100,10 @@ ActiveRecord::Schema.define(version: 20151003201252) do
     t.datetime "updated_at"
     t.string   "area_name"
     t.boolean  "active"
+    t.float    "dist_to_park_coefficient"
+    t.float    "level_coefficient"
+    t.float    "age_coefficient"
+    t.float    "garage_coefficient"
   end
 
   create_table "prediction_neighborhoods", force: true do |t|
@@ -98,6 +114,8 @@ ActiveRecord::Schema.define(version: 20151003201252) do
     t.datetime "updated_at"
     t.integer  "neighborhood_id"
     t.boolean  "active",              default: true
+    t.float    "regular_coefficient"
+    t.float    "luxury_coefficient"
   end
 
   create_table "prediction_results", force: true do |t|
@@ -128,6 +146,10 @@ ActiveRecord::Schema.define(version: 20151003201252) do
     t.float    "longitude"
     t.float    "elevation"
     t.text     "lookup_address"
+    t.boolean  "luxurious"
+    t.boolean  "garage"
+    t.integer  "year_built"
+    t.integer  "level",          default: 1
   end
 
   create_table "property_neighborhoods", force: true do |t|

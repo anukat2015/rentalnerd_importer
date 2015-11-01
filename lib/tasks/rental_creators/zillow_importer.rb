@@ -1,3 +1,4 @@
+require 'net/http'
 require './lib/tasks/rental_creators/rental_creator'
 
 class ZillowImporter
@@ -7,6 +8,9 @@ class ZillowImporter
 
   def create_import_log_with_zillow_special(row)
     return if is_diry? row
+    row["garage"] = false
+    row["garage"] = row["parking"].include? "Garage" unless row["parking"].nil?
+    row["year_built"] = row["year built"].to_i unless row["year built"].to_i == 0
 
     row["price"] = /[0-9,]+/.match(row["price"]).to_s
     if row["transaction_type"].nil?
@@ -26,9 +30,13 @@ class ZillowImporter
     end
 
     new_import_log = create_import_log_without_zillow_special row
-    new_import_log[:date_closed]  = ImportFormatter.to_date_short_year row["date_closed"]
-    new_import_log[:date_listed]  = ImportFormatter.to_date_short_year row["date_listed"]
-    new_import_log.save!
+
+    unless new_import_log.nil?
+      new_import_log[:date_closed]  = ImportFormatter.to_date_short_year row["date_closed"]
+      new_import_log[:date_listed]  = ImportFormatter.to_date_short_year row["date_listed"]
+      new_import_log[:date_transacted]  = new_import_log[:date_closed] || new_import_log[:date_listed]
+      new_import_log.save!
+    end
 
   end
 
@@ -94,6 +102,11 @@ class ZillowImporter
     to_proceed = true
     if diff_type == "deleted"
       to_proceed = most_recent_transaction_for_property_in_batch? import_log
+
+      is_scam = scam?( import_log["origin_url"] )
+      purge_scam_records( import_log["origin_url"] ) if is_scam
+
+      to_proceed = to_proceed && !is_scam
     end
     return unless to_proceed
     super( curr_import_job_id, import_log, diff_type, new_log_id, old_log_id=nil )
@@ -123,6 +136,21 @@ class ZillowImporter
     return true if !import_log[:date_listed].nil?
     return false
     
+  end
+
+  def scam? url
+    uri = URI( url)
+    res = Net::HTTP.get_response(uri)
+    if res.code == "200"
+      return false
+    elsif res.code == "301"
+      return true
+    end
+    return false
+  end
+
+  def purge_scam_records scam_url
+    Property.destroy_all( origin_url: scam_url )
   end
 
 end

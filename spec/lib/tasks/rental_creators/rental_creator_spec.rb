@@ -21,17 +21,34 @@ RSpec.describe RentalCreator do
   end
 
   def csv_headers
-    headers = ["address", "neighborhood", "bedrooms", "bathrooms", "price", "sqft", "source", "origin_url", "import_job_id", "transaction_type", "date_closed", "date_listed"]    
+    headers = [
+      "address", 
+      "neighborhood", 
+      "bedrooms", 
+      "bathrooms", 
+      "price", 
+      "sqft", 
+      "parking",
+      "year built",
+      "source", 
+      "origin_url", 
+      "import_job_id", 
+      "transaction_type", 
+      "date_closed", 
+      "date_listed"
+    ]
   end
 
   def default_attributes
     default_attrs = {
-      "address" => "some address", 
+      "address" => "111 some address", 
       "neighborhood" => "some neighborhood", 
       "bedrooms" => "5", 
       "bathrooms" => "5", 
       "price" => "100", 
       "sqft" => "50", 
+      "parking" => nil, 
+      "year built" => nil,
       "source" => "lalaland", 
       "origin_url" => "http://google.com", 
       "import_job_id" => "1",
@@ -188,7 +205,7 @@ RSpec.describe RentalCreator do
           il = create(:import_log, 
             source: "some source",        
             import_job_id: ij.id,
-            origin_url: "some url", 
+            origin_url: "http://legit.com/this-is-good", 
             transaction_type: "rental",
             date_transacted: transacted_date,
             price: 1000
@@ -207,7 +224,7 @@ RSpec.describe RentalCreator do
           il = create(:import_log, 
             source: "some source",        
             import_job_id: nij.id,
-            origin_url: "some url", 
+            origin_url: "http://legit.com/this-is-good", 
             transaction_type: "rental",
             date_transacted: transacted_date,
             price: 1000
@@ -228,7 +245,7 @@ RSpec.describe RentalCreator do
           il1 = create(:import_log, 
             source: "some source",        
             import_job_id: ij.id,
-            origin_url: "some url", 
+            origin_url: "http://legit.com/this-is-good", 
             transaction_type: "rental",
             date_transacted: transacted_date,
             price: 1000
@@ -238,7 +255,7 @@ RSpec.describe RentalCreator do
           il2 = create(:import_log, 
             source: "some source",        
             import_job_id: nij.id,
-            origin_url: "some url", 
+            origin_url: "http://legit.com/this-is-good", 
             transaction_type: "rental",
             date_transacted: transacted_date,
             price: 1000
@@ -259,7 +276,7 @@ RSpec.describe RentalCreator do
         il1 = create(:import_log, 
           source: "some source",        
           import_job_id: ij.id,
-          origin_url: "some url", 
+          origin_url: "http://legit.com/this-is-good", 
           transaction_type: "rental",
           date_transacted: transacted_date,
           price: 1000
@@ -279,7 +296,7 @@ RSpec.describe RentalCreator do
       il1 = create(:import_log, 
         source: "some source",        
         import_job_id: ij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_transacted: transacted_date,
         date_listed: transacted_date,
@@ -300,7 +317,7 @@ RSpec.describe RentalCreator do
       il1 = create(:import_log,
         source: "some source",
         import_job_id: ij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_transacted: transacted_date,
         date_closed: transacted_date,
@@ -321,7 +338,7 @@ RSpec.describe RentalCreator do
       il1 = create(:import_log, 
         source: "some source",        
         import_job_id: ij.id,
-        origin_url: "some url", 
+        origin_url: "http://legit.com/this-is-good", 
         transaction_type: "rental",
         date_transacted: transacted_date,
         price: 1000
@@ -343,4 +360,54 @@ RSpec.describe RentalCreator do
 
     end    
   end
+
+  describe '#discard?' do
+    it 'returns false if price is not set properyly' do
+      row = generate_row price: "0"
+      ic.create_import_log row
+      ImportLog.all.size.should == 0
+    end
+
+    it 'returns false if price is zero' do
+      row = generate_row price: "NA"
+      ic.create_import_log row
+      ImportLog.all.size.should == 0
+    end
+    it 'returns true if price is set properyly' do
+      row = generate_row price: "666"
+      ic.create_import_log row
+      ImportLog.all.size.should == 1      
+    end
+
+    it 'returns true if sqft is not set properyly' do
+      row = generate_row sqft: "NA"
+      ic.create_import_log row
+      ImportLog.all.size.should == 0      
+    end
+
+    it 'returns true if price is set properyly' do
+      row = generate_row sqft: "1,000"
+      ic.create_import_log row
+      ImportLog.all.size.should == 1      
+    end
+
+    it 'returns true if address is undisclosed' do
+      row = generate_row address: "(Undisclosed Address) San Francisco, CA 94114"
+      ic.create_import_log row
+      ImportLog.all.size.should == 0
+    end
+
+    it 'returns true if address does not start with a number' do
+      row = generate_row address: "San Francisco, CA 94114"
+      ic.create_import_log row
+      ImportLog.all.size.should == 0
+    end    
+
+    it 'returns false if address starts with a number' do
+      row = generate_row address: "111 San Francisco, CA 94114"
+      ic.create_import_log row
+      ImportLog.all.size.should == 1
+    end        
+  end
+
 end

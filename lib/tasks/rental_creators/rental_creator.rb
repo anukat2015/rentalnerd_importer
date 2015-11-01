@@ -10,6 +10,12 @@ module RentalCreator
   end
 
   def create_import_log(row)
+
+    if discard? row
+      puts "\tdiscarding record for: " + row["origin_url"]      
+      return 
+    end
+
     puts "\tcreating new import_log: " + row["origin_url"]
     import_log = ImportLog.create
     import_log[:address]          = row["address"]
@@ -18,6 +24,8 @@ module RentalCreator
     import_log[:bathrooms]        = ImportFormatter.to_float row["bathrooms"]
     import_log[:price]            = ImportFormatter.to_float row["price"]
     import_log[:sqft]             = ImportFormatter.to_float row["sqft"]
+    import_log[:garage]           = row["garage"]
+    import_log[:year_built]       = row["year_built"]
     import_log[:date_closed]      = ImportFormatter.to_date row["date_closed"]
     import_log[:date_listed]      = ImportFormatter.to_date row["date_listed"]
     import_log[:date_transacted]  = import_log[:date_closed] || import_log[:date_listed]
@@ -27,6 +35,21 @@ module RentalCreator
     import_log[:transaction_type] = row["transaction_type"] || DEFAULT_TRANSACTION_TYPE
     import_log.save!
     import_log
+  end
+
+  def discard? row
+    if ImportFormatter.to_float(row["sqft"]) == 0
+      return true       
+    elsif ImportFormatter.to_float(row["price"]) == 0
+      return true 
+    elsif row["address"].include? "Undisclosed Address"
+      return true 
+    elsif ![*0..9].map { |n| n.to_s}.include? row["address"][0]
+      return true 
+    else
+      return false      
+    end
+
   end
 
   def generate_import_diffs( curr_import_job_id )
@@ -114,6 +137,9 @@ module RentalCreator
       import_diff[:bathrooms]         = import_log[:bathrooms]
       import_diff[:price]             = import_log[:price]
       import_diff[:sqft]              = import_log[:sqft]
+      import_diff[:garage]            = import_log[:garage]
+      import_diff[:year_built]        = import_log[:year_built]
+      import_diff[:level]             = import_log[:level]
       import_diff[:date_closed]       = import_log[:date_closed]
       import_diff[:date_listed]       = import_log[:date_listed]
       import_diff[:date_transacted]   = import_log[:date_transacted]
@@ -136,6 +162,7 @@ module RentalCreator
     ImportDiff.where( import_job_id: job_id ).each do |import_diff|
       create_property import_diff
     end
+    LuxuryAddress.set_property_grades    
 
   end
 
@@ -150,8 +177,11 @@ module RentalCreator
         bedrooms:       import_diff[:bedrooms],
         bathrooms:      import_diff[:bathrooms],
         sqft:           import_diff[:sqft],
+        year_built:     import_diff[:year_built],
+        garage:         import_diff[:garage],
         source:         import_diff[:source],
-        origin_url:     import_diff[:origin_url]
+        origin_url:     import_diff[:origin_url],
+        level:          import_diff[:level]
       )
     else
       property.address      = import_diff[:address]
@@ -159,6 +189,9 @@ module RentalCreator
       property.bedrooms     = import_diff[:bedrooms]
       property.bathrooms    = import_diff[:bathrooms]
       property.sqft         = import_diff[:sqft]
+      property.year_built   = import_diff[:year_built]
+      property.garage       = import_diff[:garage]
+      property.level        = import_diff[:level]
       property.save!
     end
 

@@ -11,6 +11,7 @@ class Property < ActiveRecord::Base
       obj.lookup_address_changed?
     )
   }
+  after_validation :set_level
   after_commit :associate_with_neighborhoods
 
   has_many :prediction_results, dependent: :destroy
@@ -32,7 +33,7 @@ class Property < ActiveRecord::Base
   ]
 
   def cleanup_address
-    puts "setting lookup_address"
+    puts "\tsetting lookup_address"
     temp_neig = neighborhood
     CONFUSING_TERMS.each do |term|    
       temp_neig = temp_neig.gsub( term, "" ) unless temp_neig.nil?      
@@ -41,7 +42,7 @@ class Property < ActiveRecord::Base
   end
 
   def set_elevation
-    puts "setting elevation for property #{id}"
+    puts "\tsetting elevation for property #{id}"
     url_string = "https://maps.googleapis.com/maps/api/elevation/json?locations=#{latitude},#{longitude}"
     url = URI.parse URI.encode(url_string)
     api_response = HTTParty.get(url)
@@ -56,7 +57,7 @@ class Property < ActiveRecord::Base
     possible_nbs = Neighborhood.guess self
     possible_nbs.each do |nb|
       if nb.belongs_here? self
-        puts "associating property #{id} with neighborhood #{nb.id}, #{nb.name}"
+        puts "\tassociating property #{id} with neighborhood #{nb.id}, #{nb.name}"
         PropertyNeighborhood.where(
           property_id: id, 
           neighborhood_id: nb.id 
@@ -71,6 +72,29 @@ class Property < ActiveRecord::Base
 
   def get_active_prediction_neighborhoods
     prediction_neighborhoods.where( active: true )
+  end
+
+  def set_level 
+    if address =~ /(APT |#)([0-9]{4})/
+      # Take first 2 as level
+      self.level = address.scan( /(APT |#)([0-9]{2})/).first.second.to_i
+
+    elsif address =~ /(APT |#)([0-9]{3})[A-Z]/
+      # Take first 2 as level
+      self.level = address.scan( /(APT |#)([0-9]{2})/).first.second.to_i            
+
+    elsif address =~ /(APT |#)([0-9]{3})/
+      # Take first as level
+      self.level = address.scan( /(APT |#)([0-9]{1})/).first.second.to_i      
+
+    elsif address =~ /(APT |#)([0-9]{2})[A-Z]/
+      # Take first 2 as level
+      self.level = address.scan( /(APT |#)([0-9]{2})/).first.second.to_i
+
+    elsif address =~ /(APT |#)([0-9])[A-Z]/
+      # Take first as level
+      self.level = address.scan( /(APT |#)([0-9])/).first.second.to_i
+    end
   end
 
 end

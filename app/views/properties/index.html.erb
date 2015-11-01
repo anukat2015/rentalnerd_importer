@@ -1,0 +1,25 @@
+<h2><%= @total_count %> selections </h2>
+
+<%= form_tag( properties_path, method: "get") do %>
+<% end %>
+
+<table class="table table-fixed-header">
+  <thead class="header">
+    <tr>
+      <th>
+        #
+      </th>
+      <th>Something</th>
+    </tr>    
+  </thead>
+  <tbody>
+    <% @properties.each_with_index do |property, index| %>
+      <tr>
+        <td >
+          <%=index + 1 %>
+        </td>        
+        <td> aaa</td>
+      </tr>
+    <% end %>    
+  </tbody>
+</table>
