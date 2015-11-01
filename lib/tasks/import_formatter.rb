@@ -38,6 +38,7 @@ module ImportFormatter
     # If nil returns nil
     def to_date(raw_string)
       return nil if raw_string.nil?
+      return nil if raw_string !=~ /[0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4}/
       issue_date = Date.strptime(raw_string,"%m/%d/%Y")
     end
 
@@ -45,6 +46,7 @@ module ImportFormatter
     # If nil returns nil
     def to_date_short_year(raw_string)
       return nil if raw_string.nil?
+      return nil if raw_string !=~ /[0-9]{1,2}\/[0-9]{1,2}\/[0-9]{2}/
       issue_date = Date.strptime(raw_string,"%m/%d/%y")
     end
 
