@@ -75,25 +75,25 @@ class Property < ActiveRecord::Base
   end
 
   def set_level 
-    if address =~ /APT ([0-9]{4})/
+    if address =~ /(APT |#)([0-9]{4})/
       # Take first 2 as level
-      self.level = address.scan( /APT ([0-9]{2})/).first.first.to_i
+      self.level = address.scan( /(APT |#)([0-9]{2})/).first.second.to_i
 
-    elsif address =~ /APT ([0-9]{3})[A-Z]/
+    elsif address =~ /(APT |#)([0-9]{3})[A-Z]/
       # Take first 2 as level
-      self.level = address.scan( /APT ([0-9]{2})/).first.first.to_i            
+      self.level = address.scan( /(APT |#)([0-9]{2})/).first.second.to_i            
 
-    elsif address =~ /APT ([0-9]{3})/
+    elsif address =~ /(APT |#)([0-9]{3})/
       # Take first as level
-      self.level = address.scan( /APT ([0-9]{1})/).first.first.to_i      
+      self.level = address.scan( /(APT |#)([0-9]{1})/).first.second.to_i      
 
-    elsif address =~ /APT ([0-9]{2})[A-Z]/
+    elsif address =~ /(APT |#)([0-9]{2})[A-Z]/
       # Take first 2 as level
-      self.level = address.scan( /APT ([0-9]{2})/).first.first.to_i
+      self.level = address.scan( /(APT |#)([0-9]{2})/).first.second.to_i
 
-    elsif address =~ /APT ([0-9])[A-Z]/
+    elsif address =~ /(APT |#)([0-9])[A-Z]/
       # Take first as level
-      self.level = address.scan( /APT ([0-9])/).first.first.to_i
+      self.level = address.scan( /(APT |#)([0-9])/).first.second.to_i
     end
   end
 

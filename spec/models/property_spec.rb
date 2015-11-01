@@ -19,11 +19,23 @@ describe Property, type: :model do
       property.level.should == 3
     end
 
+    it 'returns level when format is #345' do
+      property.address = "2200 Pacific Ave #345, San Francisco, CA 94115"
+      property.set_level 
+      property.level.should == 3
+    end    
+
     it 'returns level when format is APT 34C' do
       property.address = "2200 Pacific Ave APT 34C, San Francisco, CA 94115"
       property.set_level
       property.level.should == 34
     end
+
+    it 'returns level when format is #34C' do
+      property.address = "2200 Pacific Ave #34C, San Francisco, CA 94115"
+      property.set_level
+      property.level.should == 34
+    end    
 
     it 'returns level when format is APT 3456' do
       property.address = "2200 Pacific Ave APT 3456, San Francisco, CA 94115"
@@ -31,17 +43,35 @@ describe Property, type: :model do
       property.level.should == 34
     end
 
+    it 'returns level when format is #3456' do
+      property.address = "2200 Pacific Ave #3456, San Francisco, CA 94115"
+      property.set_level
+      property.level.should == 34
+    end    
+
     it 'returns level when format is APT 3K' do
       property.address = "2200 Pacific Ave APT 3K, San Francisco, CA 94115"
       property.set_level
       property.level.should == 3
     end
 
+    it 'returns level when format is #3K' do
+      property.address = "2200 Pacific Ave #3K, San Francisco, CA 94115"
+      property.set_level
+      property.level.should == 3
+    end    
+
     it 'returns level when format is APT 345K' do
       property.address = "2200 Pacific Ave APT 3456, San Francisco, CA 94115"
       property.set_level
       property.level.should == 34
     end
+
+    it 'returns level when format is #345K' do
+      property.address = "2200 Pacific Ave #3456, San Francisco, CA 94115"
+      property.set_level
+      property.level.should == 34
+    end    
   end
 
 end
