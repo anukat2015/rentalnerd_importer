@@ -1,4 +1,4 @@
-<h2><%= @prediction_results.size %> outliers </h2>
+<h2><%= @prediction_results.size %> outliers since <%= 14.days.ago.to_date %></h2>
 
 <%= form_tag( outliers_prediction_results_path, method: "get") do %>
   <%= select_tag :area, 
@@ -6,26 +6,35 @@
     onchange: "this.form.submit();"
   %>  
 
-  <%= select_tag :area, 
+  <%= select_tag :transaction_type, 
     options_for_select( get_transaction_type(), @transaction_type), 
     onchange: "this.form.submit();"
   %>    
 <% end %>
 
 
-<table class="table table-fixed-header">
+<table class="table table-fixed-header table-hover">
   <thead class="header">
     <tr>
       <th>
         #
       </th>
       <th>Property ID</th>
+      <th>Transaction Log ID</th>
       <th>Address</th>
-      <th>Sale Price</th>
-      <th>Listed Rent</th>      
-      <th>Predicted Rent</th>
       <th>Date Listed</th>
-      <th>Cap Rate</th>
+      <th>Date Closed</th>
+      <th>Predicted Rent</th>
+      <th>Prediction Date</th>            
+      <% if @transaction_type == "rental" %>
+        <th>Listed Rent</th>
+        <th>Error Level</th>
+      <% end %>
+
+      <% if @transaction_type == "sales" %>
+        <th>Sale Price</th>
+        <th>Cap Rate</th>
+      <% end %>
     </tr>    
   </thead>
   <tbody>
@@ -35,6 +44,7 @@
           <%=index + 1 %>
         </td>        
         <td> <%= prediction.property.id %></td>
+        <td> <%= prediction.property_transaction_log.id %></td>
         <td> 
           <%= 
             link_to(
@@ -44,17 +54,26 @@
             ) 
           %>
         </td>
-        <td> <%= 
-          number_with_precision( prediction.property_transaction_log.price, :precision => 0, :delimiter => ',')
-        %>
-        </td>
-        <td> <%= prediction.listed_rent %></td>        
-        <td> <%= prediction.predicted_rent %></td>
-        <td> <%= prediction.property_transaction_log.date_listed %></td>
-        <td> <%= 
-            number_with_precision( prediction.cap_rate, :precision => 2, :delimiter => ',') 
-          %>%
-        </td>
+        <td> <%= prediction.property_transaction_log.date_listed %></td>        
+        <td> <%= prediction.property_transaction_log.date_closed %></td>        
+        <td> <%= prediction.predicted_rent %></td> 
+        <td> <%= prediction.created_at.to_date %></td>        
+
+        <% if @transaction_type == "rental" %>
+          <td> <%= prediction.listed_rent %></td>
+          <td> <%= prediction.error_level %></td>
+        <% end %>
+
+        <% if @transaction_type == "sales" %>
+          <td> <%= 
+            number_with_precision( prediction.listed_sale, :precision => 0, :delimiter => ',')
+          %>
+          </td>
+          <td> <%= 
+              number_with_precision( prediction.cap_rate, :precision => 2, :delimiter => ',') 
+            %>%
+          </td>
+        <% end %>        
       </tr>
     <% end %>    
   </tbody>

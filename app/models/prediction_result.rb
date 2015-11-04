@@ -21,6 +21,8 @@ class PredictionResult < ActiveRecord::Base
       nids = Neighborhood.where(shapefile_source: area).pluck(:id)
       pids = PropertyNeighborhood.where(neighborhood_id: nids).pluck(:property_id)
       query = where(property_id: pids)
+        .where( " property_transaction_log_id IS NOT NULL ")
+        .where( created_at: 14.days.ago..Time.now )
 
       case transaction_type
       when "sales"
@@ -28,13 +30,16 @@ class PredictionResult < ActiveRecord::Base
           "cap_rate > ?", 
           RentalNerd::Application.config.cap_outliers 
         )
+        query.order(created_at: :desc).order(cap_rate: :desc)
       when "rental"
         query = query.where( 
-          " ( predicted_rent - listed_rent ) * ( predicted_rent - listed_rent ) > ?", 
+          " abs(error_level) > ?", 
           RentalNerd::Application.config.predicted_rental_diff 
         )
+        query.order(created_at: :desc).order(error_level: :desc)
       end
     end
+
   end
 
 end
