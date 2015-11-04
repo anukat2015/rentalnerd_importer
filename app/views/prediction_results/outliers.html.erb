@@ -1,0 +1,61 @@
+<h2><%= @prediction_results.size %> outliers </h2>
+
+<%= form_tag( outliers_prediction_results_path, method: "get") do %>
+  <%= select_tag :area, 
+    options_for_select( get_areas(), @area), 
+    onchange: "this.form.submit();"
+  %>  
+
+  <%= select_tag :area, 
+    options_for_select( get_transaction_type(), @transaction_type), 
+    onchange: "this.form.submit();"
+  %>    
+<% end %>
+
+
+<table class="table table-fixed-header">
+  <thead class="header">
+    <tr>
+      <th>
+        #
+      </th>
+      <th>Property ID</th>
+      <th>Address</th>
+      <th>Sale Price</th>
+      <th>Listed Rent</th>      
+      <th>Predicted Rent</th>
+      <th>Date Listed</th>
+      <th>Cap Rate</th>
+    </tr>    
+  </thead>
+  <tbody>
+    <% @prediction_results.each_with_index do |prediction, index| %>
+      <tr>
+        <td >
+          <%=index + 1 %>
+        </td>        
+        <td> <%= prediction.property.id %></td>
+        <td> 
+          <%= 
+            link_to(
+              prediction.property.address,
+              prediction.property.origin_url,
+              :target => "_blank"
+            ) 
+          %>
+        </td>
+        <td> <%= 
+          number_with_precision( prediction.property_transaction_log.price, :precision => 0, :delimiter => ',')
+        %>
+        </td>
+        <td> <%= prediction.listed_rent %></td>        
+        <td> <%= prediction.predicted_rent %></td>
+        <td> <%= prediction.property_transaction_log.date_listed %></td>
+        <td> <%= 
+            number_with_precision( prediction.cap_rate, :precision => 2, :delimiter => ',') 
+          %>%
+        </td>
+      </tr>
+    <% end %>    
+  </tbody>
+</table>
