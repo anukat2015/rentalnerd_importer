@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151018072310) do
+ActiveRecord::Schema.define(version: 20151108204534) do
 
   create_table "import_diffs", force: true do |t|
     t.text     "address"
@@ -86,6 +86,23 @@ ActiveRecord::Schema.define(version: 20151018072310) do
     t.float    "min_latitude"
     t.float    "max_longitude"
     t.float    "min_longitude"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "park_vertices", force: true do |t|
+    t.integer  "park_id"
+    t.integer  "vertex_order"
+    t.float    "latitude"
+    t.float    "longitude"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "parks", force: true do |t|
+    t.string   "name"
+    t.integer  "size"
+    t.string   "shapefile_source"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
