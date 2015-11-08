@@ -21,7 +21,7 @@ namespace :db do
 
           sub_area.each do |coord| 
             nv = NeighborhoodVertex.create(longitude: coord[0], latitude: coord[1])
-            nb.add_vertice nv            
+            nb.add_vertex nv            
           end
           nb.update(shapefile_source: "SF")
         end
@@ -36,7 +36,7 @@ namespace :db do
         row["geometry"]["coordinates"][0].each do |coord|        
 
           nv = NeighborhoodVertex.create(longitude: coord[0], latitude: coord[1])
-          nb.add_vertice nv
+          nb.add_vertex nv
         end
         nb.update(shapefile_source: "SF")
       end

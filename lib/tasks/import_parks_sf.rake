@@ -21,7 +21,7 @@ namespace :db do
 
           sub_area.each do |coord| 
             pv = ParkVertex.create(longitude: coord[0], latitude: coord[1])
-            pk.add_vertice pv            
+            pk.add_vertex pv            
           end
           pk.update(shapefile_source: "SF")
         end
@@ -36,7 +36,7 @@ namespace :db do
 
         row["geometry"]["coordinates"][0].each do |coord|        
           pv = ParkVertex.create(longitude: coord[0], latitude: coord[1])
-          pk.add_vertice pv
+          pk.add_vertex pv
         end
         pk.update(shapefile_source: "SF")
       end
