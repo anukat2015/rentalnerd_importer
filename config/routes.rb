@@ -12,6 +12,7 @@ Rails.application.routes.draw do
   resources :prediction_results do
     collection do
       get 'cap_ratios'
+      get 'outliers'
     end    
   end  
 
