@@ -145,6 +145,36 @@ RSpec.describe Park, type: :model do
       p_v1.should == 1
     end
 
+    it "returns shortest distance to park with three points with the edges forming a straight line with the second nearest line further away" do
+      park = create(:park, size: 1000000)
+      pv0 = create(:park_vertex, latitude: 1, longitude: 0)
+      pv1 = create(:park_vertex, latitude: 2, longitude: 0)
+      pv2 = create(:park_vertex, latitude: 3, longitude: 0)
+
+      park.add_vertex pv0
+      park.add_vertex pv1
+      park.add_vertex pv2
+
+      property = create(:property)
+      dis = Park.shortest_distance property
+      dis.should == 1
+    end
+
+    it "returns shortest distance to park with three points with the edges forming a straight line with the property right on the edges" do
+      park = create(:park, size: 1000000)
+      pv0 = create(:park_vertex, latitude: 1, longitude: 0)
+      pv1 = create(:park_vertex, latitude: 2, longitude: 0)
+      pv2 = create(:park_vertex, latitude: -1, longitude: 0)
+
+      park.add_vertex pv0
+      park.add_vertex pv1
+      park.add_vertex pv2
+
+      property = create(:property)
+      dis = Park.shortest_distance property
+      dis.should == 1
+    end    
+
     it "returns shortest distance to park with four points" do
       stub_request(:get, /.*maps.googleapis.com.*address.*/).to_return(:status => 200, :body => rni_fixture("google_map_location_3.json"), :headers => {})
       park = create(:park, size: 1000000)
