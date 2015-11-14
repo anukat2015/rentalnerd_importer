@@ -24,7 +24,7 @@ module RentalNerd
 
     # Minimum square foot below which we do not consider it a Park
     #   DelMission Dolores Park in SF is 618,558 Sqft
-    config.minimum_park_size = 500000
+    config.minimum_park_size = 200000
     config.dist_to_park_enabled = ["SF"]
   end
 end
