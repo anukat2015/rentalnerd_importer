@@ -12,7 +12,7 @@ module RentalCreator
   def create_import_log(row)
 
     if discard? row
-      puts "\tdiscarding record for: " + row["origin_url"]      
+      puts "\tdiscarding record for: " + row["origin_url"]
       return 
     end
 
