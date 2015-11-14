@@ -43,12 +43,12 @@ class Park < ActiveRecord::Base
       p_v2  = distance_between_coord property, edge.second    
       v1_v2 = distance_between_coord edge.first, edge.second
 
-      # when the 3 points form a straight line
-      if p_v1 + v1_v2 == p_v2
+      # when the 3 points form a straight line - taking into account floating point error
+      if ( p_v1 + v1_v2 ).round(15) == p_v2.round(15)
         return p_v1
-      elsif p_v2 + v1_v2 == p_v1
+      elsif ( p_v2 + v1_v2 ).round(15) == p_v1.round(15)
         return p_v2
-      elsif p_v2 + p_v1 == v1_v2
+      elsif ( p_v2 + p_v1 ).round(15) == v1_v2.round(15)
         return [p_v2, p_v1].min        
       end
 
