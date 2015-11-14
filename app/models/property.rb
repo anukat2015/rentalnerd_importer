@@ -99,7 +99,12 @@ class Property < ActiveRecord::Base
   end
 
   def set_dist_to_park
-    self.dist_to_park = Park.shortest_distance self
+    # Only calculate for property in neighborhoods enabled with parks
+    intersects = neighborhoods.map(&:shapefile_source) & RentalNerd::Application.config.dist_to_park_enabled
+    
+    if intersects.size > 0
+      self.dist_to_park = Park.shortest_distance self
+    end
   end
 
 end

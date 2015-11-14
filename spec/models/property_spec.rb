@@ -77,6 +77,9 @@ describe Property, type: :model do
   describe '#set_dist_to_park' do
     it 'should set dist_to_park when saved' do
       stub_request(:get, /.*maps.googleapis.com.*address.*/).to_return(:status => 200, :body => rni_fixture("google_map_location_2.json"), :headers => {})
+      property = create(:property)
+      nb = create(:neighborhood, shapefile_source: "SF")      
+      property.neighborhoods << nb
       park1 = create(:park, size: 1000000)
       pv0 = create(:park_vertex, latitude: 1, longitude: 0)
       pv1 = create(:park_vertex, latitude: 0, longitude: 1)
@@ -89,6 +92,40 @@ describe Property, type: :model do
       property.set_dist_to_park
       property.dist_to_park.should == 0.7071067811865476 
     end
+
+    it 'should set dist_to_park when property in SF is saved' do
+      stub_request(:get, /.*maps.googleapis.com.*address.*/).to_return(:status => 200, :body => rni_fixture("google_map_location_2.json"), :headers => {})
+      property = create(:property)
+      nb = create(:neighborhood, shapefile_source: "SF")
+      property.neighborhoods << nb
+      park1 = create(:park, size: 1000000)
+      pv0 = create(:park_vertex, latitude: 1, longitude: 0)
+      pv1 = create(:park_vertex, latitude: 0, longitude: 1)
+      pv2 = create(:park_vertex, latitude: 1, longitude: 1)
+
+      park1.add_vertex pv0
+      park1.add_vertex pv1
+      park1.add_vertex pv2
+
+      property.set_dist_to_park
+      property.dist_to_park.should == 0.7071067811865476 
+    end    
+
+    it 'should not set dist_to_park when property not in SF is saved' do
+      stub_request(:get, /.*maps.googleapis.com.*address.*/).to_return(:status => 200, :body => rni_fixture("google_map_location_2.json"), :headers => {})
+      property = create(:property)
+      park1 = create(:park, size: 1000000)
+      pv0 = create(:park_vertex, latitude: 1, longitude: 0)
+      pv1 = create(:park_vertex, latitude: 0, longitude: 1)
+      pv2 = create(:park_vertex, latitude: 1, longitude: 1)
+
+      park1.add_vertex pv0
+      park1.add_vertex pv1
+      park1.add_vertex pv2
+
+      property.set_dist_to_park
+      property.dist_to_park.should == nil
+    end        
   end
 
 end
