@@ -4,7 +4,11 @@ class ParkVertex < ActiveRecord::Base
   class << self
 
     # Returns the park vertex closes to this current 
-    def nearest_vertex property
+    def nearest_vertex property, excluded_park_ids = []
+      to_exclude = ""
+      if excluded_park_ids.size > 0
+        to_exclude = " WHERE park_id NOT IN (#{excluded_park_ids.join(',')})"
+      end
 
       pv = ParkVertex.find_by_sql(" 
         SELECT
@@ -21,15 +25,18 @@ class ParkVertex < ActiveRecord::Base
           ) AS distance
         FROM
           park_vertices
+        #{to_exclude}
         ORDER BY 
           distance ASC
         LIMIT 1
       ")
       pv.first
     end
+
   end
 
   def adjacent_vertices
+    return [] if park.nil?
     number_vertices = park.park_vertices.count
     order_before = ( number_vertices + vertex_order - 1 ) % number_vertices
     order_after = ( vertex_order + 1 ) % number_vertices
