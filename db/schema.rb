@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151018072310) do
+ActiveRecord::Schema.define(version: 20151011214525) do
 
   create_table "import_diffs", force: true do |t|
     t.text     "address"
@@ -101,9 +101,6 @@ ActiveRecord::Schema.define(version: 20151018072310) do
     t.string   "area_name"
     t.boolean  "active"
     t.float    "dist_to_park_coefficient"
-    t.float    "level_coefficient"
-    t.float    "age_coefficient"
-    t.float    "garage_coefficient"
   end
 
   create_table "prediction_neighborhoods", force: true do |t|

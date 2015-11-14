@@ -1,3 +1,5 @@
+<%= stylesheet_link_tag "property_details" %>
+
 <h2>Cap Ratios of <%= @prediction_results.size %> Properties</h2>
 
 <%= form_tag( cap_ratios_prediction_results_path, method: "get") do %>
@@ -6,6 +8,11 @@
     onchange: "this.form.submit();"
   %>  
 <% end %>
+
+<div class="tooltip" id="tooltip"></div>
+
+<div id="waterfall"></div>
+
 
 <table class="table table-fixed-header">
   <thead class="header">
@@ -23,8 +30,8 @@
   </thead>
   <tbody>
     <% @prediction_results.each_with_index do |prediction, index| %>
-      <tr>
-        <td >
+      <tr class="property" title="<%=prediction.property.address %>">
+        <td>
           <%=index + 1 %>
         </td>        
         <td> <%= prediction.property.id %></td>
