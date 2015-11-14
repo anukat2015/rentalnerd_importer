@@ -191,13 +191,10 @@ class DataImporter
     if row["event_date"].nil?
       return false
     elsif row["transaction_type_raw"].present? && row["transaction_type_raw"].downcase.strip == "auction"
-      binding.pry
       return false
     elsif row["ccrc"].present? && row["ccrc"].strip.length > 0
-      binding.pry
       return false
     elsif row["bmr"].present? && row["bmr"].strip.length > 0
-      binding.pry
       return false
     else
       return true
