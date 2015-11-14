@@ -11,14 +11,14 @@ RSpec.describe Neighborhood, type: :model do
     google_map_request
   end  
 
-  context "add_vertice" do
+  context "add_vertex" do
     let(:neighborhood) { create(:neighborhood) }
 
-    describe "#add_vertice" do 
+    describe "#add_vertex" do 
 
       it "adds a new vertex to the Neighborhood" do
         vertex = create(:neighborhood_vertex)
-        neighborhood.add_vertice vertex
+        neighborhood.add_vertex vertex
         added_vertex = NeighborhoodVertex.where( neighborhood_id: neighborhood.id ).first
         added_vertex.id.should == vertex.id
         added_vertex.vertex_order.should == 0
@@ -26,10 +26,10 @@ RSpec.describe Neighborhood, type: :model do
 
       it "adds two vertices to the Neighborhood" do
         vertex = create(:neighborhood_vertex)
-        neighborhood.add_vertice vertex
+        neighborhood.add_vertex vertex
 
         vertex_2 = create(:neighborhood_vertex)
-        neighborhood.add_vertice vertex_2
+        neighborhood.add_vertex vertex_2
 
         neighborhood.neighborhood_vertices.size.should == 2
         vertex_2.vertex_order.should == 1
@@ -37,11 +37,11 @@ RSpec.describe Neighborhood, type: :model do
 
       it "adds a vertices that was assigned to Neighborhood but with no order" do
         vertex = create(:neighborhood_vertex)
-        neighborhood.add_vertice vertex
+        neighborhood.add_vertex vertex
 
         vertex_2 = create(:neighborhood_vertex, neighborhood_id: neighborhood.id, vertex_order: nil )
         neighborhood.reload
-        neighborhood.add_vertice vertex_2
+        neighborhood.add_vertex vertex_2
 
         neighborhood.neighborhood_vertices.size.should == 2
         vertex_2.vertex_order.should == 1
@@ -52,14 +52,14 @@ RSpec.describe Neighborhood, type: :model do
     describe "#is_complete?" do
       it "returns false when neighborhood has less than 3 vertices " do
         vertex = create(:neighborhood_vertex)
-        neighborhood.add_vertice vertex
+        neighborhood.add_vertex vertex
         neighborhood.is_complete?.should == false
       end
 
       it "returns true when neighborhood has more than or equals to 3 vertices " do
         3.times {
           vertex = create(:neighborhood_vertex)
-          neighborhood.add_vertice vertex
+          neighborhood.add_vertex vertex
         }
 
         neighborhood.is_complete?.should == true        
@@ -70,32 +70,32 @@ RSpec.describe Neighborhood, type: :model do
       it "sets the maximum latitude" do
         vertex_1 = create(:neighborhood_vertex, latitude: 100)
         vertex_2 = create(:neighborhood_vertex, latitude: 50)
-        neighborhood.add_vertice vertex_1
-        neighborhood.add_vertice vertex_2
+        neighborhood.add_vertex vertex_1
+        neighborhood.add_vertex vertex_2
         neighborhood.max_latitude.should == 100
       end
 
       it "sets the minimum latitude" do
         vertex_1 = create(:neighborhood_vertex, latitude: 100)
         vertex_2 = create(:neighborhood_vertex, latitude: 50)
-        neighborhood.add_vertice vertex_1
-        neighborhood.add_vertice vertex_2
+        neighborhood.add_vertex vertex_1
+        neighborhood.add_vertex vertex_2
         neighborhood.min_latitude.should == 50
       end
 
       it "sets the maximum longitude" do
         vertex_1 = create(:neighborhood_vertex, longitude: 100)
         vertex_2 = create(:neighborhood_vertex, longitude: 50)
-        neighborhood.add_vertice vertex_1
-        neighborhood.add_vertice vertex_2
+        neighborhood.add_vertex vertex_1
+        neighborhood.add_vertex vertex_2
         neighborhood.max_longitude.should == 100
       end
 
       it "sets the minimum longitude" do
         vertex_1 = create(:neighborhood_vertex, longitude: 100)
         vertex_2 = create(:neighborhood_vertex, longitude: 50)
-        neighborhood.add_vertice vertex_1
-        neighborhood.add_vertice vertex_2
+        neighborhood.add_vertex vertex_1
+        neighborhood.add_vertex vertex_2
         neighborhood.min_longitude.should == 50
       end
 
@@ -120,9 +120,9 @@ RSpec.describe Neighborhood, type: :model do
         vertex_1 = create(:neighborhood_vertex, latitude: 0, longitude: 0)
         vertex_2 = create(:neighborhood_vertex, latitude: 100, longitude: 0)
         vertex_3 = create(:neighborhood_vertex, latitude: 0, longitude: 100)
-        neighborhood.add_vertice vertex_1
-        neighborhood.add_vertice vertex_2
-        neighborhood.add_vertice vertex_3
+        neighborhood.add_vertex vertex_1
+        neighborhood.add_vertex vertex_2
+        neighborhood.add_vertex vertex_3
 
         edges = neighborhood.get_all_edges
         edges.size.should == 3
@@ -142,9 +142,9 @@ RSpec.describe Neighborhood, type: :model do
         vertex_1 = create(:neighborhood_vertex, latitude: 0, longitude: 0)
         vertex_2 = create(:neighborhood_vertex, latitude: 25, longitude: 0)
         vertex_3 = create(:neighborhood_vertex, latitude: 0, longitude: 25)
-        neighborhood.add_vertice vertex_1
-        neighborhood.add_vertice vertex_2
-        neighborhood.add_vertice vertex_3        
+        neighborhood.add_vertex vertex_1
+        neighborhood.add_vertex vertex_2
+        neighborhood.add_vertex vertex_3        
 
         property = create(:property )
         property.update( longitude: 50, latitude: 50 )
@@ -160,11 +160,11 @@ RSpec.describe Neighborhood, type: :model do
         vertex_4 = create(:neighborhood_vertex, latitude: -100, longitude: 0)
         vertex_5 = create(:neighborhood_vertex, latitude: 0, longitude: -100)
 
-        neighborhood.add_vertice vertex_1
-        neighborhood.add_vertice vertex_2
-        neighborhood.add_vertice vertex_3
-        neighborhood.add_vertice vertex_4
-        neighborhood.add_vertice vertex_5
+        neighborhood.add_vertex vertex_1
+        neighborhood.add_vertex vertex_2
+        neighborhood.add_vertex vertex_3
+        neighborhood.add_vertex vertex_4
+        neighborhood.add_vertex vertex_5
 
         property = create(:property )
         property.update( longitude: 50, latitude: 50 )
@@ -182,11 +182,11 @@ RSpec.describe Neighborhood, type: :model do
         vertex_4 = create(:neighborhood_vertex, latitude: -100, longitude: 0)
         vertex_5 = create(:neighborhood_vertex, latitude: 0, longitude: -100)
 
-        neighborhood.add_vertice vertex_1
-        neighborhood.add_vertice vertex_2
-        neighborhood.add_vertice vertex_3
-        neighborhood.add_vertice vertex_4
-        neighborhood.add_vertice vertex_5        
+        neighborhood.add_vertex vertex_1
+        neighborhood.add_vertex vertex_2
+        neighborhood.add_vertex vertex_3
+        neighborhood.add_vertex vertex_4
+        neighborhood.add_vertex vertex_5        
 
         property = create(:property )
         property.update( longitude: 49, latitude: 49 )
@@ -200,11 +200,11 @@ RSpec.describe Neighborhood, type: :model do
         vertex_4 = create(:neighborhood_vertex, latitude: -100, longitude: 0)
         vertex_5 = create(:neighborhood_vertex, latitude: 0, longitude: -100)
 
-        neighborhood.add_vertice vertex_1
-        neighborhood.add_vertice vertex_2
-        neighborhood.add_vertice vertex_3
-        neighborhood.add_vertice vertex_4
-        neighborhood.add_vertice vertex_5        
+        neighborhood.add_vertex vertex_1
+        neighborhood.add_vertex vertex_2
+        neighborhood.add_vertex vertex_3
+        neighborhood.add_vertex vertex_4
+        neighborhood.add_vertex vertex_5        
 
         property = create(:property )
         property.update( longitude: 25, latitude: 25 )
@@ -218,11 +218,11 @@ RSpec.describe Neighborhood, type: :model do
         vertex_4 = create(:neighborhood_vertex, latitude: -100, longitude: 0)
         vertex_5 = create(:neighborhood_vertex, latitude: 0, longitude: -100)
 
-        neighborhood.add_vertice vertex_1
-        neighborhood.add_vertice vertex_2
-        neighborhood.add_vertice vertex_3
-        neighborhood.add_vertice vertex_4
-        neighborhood.add_vertice vertex_5        
+        neighborhood.add_vertex vertex_1
+        neighborhood.add_vertex vertex_2
+        neighborhood.add_vertex vertex_3
+        neighborhood.add_vertex vertex_4
+        neighborhood.add_vertex vertex_5        
 
         property = create(:property )
         property.update( longitude: 0, latitude: 0 )
@@ -236,11 +236,11 @@ RSpec.describe Neighborhood, type: :model do
         vertex_4 = create(:neighborhood_vertex, latitude: -100, longitude: 0)
         vertex_5 = create(:neighborhood_vertex, latitude: 0, longitude: -100)
 
-        neighborhood.add_vertice vertex_1
-        neighborhood.add_vertice vertex_2
-        neighborhood.add_vertice vertex_3
-        neighborhood.add_vertice vertex_4
-        neighborhood.add_vertice vertex_5        
+        neighborhood.add_vertex vertex_1
+        neighborhood.add_vertex vertex_2
+        neighborhood.add_vertex vertex_3
+        neighborhood.add_vertex vertex_4
+        neighborhood.add_vertex vertex_5        
 
         property = create(:property )
         property.update( longitude: 51, latitude: 51 )
@@ -254,11 +254,11 @@ RSpec.describe Neighborhood, type: :model do
         vertex_4 = create(:neighborhood_vertex, latitude: -100, longitude: 0)
         vertex_5 = create(:neighborhood_vertex, latitude: 0, longitude: -100)
 
-        neighborhood.add_vertice vertex_1
-        neighborhood.add_vertice vertex_2
-        neighborhood.add_vertice vertex_3
-        neighborhood.add_vertice vertex_4
-        neighborhood.add_vertice vertex_5        
+        neighborhood.add_vertex vertex_1
+        neighborhood.add_vertex vertex_2
+        neighborhood.add_vertex vertex_3
+        neighborhood.add_vertex vertex_4
+        neighborhood.add_vertex vertex_5        
 
         property = create(:property )
         property.update( longitude: -51, latitude: -51 )
@@ -272,11 +272,11 @@ RSpec.describe Neighborhood, type: :model do
         vertex_4 = create(:neighborhood_vertex, latitude: -100, longitude: 0)
         vertex_5 = create(:neighborhood_vertex, latitude: 0, longitude: -100)
 
-        neighborhood.add_vertice vertex_1
-        neighborhood.add_vertice vertex_2
-        neighborhood.add_vertice vertex_3
-        neighborhood.add_vertice vertex_4
-        neighborhood.add_vertice vertex_5        
+        neighborhood.add_vertex vertex_1
+        neighborhood.add_vertex vertex_2
+        neighborhood.add_vertex vertex_3
+        neighborhood.add_vertex vertex_4
+        neighborhood.add_vertex vertex_5        
 
         property = create(:property )
         property.update( longitude: 0, latitude: 101 )
@@ -290,11 +290,11 @@ RSpec.describe Neighborhood, type: :model do
         vertex_4 = create(:neighborhood_vertex, latitude: -100, longitude: 0)
         vertex_5 = create(:neighborhood_vertex, latitude: 0, longitude: -100)
 
-        neighborhood.add_vertice vertex_1
-        neighborhood.add_vertice vertex_2
-        neighborhood.add_vertice vertex_3
-        neighborhood.add_vertice vertex_4
-        neighborhood.add_vertice vertex_5        
+        neighborhood.add_vertex vertex_1
+        neighborhood.add_vertex vertex_2
+        neighborhood.add_vertex vertex_3
+        neighborhood.add_vertex vertex_4
+        neighborhood.add_vertex vertex_5        
 
         property = create(:property )
         property.update( longitude: 0, latitude: -101 )
@@ -311,11 +311,11 @@ RSpec.describe Neighborhood, type: :model do
         vertex_4 = create(:neighborhood_vertex, latitude: -100, longitude: 0)
         vertex_5 = create(:neighborhood_vertex, latitude: 0, longitude: -100)
 
-        neighborhood.add_vertice vertex_1
-        neighborhood.add_vertice vertex_2
-        neighborhood.add_vertice vertex_3
-        neighborhood.add_vertice vertex_4
-        neighborhood.add_vertice vertex_5        
+        neighborhood.add_vertex vertex_1
+        neighborhood.add_vertex vertex_2
+        neighborhood.add_vertex vertex_3
+        neighborhood.add_vertex vertex_4
+        neighborhood.add_vertex vertex_5        
         neighborhood.neighborhood_vertices.size.should == 5
 
         neighborhood.empty_vertices!
@@ -325,7 +325,7 @@ RSpec.describe Neighborhood, type: :model do
       it "does not remove vertices not associated with neighborhood" do
         neighborhood_2 = create(:neighborhood)
         vertex_6 = create(:neighborhood_vertex, latitude: 0, longitude: 0)
-        neighborhood_2.add_vertice vertex_6        
+        neighborhood_2.add_vertex vertex_6        
 
         neighborhood.empty_vertices!
         neighborhood.neighborhood_vertices.size.should == 0

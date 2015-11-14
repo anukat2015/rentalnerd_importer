@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151018072310) do
+ActiveRecord::Schema.define(version: 20151114065813) do
 
   create_table "import_diffs", force: true do |t|
     t.text     "address"
@@ -90,6 +90,23 @@ ActiveRecord::Schema.define(version: 20151018072310) do
     t.datetime "updated_at"
   end
 
+  create_table "park_vertices", force: true do |t|
+    t.integer  "park_id"
+    t.integer  "vertex_order"
+    t.float    "latitude"
+    t.float    "longitude"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "parks", force: true do |t|
+    t.string   "name"
+    t.integer  "size"
+    t.string   "shapefile_source"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "prediction_models", force: true do |t|
     t.float    "base_rent"
     t.float    "bedroom_coefficient"
@@ -150,6 +167,7 @@ ActiveRecord::Schema.define(version: 20151018072310) do
     t.boolean  "garage"
     t.integer  "year_built"
     t.integer  "level",          default: 1
+    t.float    "dist_to_park"
   end
 
   create_table "property_neighborhoods", force: true do |t|

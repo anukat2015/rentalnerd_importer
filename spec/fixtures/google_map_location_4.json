@@ -1,0 +1,71 @@
+
+{
+   "results" : [
+      {
+         "address_components" : [
+            {
+               "long_name" : "16",
+               "short_name" : "16",
+               "types" : [ "subpremise" ]
+            },
+            {
+               "long_name" : "1411",
+               "short_name" : "1411",
+               "types" : [ "street_number" ]
+            },
+            {
+               "long_name" : "Creekside Drive",
+               "short_name" : "Creekside Dr",
+               "types" : [ "route" ]
+            },
+            {
+               "long_name" : "Walnut Creek",
+               "short_name" : "Walnut Creek",
+               "types" : [ "locality", "political" ]
+            },
+            {
+               "long_name" : "Contra Costa County",
+               "short_name" : "Contra Costa County",
+               "types" : [ "administrative_area_level_2", "political" ]
+            },
+            {
+               "long_name" : "California",
+               "short_name" : "CA",
+               "types" : [ "administrative_area_level_1", "political" ]
+            },
+            {
+               "long_name" : "United States",
+               "short_name" : "US",
+               "types" : [ "country", "political" ]
+            },
+            {
+               "long_name" : "94596",
+               "short_name" : "94596",
+               "types" : [ "postal_code" ]
+            }
+         ],
+         "formatted_address" : "1411 Creekside Drive #16, Walnut Creek, CA 94596, USA",
+         "geometry" : {
+            "location" : {
+               "lat" : 4,
+               "lng" : 0
+            },
+            "location_type" : "ROOFTOP",
+            "viewport" : {
+               "northeast" : {
+                  "lat" : 37.8861551802915,
+                  "lng" : -122.0500045197085
+               },
+               "southwest" : {
+                  "lat" : 37.8834572197085,
+                  "lng" : -122.0527024802915
+               }
+            }
+         },
+         "partial_match" : true,
+         "place_id" : "EjUxNDExIENyZWVrc2lkZSBEcml2ZSAjMTYsIFdhbG51dCBDcmVlaywgQ0EgOTQ1OTYsIFVTQQ",
+         "types" : [ "subpremise" ]
+      }
+   ],
+   "status" : "OK"
+}
