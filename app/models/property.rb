@@ -12,6 +12,7 @@ class Property < ActiveRecord::Base
     )
   }
   after_validation :set_level
+  after_validation :set_dist_to_park
   after_commit :associate_with_neighborhoods
 
   has_many :prediction_results, dependent: :destroy
@@ -94,6 +95,15 @@ class Property < ActiveRecord::Base
     elsif address =~ /(APT |#)([0-9])[A-Z]/
       # Take first as level
       self.level = address.scan( /(APT |#)([0-9])/).first.second.to_i
+    end
+  end
+
+  def set_dist_to_park
+    # Only calculate for property in neighborhoods enabled with parks
+    intersects = neighborhoods.map(&:shapefile_source) & RentalNerd::Application.config.dist_to_park_enabled
+    
+    if intersects.size > 0
+      self.dist_to_park = Park.shortest_distance self
     end
   end
 

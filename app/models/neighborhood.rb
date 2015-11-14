@@ -10,7 +10,7 @@ class Neighborhood < ActiveRecord::Base
     .where( " min_longitude <= ? ", property.longitude )
   end
 
-  def add_vertice vertex
+  def add_vertex vertex
     return if vertex.neighborhood_id == id && 
       vertex.vertex_order.present?
 
