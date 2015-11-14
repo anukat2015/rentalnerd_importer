@@ -43,6 +43,15 @@ class Park < ActiveRecord::Base
       p_v2  = distance_between_coord property, edge.second    
       v1_v2 = distance_between_coord edge.first, edge.second
 
+      # when the 3 points form a straight line
+      if p_v1 + v1_v2 == p_v2
+        return p_v1
+      elsif p_v2 + v1_v2 == p_v1
+        return p_v2
+      elsif p_v2 + p_v1 == v1_v2
+        return [p_v2, p_v1].min        
+      end
+
       p_acos = ( p_v1 ** 2 + p_v2 ** 2 - v1_v2 ** 2 ) / ( 2 * p_v1 * p_v2 )
       v1_acos = ( p_v1 ** 2 + v1_v2 ** 2 - p_v2 ** 2 ) / ( 2 * p_v1 * v1_v2 )
       v2_acos = ( p_v2 ** 2 + v1_v2 ** 2 - p_v1 ** 2 ) / ( 2 * p_v2 * v1_v2 )
