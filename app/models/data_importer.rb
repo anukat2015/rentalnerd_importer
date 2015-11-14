@@ -115,6 +115,8 @@ class DataImporter
       row["origin_url"] = row["apartment page"]
       row["import_job_id"] = job.id
       row["sqft"] = row["size"]
+      row["transaction_type_raw"] = row["transaction_type"]
+      row["transaction_type"] = nil
 
       case row["event_name"]
       when "Listed for rent"
@@ -157,6 +159,7 @@ class DataImporter
 
       # If record is not of type we want
       else 
+        puts "\tdiscarding disqualified record for: " + row["origin_url"]
         Property.purge_records( row["origin_url"] )
         ImportLog.purge_records( row["origin_url"] )
         ImportDiff.purge_records( row["origin_url"] )
@@ -187,7 +190,8 @@ class DataImporter
   def accept_zillow_row(row)
     if row["event_date"].nil?
       return false
-    elsif row["transaction_type"].present? && row["transaction_type"].downcase.strip == "auction"
+    elsif row["transaction_type_raw"].present? && row["transaction_type_raw"].downcase.strip == "auction"
+      binding.pry
       return false
     elsif row["ccrc"].present? && row["ccrc"].strip.length > 0
       binding.pry

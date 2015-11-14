@@ -7,8 +7,8 @@ class PropertyTransactionLog < ActiveRecord::Base
 
   after_validation :set_days_on_market
   after_validation :set_transaction_status
-  after_commit :update_property_transaction
-  after_commit :generate_prediction_results
+  after_commit :update_property_transaction, on: [:create, :update]
+  after_commit :generate_prediction_results, on: [:create, :update]
 
   TRANSACTION_TYPES = {
     rental: "rental",
