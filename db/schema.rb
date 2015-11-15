@@ -118,6 +118,9 @@ ActiveRecord::Schema.define(version: 20151114065813) do
     t.string   "area_name"
     t.boolean  "active"
     t.float    "dist_to_park_coefficient"
+    t.float    "level_coefficient"
+    t.float    "age_coefficient"
+    t.float    "garage_coefficient"
   end
 
   create_table "prediction_neighborhoods", force: true do |t|

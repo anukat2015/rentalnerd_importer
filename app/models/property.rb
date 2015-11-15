@@ -66,6 +66,10 @@ class Property < ActiveRecord::Base
       end
     end
   end
+
+  def most_recent_prediction
+    prediction_results.where()
+  end
   
   def get_prediction_neighborhood_for_model prediction_model_id
     prediction_neighborhoods.where( prediction_model_id: prediction_model_id ).first
@@ -73,6 +77,10 @@ class Property < ActiveRecord::Base
 
   def get_active_prediction_neighborhoods
     prediction_neighborhoods.where( active: true )
+  end
+
+  def get_active_prediction_model
+    prediction_models.where(active: true).first
   end
 
   def set_level 
@@ -106,5 +114,8 @@ class Property < ActiveRecord::Base
       self.dist_to_park = Park.shortest_distance self
     end
   end
+
+
+
 
 end

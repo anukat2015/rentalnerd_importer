@@ -17,8 +17,10 @@ class PredictionModel < ActiveRecord::Base
   def predicted_rent property_id
     property = Property.find property_id
     predicted_rent =  base_rent 
-    predicted_rent += property.bedrooms * bedroom_coefficient
-    predicted_rent += property.bathrooms * bathroom_coefficient
+    predicted_rent += get_bedroom_component property
+
+    predicted_rent += get_bathroom_component property
+
 
     # Old model
     predicted_rent += get_sqft_component property
@@ -28,9 +30,38 @@ class PredictionModel < ActiveRecord::Base
     predicted_rent += get_luxury_component property
     predicted_rent += get_elevation_component property
     predicted_rent += get_level_component property
+
     predicted_rent += get_age_component property
     predicted_rent += get_garage_component property
+  
+  end
 
+  def get_bedroom_component property
+    property.bedrooms * bedroom_coefficient
+  end
+
+  def get_bathroom_component property
+    property.bathrooms * bathroom_coefficient
+  end
+
+  def prediction_waterfall_params property_id
+    property = Property.find property_id
+
+    pn = property.get_prediction_neighborhood_for_model id
+
+    avg_rent_per_foot = 1.2
+    params = {
+      bedrooms: get_bedroom_component( property ),
+      bathrooms: get_bathroom_component( property ),
+      level: get_level_component( property ),
+      elevation: get_elevation_component( property ),
+      age: get_age_component( property ),
+      sqft: property.sqft * avg_rent_per_foot,
+      neighborhood: get_regular_component(property) + get_sqft_component(property) - (avg_rent_per_foot * property.sqft),
+      luxurious: get_luxury_component(property),
+      dist_to_park: 0,
+      garage: get_garage_component(property)
+    }
   end
 
   def get_regular_component(property)

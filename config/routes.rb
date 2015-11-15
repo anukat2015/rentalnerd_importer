@@ -13,9 +13,14 @@ Rails.application.routes.draw do
     collection do
       get 'cap_ratios'
       get 'outliers'
+      get 'waterfall', :defaults => { :format => 'json' }
     end    
   end  
 
-  get 'property_details/data', :defaults => { :format => 'json' }
+  resources :properties do
+    collection do
+      get 'waterfall', :defaults => { :format => 'json' }
+    end    
+  end    
 
 end
