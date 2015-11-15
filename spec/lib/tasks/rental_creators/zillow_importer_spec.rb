@@ -698,23 +698,6 @@ RSpec.describe ZillowImporter do
 
   end
 
-  describe '#purge_scam_records' do
-    it 'remove all corresponding properties that match url that is marked as scam' do
-      create( :property, origin_url: 'http://scam.com/this-is-bad' )
-      Property.where( origin_url: 'http://scam.com/this-is-bad' ).size.should == 1
-      zi.purge_scam_records 'http://scam.com/this-is-bad'
-      Property.where( origin_url: 'http://scam.com/this-is-bad' ).size.should == 0          
-    end
-
-    it 'does not remove any properties that match url that is good' do
-      create( :property, origin_url: 'http://legit.com/this-is-good' )
-      Property.where( origin_url: 'http://legit.com/this-is-good' ).size.should == 1
-      zi.purge_scam_records 'http://scam.com/this-is-bad'
-      Property.where( origin_url: 'http://legit.com/this-is-good' ).size.should == 1
-    end
-
-  end
-
   describe '#create_property' do
     it 'sets the year_built from import_diff - 1995' do
       idiff = create(:import_diff, year_built: 1995)

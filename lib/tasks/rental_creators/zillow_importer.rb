@@ -104,7 +104,13 @@ class ZillowImporter
       to_proceed = most_recent_transaction_for_property_in_batch? import_log
 
       is_scam = scam?( import_log["origin_url"] )
-      purge_scam_records( import_log["origin_url"] ) if is_scam
+      
+      if is_scam
+        puts "\tdiscarding scam record for: " + import_log["origin_url"]
+        Property.purge_records( import_log["origin_url"] ) 
+        ImportLog.purge_records( import_log["origin_url"] ) 
+        ImportDiff.purge_records( import_log["origin_url"] ) 
+      end
 
       to_proceed = to_proceed && !is_scam
     end

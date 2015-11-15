@@ -13,7 +13,7 @@ class Property < ActiveRecord::Base
   }
   after_validation :set_level
   after_validation :set_dist_to_park
-  after_commit :associate_with_neighborhoods
+  after_commit :associate_with_neighborhoods, on: [:create, :update]
 
   has_many :prediction_results, dependent: :destroy
   has_many :property_transaction_logs, dependent: :destroy
@@ -32,6 +32,12 @@ class Property < ActiveRecord::Base
     "East Bay",
     "Peninsula"
   ]
+
+  class << self
+    def purge_records origin_url
+      Property.destroy_all( origin_url: origin_url )
+    end
+  end
 
   def cleanup_address
     puts "\tsetting lookup_address"

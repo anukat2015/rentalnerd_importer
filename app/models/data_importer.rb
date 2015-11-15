@@ -115,6 +115,8 @@ class DataImporter
       row["origin_url"] = row["apartment page"]
       row["import_job_id"] = job.id
       row["sqft"] = row["size"]
+      row["transaction_type_raw"] = row["transaction_type"]
+      row["transaction_type"] = nil
 
       case row["event_name"]
       when "Listed for rent"
@@ -151,8 +153,16 @@ class DataImporter
 
       row["event_date"]       = ImportFormatter.to_date_short_year row["event_date"]      
       
-      unless row["event_date"].nil?
+      # If record is of type we want
+      if accept_zillow_row row
         rows << row
+
+      # If record is not of type we want
+      else 
+        puts "\tdiscarding disqualified record for: " + row["origin_url"]
+        Property.purge_records( row["origin_url"] )
+        ImportLog.purge_records( row["origin_url"] )
+        ImportDiff.purge_records( row["origin_url"] )
       end
       
     end
@@ -165,11 +175,29 @@ class DataImporter
       zi.create_import_log row
     end
 
-
-    
     zi.generate_import_diffs job.id    
     zi.generate_properties job.id
     zi.generate_transactions job.id
     temp_file.close!     
+  end
+
+  # Checks if this row should even be considered for entry into our database
+  #   return false if 
+  #     is a retirement community
+  #     is a below market, affordable housing type
+  #     is an auction type
+  #
+  def accept_zillow_row(row)
+    if row["event_date"].nil?
+      return false
+    elsif row["transaction_type_raw"].present? && row["transaction_type_raw"].downcase.strip == "auction"
+      return false
+    elsif row["ccrc"].present? && row["ccrc"].strip.length > 0
+      return false
+    elsif row["bmr"].present? && row["bmr"].strip.length > 0
+      return false
+    else
+      return true
+    end
   end
 end
