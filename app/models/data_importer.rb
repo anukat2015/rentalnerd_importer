@@ -149,7 +149,7 @@ class DataImporter
         row["date_closed"]  = row["event_date"]
         row["date_listed"]  = row["event_date"]
       end
-      binding.pry
+      
       row["event_date"]       = ImportFormatter.to_date_short_year row["event_date"]      
       
       # If record is of type we want
