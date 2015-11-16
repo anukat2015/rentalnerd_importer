@@ -148,9 +148,8 @@ class DataImporter
         row["price"]        = row["event_price"] 
         row["date_closed"]  = row["event_date"]
         row["date_listed"]  = row["event_date"]
-
       end
-
+      binding.pry
       row["event_date"]       = ImportFormatter.to_date_short_year row["event_date"]      
       
       # If record is of type we want
@@ -195,6 +194,9 @@ class DataImporter
     elsif row["ccrc"].present? && row["ccrc"].strip.length > 0
       return false
     elsif row["bmr"].present? && row["bmr"].strip.length > 0
+      return false
+    elsif row["event_name"].nil?
+      SlackFatalErrorWarning.perform_async row["origin_url"]
       return false
     else
       return true
