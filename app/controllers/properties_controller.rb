@@ -28,4 +28,59 @@ class PropertiesController < ApplicationController
     end
     
   end
+
+  def waterfall
+    @property_id = params["property_id"] || 6063
+    prop = Property.find params["property_id"]
+    
+    pm = prop.get_active_prediction_model
+    p_params =  pm.prediction_waterfall_params prop.id
+
+    respond_to do |format|
+      format.json {
+        render :json => [ 
+      {
+        'name' => "#{prop.bedrooms} Bedrooms",
+        'value' => p_params[:bedrooms]
+      },
+      {
+        'name' => "#{prop.bathrooms} Bathrooms",
+        'value' => p_params[:bathrooms]
+      },
+      {
+        'name' =>  "#{prop.sqft} Sq Ft",
+        'value' => p_params[:sqft]
+      },
+      {
+        'name' => "#{prop.level}th Level",
+        'value' => p_params[:level]
+      },
+      {
+        'name' => "Built in #{prop.year_built}",
+        'value' => p_params[:age]
+      },
+      {
+        'name' => "#{prop.elevation}m Elevation",
+        'value' => p_params[:elevation]
+      },
+      {
+        'name' => prop.neighborhood,
+        'value' => p_params[:neighborhood]
+      },
+      {
+        'name' => "Luxury Bldg #{prop.luxurious}",
+        'value' => p_params[:luxurious]
+      },
+      {
+        'name' => "#{prop.dist_to_park}m to Nearest Park",
+        'value' => p_params[:dist_to_park]
+      },
+      {
+        'name' => "Has a Garage #{prop.garage}",
+        'value' => p_params[:garage]
+      }
+      ]
+    }
+    end
+  end
 end

@@ -81,6 +81,10 @@ class Property < ActiveRecord::Base
     prediction_neighborhoods.where( active: true )
   end
 
+  def get_active_prediction_model
+    prediction_models.where(active: true).first
+  end
+
   def set_level 
     if address =~ /(APT |#)([0-9]{4})/
       # Take first 2 as level

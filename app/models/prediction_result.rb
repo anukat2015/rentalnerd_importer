@@ -6,6 +6,7 @@ class PredictionResult < ActiveRecord::Base
 
   class << self
     def prediction_results_by_cap_ratio(area)
+      pm = PredictionModel.get_active_prediction_model area
       nids = Neighborhood.where(shapefile_source: area).pluck(:id)
       pids = PropertyNeighborhood.where(neighborhood_id: nids).pluck(:property_id)
       tids = PropertyTransactionLog.where(
@@ -14,7 +15,7 @@ class PredictionResult < ActiveRecord::Base
         property_id: pids,
       ).where("price > 30000").pluck(:id)
 
-      where(property_transaction_log_id: tids).order(cap_rate: :desc).includes( :property, :property_transaction_log )
+      where(property_transaction_log_id: tids, prediction_model_id: pm.id).order(cap_rate: :desc).includes( :property, :property_transaction_log )
     end
 
     def outliers(area, transaction_type)
