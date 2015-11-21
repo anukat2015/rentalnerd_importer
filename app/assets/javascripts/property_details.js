@@ -3,6 +3,7 @@ function mouseOver(d) {
 
   // select the property ID from the row table
   sid = parseInt(d.find("td")[1].innerText);
+  highlight(d);
 
   // refresh the waterfall chart with the data for the selected property
   $.ajax({
@@ -30,6 +31,13 @@ $(document).ready(function() {
   $("tr[class='property']:first").click();
 
 });
+
+
+function highlight(d) {
+  $("tr.selected").removeClass("selected");
+  d.addClass("selected");
+  d.prependTo( $("table#cap_rate_table tbody") );
+}
  
 function draw(data) {
 

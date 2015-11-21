@@ -11,7 +11,11 @@ class PredictionModel < ActiveRecord::Base
 
     def most_recent_deactivated_model area_name
       PredictionModel.where(area_name: area_name, active: false).order(id: :desc).limit(1).first
-    end    
+    end
+
+    def get_active_prediction_model area_name
+      PredictionModel.where(area_name: area_name, active: true).limit(1).first
+    end
   end
 
   def predicted_rent property_id

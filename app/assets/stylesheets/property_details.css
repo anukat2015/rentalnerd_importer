@@ -22,6 +22,10 @@ tr:hover {
   background: #FCF; 
 }
 
+tr.selected {
+  background: #ECE; 
+}
+
 .bar.total rect {
   fill: steelblue;
 }
