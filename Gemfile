@@ -36,7 +36,7 @@ gem 'awesome_print'
 gem 'httparty'
 gem "therubyracer"
 gem "less-rails" 
-gem "twitter-bootstrap-rails"
+gem "twitter-bootstrap-rails", '2.2.8'
 gem "d3-rails"
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
