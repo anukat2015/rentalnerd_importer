@@ -14,6 +14,7 @@ class Property < ActiveRecord::Base
   after_validation :set_level
   after_validation :set_dist_to_park
   after_commit :associate_with_neighborhoods, on: [:create, :update]
+  after_commit :reset_prediction_results, on: [:create, :update]
 
   has_many :prediction_results, dependent: :destroy
   has_many :property_transaction_logs, dependent: :destroy
@@ -70,6 +71,12 @@ class Property < ActiveRecord::Base
           neighborhood_id: nb.id 
         ).first_or_create
       end
+    end
+  end
+
+  def reset_prediction_results
+    property_transaction_logs.each do |ptl|
+      ptl.generate_prediction_results
     end
   end
   
