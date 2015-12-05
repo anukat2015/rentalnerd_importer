@@ -133,13 +133,11 @@ class DataImporter
         row["date_listed"]  = row["event_date"]        
 
       when /sold/i
-        puts  row["event_name"]
         row["price"]            = row["event_price"] 
         row["date_closed"]      = row["event_date"]
         row["transaction_type"] = "sales"
 
       when /sale/i
-        puts  row["event_name"]
         row["price"]            = row["event_price"] 
         row["date_listed"]      = row["event_date"]
         row["transaction_type"] = "sales"
@@ -188,14 +186,19 @@ class DataImporter
   #
   def accept_zillow_row(row)
     if row["event_date"].nil?
+      puts "\tevent_date cannot be nil"
       return false
     elsif row["transaction_type_raw"].present? && row["transaction_type_raw"].downcase.strip == "auction"
+      puts "\ttransaction_type_raw cannot be auction"
       return false
     elsif row["ccrc"].present? && row["ccrc"].strip.length > 0
+      puts "\tcannot be retirement community"
       return false
     elsif row["bmr"].present? && row["bmr"].strip.length > 0
+      puts "\tcannot be affordable housing type"
       return false
     elsif row["event_name"].nil?
+      puts "\tevent_name cannot be nil"
       SlackFatalErrorWarning.perform_async row["origin_url"]
       return false
     else

@@ -42,6 +42,18 @@ class ZillowImporter
 
   alias_method_chain :create_import_log, :zillow_special
 
+  # To be overwritten: Determines if record corresponds to a single family home
+  #
+  # Params: 
+  #   CSV::ROW
+  #
+  # Returns:
+  #   Boolean
+  #
+  def is_single_family?( csv_row )
+    csv_row["sfh"] == "Single Family"
+  end
+
   # returns true when this data point is dirty and should not be imported
   def is_diry? row
     /(--|xxx)/.match(row["price"])

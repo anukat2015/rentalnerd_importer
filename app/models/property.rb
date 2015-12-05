@@ -41,7 +41,7 @@ class Property < ActiveRecord::Base
   end
 
   def cleanup_address
-    puts "\tsetting lookup_address"
+    puts "\t\tsetting lookup_address"
     temp_neig = neighborhood
     CONFUSING_TERMS.each do |term|    
       temp_neig = temp_neig.gsub( term, "" ) unless temp_neig.nil?      
@@ -50,7 +50,7 @@ class Property < ActiveRecord::Base
   end
 
   def set_elevation
-    puts "\tsetting elevation for property #{id}"
+    puts "\t\tsetting elevation for property #{id}"
     url_string = "https://maps.googleapis.com/maps/api/elevation/json?locations=#{latitude},#{longitude}"
     url = URI.parse URI.encode(url_string)
     api_response = HTTParty.get(url)
@@ -65,7 +65,7 @@ class Property < ActiveRecord::Base
     possible_nbs = Neighborhood.guess self
     possible_nbs.each do |nb|
       if nb.belongs_here? self
-        puts "\tassociating property #{id} with neighborhood #{nb.id}, #{nb.name}"
+        puts "\t\tassociating property #{id} with neighborhood #{nb.id}, #{nb.name}"
         PropertyNeighborhood.where(
           property_id: id, 
           neighborhood_id: nb.id 

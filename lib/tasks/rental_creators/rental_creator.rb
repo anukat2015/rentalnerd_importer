@@ -12,7 +12,7 @@ module RentalCreator
   def create_import_log(row)
 
     if discard? row
-      puts "\tdiscarding record for: " + row["origin_url"]
+      puts "\t\tdiscarding record for: " + row["origin_url"]
       return 
     end
 
@@ -33,23 +33,40 @@ module RentalCreator
     import_log[:origin_url]       = row["origin_url"]
     import_log[:import_job_id]    = row["import_job_id"]
     import_log[:transaction_type] = row["transaction_type"] || DEFAULT_TRANSACTION_TYPE
+    import_log[:sfh]              = is_single_family? row
     import_log.save!
     import_log
   end
 
   def discard? row
     if ImportFormatter.to_float(row["sqft"]) == 0
+      puts "\tsqft is 0"
       return true       
     elsif ImportFormatter.to_float(row["price"]) == 0
+      puts "\tprice is 0"
       return true 
     elsif row["address"].include? "Undisclosed Address"
+      puts "\taddress is undisclosed"
       return true 
     elsif ![*0..9].map { |n| n.to_s}.include? row["address"][0]
+      puts "\taddress does not have street number"
       return true 
     else
       return false      
     end
 
+  end
+
+  # To be overwritten: Determines if record corresponds to a single family home
+  #
+  # Params: 
+  #   CSV::ROW
+  #
+  # Returns:
+  #   Boolean
+  #
+  def is_single_family?( csv_row )
+    false
   end
 
   def generate_import_diffs( curr_import_job_id )
@@ -147,6 +164,7 @@ module RentalCreator
       import_diff[:origin_url]        = import_log[:origin_url]
       import_diff[:import_job_id]     = curr_job_id
       import_diff[:transaction_type]  = import_log[:transaction_type]
+      import_diff[:sfh]               = import_log[:sfh]
       import_diff[:diff_type]         = diff_type
       import_diff[:old_log_id]        = old_log_id
       import_diff[:new_log_id]        = new_log_id
@@ -170,7 +188,7 @@ module RentalCreator
 
     property = get_matching_property import_diff[:origin_url]
     if property.nil?
-      puts "\tNew property detected: #{import_diff[:origin_url]}\n\tSource: #{import_diff[:source]}"
+      puts "\n\tNew property detected: #{import_diff[:origin_url]}\n\tSource: #{import_diff[:source]}"
       property = Property.create!(
         address:        import_diff[:address],
         neighborhood:   import_diff[:neighborhood],
@@ -181,9 +199,11 @@ module RentalCreator
         garage:         import_diff[:garage],
         source:         import_diff[:source],
         origin_url:     import_diff[:origin_url],
-        level:          import_diff[:level]
+        level:          import_diff[:level],
+        sfh:            import_diff[:sfh]
       )
     else
+      puts "\n\tUpdating property: #{import_diff[:origin_url]}\n\tSource: #{import_diff[:source]}"
       property.address      = import_diff[:address]
       property.neighborhood = import_diff[:neighborhood]
       property.bedrooms     = import_diff[:bedrooms]
@@ -192,6 +212,7 @@ module RentalCreator
       property.year_built   = import_diff[:year_built]
       property.garage       = import_diff[:garage]
       property.level        = import_diff[:level]
+      property.sfh          = import_diff[:sfh]
       property.save!
     end
 

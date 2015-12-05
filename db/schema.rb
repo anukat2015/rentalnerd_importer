@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151114065813) do
+ActiveRecord::Schema.define(version: 20151205185940) do
 
   create_table "import_diffs", force: true do |t|
     t.text     "address"
@@ -35,6 +35,7 @@ ActiveRecord::Schema.define(version: 20151114065813) do
     t.boolean  "garage"
     t.integer  "year_built"
     t.integer  "level",            default: 1
+    t.boolean  "sfh",              default: false
   end
 
   create_table "import_jobs", force: true do |t|
@@ -62,6 +63,7 @@ ActiveRecord::Schema.define(version: 20151114065813) do
     t.boolean  "garage"
     t.integer  "year_built"
     t.integer  "level",            default: 1
+    t.boolean  "sfh",              default: false
   end
 
   create_table "luxury_addresses", force: true do |t|
@@ -168,6 +170,7 @@ ActiveRecord::Schema.define(version: 20151114065813) do
     t.integer  "year_built"
     t.integer  "level",          default: 1
     t.float    "dist_to_park"
+    t.boolean  "sfh",            default: false
   end
 
   create_table "property_neighborhoods", force: true do |t|
