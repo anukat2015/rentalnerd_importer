@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151205205905) do
+ActiveRecord::Schema.define(version: 20151205223825) do
 
   create_table "import_diffs", force: true do |t|
     t.text     "address"
@@ -110,7 +110,6 @@ ActiveRecord::Schema.define(version: 20151205205905) do
   end
 
   create_table "prediction_models", force: true do |t|
-    t.decimal  "base_rent",                precision: 30, scale: 20
     t.decimal  "bedroom_coefficient",      precision: 30, scale: 20
     t.decimal  "bathroom_coefficient",     precision: 30, scale: 20
     t.decimal  "sqft_coefficient",         precision: 30, scale: 20
@@ -129,7 +128,6 @@ ActiveRecord::Schema.define(version: 20151205205905) do
   create_table "prediction_neighborhoods", force: true do |t|
     t.integer  "prediction_model_id"
     t.string   "name"
-    t.float    "coefficient"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "neighborhood_id"
