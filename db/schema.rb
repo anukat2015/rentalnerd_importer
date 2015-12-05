@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151205185940) do
+ActiveRecord::Schema.define(version: 20151205205905) do
 
   create_table "import_diffs", force: true do |t|
     t.text     "address"
@@ -110,19 +110,20 @@ ActiveRecord::Schema.define(version: 20151205185940) do
   end
 
   create_table "prediction_models", force: true do |t|
-    t.float    "base_rent"
-    t.float    "bedroom_coefficient"
-    t.float    "bathroom_coefficient"
-    t.float    "sqft_coefficient"
-    t.float    "elevation_coefficient"
+    t.decimal  "base_rent",                precision: 30, scale: 20
+    t.decimal  "bedroom_coefficient",      precision: 30, scale: 20
+    t.decimal  "bathroom_coefficient",     precision: 30, scale: 20
+    t.decimal  "sqft_coefficient",         precision: 30, scale: 20
+    t.decimal  "elevation_coefficient",    precision: 30, scale: 20
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "area_name"
     t.boolean  "active"
-    t.float    "dist_to_park_coefficient"
-    t.float    "level_coefficient"
-    t.float    "age_coefficient"
-    t.float    "garage_coefficient"
+    t.decimal  "dist_to_park_coefficient", precision: 30, scale: 20
+    t.decimal  "level_coefficient",        precision: 30, scale: 20
+    t.decimal  "age_coefficient",          precision: 30, scale: 20
+    t.decimal  "garage_coefficient",       precision: 30, scale: 20
+    t.decimal  "mser",                     precision: 30, scale: 20
   end
 
   create_table "prediction_neighborhoods", force: true do |t|
@@ -132,9 +133,9 @@ ActiveRecord::Schema.define(version: 20151205185940) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "neighborhood_id"
-    t.boolean  "active",              default: true
-    t.float    "regular_coefficient"
-    t.float    "luxury_coefficient"
+    t.boolean  "active",                                        default: true
+    t.decimal  "regular_coefficient", precision: 30, scale: 20
+    t.decimal  "luxury_coefficient",  precision: 30, scale: 20
   end
 
   create_table "prediction_results", force: true do |t|

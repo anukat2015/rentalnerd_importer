@@ -3,6 +3,61 @@ class PredictionModel < ActiveRecord::Base
   has_many  :prediction_results, dependent: :destroy
 
   class << self
+
+    def refresh_model! area_name, model_features_name, model_neighborhood_name
+      raise "Area Name cannot be undefined" if area_name.nil?
+      raise "model_features_name is undefined" if model_features_name.nil?
+      raise "model_neighborhood_name is undefined" if model_neighborhood_name.nil?
+
+      model_coeffi_file = File.new( "./lib/tasks/model_files/#{model_features_name}" )
+      neighborhood_coeffi_file = File.new( "./lib/tasks/model_files/#{model_neighborhood_name}" )
+
+      PredictionModel.deactivate_area! area_name
+      pm = PredictionModel.new(area_name: area_name, active: true)      
+
+      CSV.new( open( model_coeffi_file ), :headers => :first_row ).each do |row|
+        case row["Effect"]        
+        when "bedrooms"
+          pm.bedroom_coefficient = ImportFormatter.to_decimal row["Coefficient"]
+
+        when "bathrooms"
+          pm.bathroom_coefficient = ImportFormatter.to_decimal row["Coefficient"]
+
+        when "base_rent"
+          pm.base_rent = ImportFormatter.to_decimal row["Coefficient"]
+
+        # Used in the old model
+        # when "adj_sqft"
+        #   pm.sqft_coefficient = ImportFormatter.to_decimal row["Coefficient"]        
+
+        # Used in the new model
+        when "dist_to_park"
+          pm.dist_to_park_coefficient = ImportFormatter.to_decimal row["Coefficient"]
+
+        # Used in the new model
+        when "elevation"
+          pm.elevation_coefficient = ImportFormatter.to_decimal row["Coefficient"]
+
+        # Used in the new model
+        when "floor", "level"
+          pm.level_coefficient = ImportFormatter.to_decimal row["Coefficient"]
+
+        # Used in the new model
+        when "age"
+          pm.age_coefficient = ImportFormatter.to_decimal row["Coefficient"]
+
+        # Used in the new model
+        when "garage"
+          pm.garage_coefficient = ImportFormatter.to_decimal row["Coefficient"]
+
+        when "mean square error of residuals"
+          pm.mser = ImportFormatter.to_decimal row["Coefficient"]
+        end
+      end
+      pm.save!
+      pm.refresh_neighborhood_predictions! neighborhood_coeffi_file
+    end
+
     def deactivate_area! area_name
       PredictionModel.where(area_name: area_name).each do |pm|
         pm.deactivate!
@@ -16,6 +71,41 @@ class PredictionModel < ActiveRecord::Base
     def get_active_prediction_model area_name
       PredictionModel.where(area_name: area_name, active: true).limit(1).first
     end
+  end
+
+  def refresh_neighborhood_predictions! neighborhood_coeffi_file
+
+    # For each neighborhood coefficient
+    CSV.new( open( neighborhood_coeffi_file ), :headers => :first_row ).each do |row|
+      curr_name = row["neighborhood"]
+
+      # For each matching neighborhood in our database
+      #   for neighborhoods that have multiple areas
+      has_matching = false
+      Neighborhood.where( "name LIKE ?", "%#{curr_name}%" ).each do |nb|
+        has_matching = true
+        pn = PredictionNeighborhood.new
+        pn.prediction_model_id  = id
+        pn.name                 = nb.name
+
+        # Old model
+        # pn.coefficient          = ImportFormatter.to_float row["Multiplier"]
+
+        #New Model
+        pn.regular_coefficient  = ImportFormatter.to_decimal row["regular"]
+        pn.luxury_coefficient   = ImportFormatter.to_decimal row["luxurious"]
+
+        if nb.nil?
+          binding.pry
+        else
+          pn.neighborhood_id      = nb.id
+        end
+        pn.save!
+      end
+
+      binding.pry unless has_matching
+    end
+
   end
 
   def predicted_rent property_id
