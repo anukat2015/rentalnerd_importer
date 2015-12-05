@@ -21,6 +21,11 @@ Rails.application.routes.draw do
     collection do
       get 'waterfall', :defaults => { :format => 'json' }
     end    
-  end    
+  end   
 
+  resources :cash_flow do
+    collection do
+      get 'cash_flow'
+    end
+  end
 end

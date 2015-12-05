@@ -1,0 +1,42 @@
+<%= form_tag("/cash_flow", method: "get") do %>
+  <%= label_tag(:price, "Purchase price:") %>
+  <%= text_field_tag(:price) %>
+  <%= label_tag(:rate, "Interest rate:") %>
+  <%= text_field_tag(:rate) %>
+  <%= label_tag(:rent, "Rent:") %>
+  <%= text_field_tag(:rent) %>  
+  <%= label_tag(:period, "Investment Period:") %>
+  <%= text_field_tag(:period) %> 
+  <%= submit_tag("Calculate") %>
+  <table>
+  	<tr>
+  		<td>Max Loan Size:</td>
+  		<td>$<%= number_with_precision( @loan_amt, :precision => 0, :delimiter => ',') %></td>
+  	</tr>
+  	<tr>
+  		<td>Monthly Payment:</td>
+  		<td>$<%= number_with_precision( @pmt, :precision => 0, :delimiter => ',') %></td>
+	</tr>
+	<tr>
+		<td>Monthly Insurance:</td>
+		<td>$<%= number_with_precision( @insurance, :precision => 0, :delimiter => ',') %></td>
+	</tr>
+	<tr>
+		<td>Monthly Property Taxes:</td>
+		<td>$<%= number_with_precision( @taxes, :precision => 0, :delimiter => ',') %></td>
+	</tr>
+	<tr>
+		<td>PITI:</td>
+		<td>$<%= number_with_precision( @PITI, :precision => 0, :delimiter => ',') %></td>
+	</tr>
+	<tr>
+		<td>Monthly Cash Flow:</td>
+		<td>$<%= number_with_precision( @NOI, :precision => 0, :delimiter => ',') %></td>
+	</tr>
+	<tr>
+		<td>Net Annual Cash Return:</td>
+		<td><%= number_with_precision( @net_return, :precision => 2, :delimiter => ',') %>%</td>
+	</tr>
+  </table>
+
+<% end %>

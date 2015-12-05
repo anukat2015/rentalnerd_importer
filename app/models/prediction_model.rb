@@ -34,7 +34,7 @@ class PredictionModel < ActiveRecord::Base
     predicted_rent += get_luxury_component property
     predicted_rent += get_elevation_component property
     predicted_rent += get_level_component property
-
+    predicted_rent += get_park_component property
     predicted_rent += get_age_component property
     predicted_rent += get_garage_component property
   
@@ -63,7 +63,7 @@ class PredictionModel < ActiveRecord::Base
       sqft: property.sqft * avg_rent_per_foot,
       neighborhood: get_regular_component(property) + get_sqft_component(property) - (avg_rent_per_foot * property.sqft),
       luxurious: get_luxury_component(property),
-      dist_to_park: 0,
+      dist_to_park: get_park_component(property),
       garage: get_garage_component(property)
     }
   end
@@ -117,6 +117,14 @@ class PredictionModel < ActiveRecord::Base
   def get_age_component(property)
     if property.year_built.present? && age_coefficient.present?
       ( Time.now.year - property.year_built ) * age_coefficient
+    else
+      0
+    end
+  end
+
+  def get_park_component(property)
+    if property.dist_to_park.present? && dist_to_park_coefficient.present?
+      property.dist_to_park * dist_to_park_coefficient
     else
       0
     end
