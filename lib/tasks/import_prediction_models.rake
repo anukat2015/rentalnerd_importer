@@ -11,6 +11,7 @@ namespace :db do
 
   end
 
+  desc "imports Prediction Model for Phoenix those that have already been listed"  
   task :import_prediction_model_ph => :environment do   
     puts "Importing prediction model data - PH"
 
@@ -20,6 +21,7 @@ namespace :db do
 
   end  
 
+  desc "imports Prediction Model for Bay Area those that have already been listed"  
   task :import_prediction_model_bay_area => :environment do   
     puts "Importing prediction model data - BAY_AREA"
 
