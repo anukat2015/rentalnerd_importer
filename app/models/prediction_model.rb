@@ -77,6 +77,7 @@ class PredictionModel < ActiveRecord::Base
 
     # For each neighborhood coefficient
     CSV.new( open( neighborhood_coeffi_file ), :headers => :first_row ).each do |row|
+      puts "\n\trefreshing neighborhood_predictions for: #{row['neighborhood']}"
       curr_name = row["neighborhood"]
 
       # For each matching neighborhood in our database
@@ -94,13 +95,10 @@ class PredictionModel < ActiveRecord::Base
         #New Model
         pn.regular_coefficient  = ImportFormatter.to_decimal row["regular"]
         pn.luxury_coefficient   = ImportFormatter.to_decimal row["luxurious"]
-
-        if nb.nil?
-          binding.pry
-        else
-          pn.neighborhood_id      = nb.id
-        end
+        pn.neighborhood_id      = nb.id
         pn.save!
+
+        nb.refresh_property_predictions!
       end
 
       binding.pry unless has_matching
@@ -114,10 +112,6 @@ class PredictionModel < ActiveRecord::Base
     predicted_rent += get_bedroom_component property
 
     predicted_rent += get_bathroom_component property
-
-
-    # Old model
-    predicted_rent += get_sqft_component property
 
     # New model
     predicted_rent += get_regular_component property
@@ -151,7 +145,7 @@ class PredictionModel < ActiveRecord::Base
       elevation: get_elevation_component( property ),
       age: get_age_component( property ),
       sqft: property.sqft * avg_rent_per_foot,
-      neighborhood: get_regular_component(property) + get_sqft_component(property) - (avg_rent_per_foot * property.sqft),
+      neighborhood: get_regular_component(property) - (avg_rent_per_foot * property.sqft),
       luxurious: get_luxury_component(property),
       dist_to_park: 0,
       garage: get_garage_component(property)
@@ -219,34 +213,6 @@ class PredictionModel < ActiveRecord::Base
       0
     end    
   end
-
-  # Uses the old model if the old model is still active
-  def get_sqft_component( property )
-
-    if sqft_coefficient.present? 
-      return adjusted_sqft(property) * sqft_coefficient
-    else
-      return 0
-    end
-    
-  end
-
-  def adjusted_sqft property
-    property.sqft * neighborhood_coefficient(property)
-  end
-
-  # TODO: modify this method to use coefficient of new neighborhoods in the table
-  def neighborhood_coefficient property
-    pn = property.get_prediction_neighborhood_for_model id
-    if pn.nil?
-      puts " could not find neighborhood for #{property.id}, #{property.neighborhood} "
-      return 0
-    end
-
-    # Uses the old model if the old model is still ActiveRecord
-    return pn.coefficient unless pn.coefficient.nil?
-    return 0
-  end  
 
   def deactivate!
     update(active: false)
