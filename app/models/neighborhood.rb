@@ -13,8 +13,9 @@ class Neighborhood < ActiveRecord::Base
   end
 
   def refresh_property_predictions!
+    puts "\t\trefreshing predictions for neighborhood: #{id}"
     properties.each do |pp|
-      puts "\t\trefreshing predictions for property: #{pp.id}"
+      puts "\t\t\trefreshing predictions for property: #{pp.id}"
       pp.reset_prediction_results
     end
   end

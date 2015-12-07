@@ -4,13 +4,10 @@ class PredictionModel < ActiveRecord::Base
 
   class << self
 
-    def refresh_model! area_name, model_features_name, model_neighborhood_name
-      raise "Area Name cannot be undefined" if area_name.nil?
-      raise "model_features_name is undefined" if model_features_name.nil?
-      raise "model_neighborhood_name is undefined" if model_neighborhood_name.nil?
-
+    def import_model! area_name, model_features_name, model_neighborhood_name, model_covariance_name
       model_coeffi_file = File.new( "./lib/tasks/model_files/#{model_features_name}" )
       neighborhood_coeffi_file = File.new( "./lib/tasks/model_files/#{model_neighborhood_name}" )
+      model_covariance_file = File.new( "./lib/tasks/model_files/#{model_covariance_name}" )
 
       PredictionModel.deactivate_area! area_name
       pm = PredictionModel.new(area_name: area_name, active: true)      
@@ -55,7 +52,8 @@ class PredictionModel < ActiveRecord::Base
         end
       end
       pm.save!
-      pm.refresh_neighborhood_predictions! neighborhood_coeffi_file
+      Covariance.import_covariances! pm.id, model_covariance_file
+      PredictionNeighborhood.import_prediction_neighborhoods! pm.id, neighborhood_coeffi_file
     end
 
     def deactivate_area! area_name
@@ -71,39 +69,6 @@ class PredictionModel < ActiveRecord::Base
     def get_active_prediction_model area_name
       PredictionModel.where(area_name: area_name, active: true).limit(1).first
     end
-  end
-
-  def refresh_neighborhood_predictions! neighborhood_coeffi_file
-
-    # For each neighborhood coefficient
-    CSV.new( open( neighborhood_coeffi_file ), :headers => :first_row ).each do |row|
-      puts "\n\trefreshing neighborhood_predictions for: #{row['neighborhood']}"
-      curr_name = row["neighborhood"]
-
-      # For each matching neighborhood in our database
-      #   for neighborhoods that have multiple areas
-      has_matching = false
-      Neighborhood.where( "name LIKE ?", "%#{curr_name}%" ).each do |nb|
-        has_matching = true
-        pn = PredictionNeighborhood.new
-        pn.prediction_model_id  = id
-        pn.name                 = nb.name
-
-        # Old model
-        # pn.coefficient          = ImportFormatter.to_float row["Multiplier"]
-
-        #New Model
-        pn.regular_coefficient  = ImportFormatter.to_decimal row["regular"]
-        pn.luxury_coefficient   = ImportFormatter.to_decimal row["luxurious"]
-        pn.neighborhood_id      = nb.id
-        pn.save!
-
-        nb.refresh_property_predictions!
-      end
-
-      binding.pry unless has_matching
-    end
-
   end
 
   def predicted_rent property_id
