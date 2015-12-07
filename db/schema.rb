@@ -11,7 +11,26 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151205223825) do
+ActiveRecord::Schema.define(version: 20151207062723) do
+
+  create_table "covariances", force: true do |t|
+    t.integer  "prediction_model_id"
+    t.string   "row_type"
+    t.integer  "row_neighborhood_id"
+    t.integer  "row_year"
+    t.boolean  "row_is_luxurious"
+    t.string   "col_type"
+    t.integer  "col_neighborhood_id"
+    t.integer  "col_year"
+    t.boolean  "col_is_luxurious"
+    t.decimal  "coefficient",         precision: 30, scale: 20
+    t.string   "row_raw"
+    t.string   "col_raw"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "covariances", ["prediction_model_id", "col_type", "col_neighborhood_id", "col_year"], name: "normal_rows", length: {"prediction_model_id"=>nil, "col_type"=>191, "col_neighborhood_id"=>nil, "col_year"=>nil}, using: :btree
 
   create_table "import_diffs", force: true do |t|
     t.text     "address"
@@ -110,9 +129,9 @@ ActiveRecord::Schema.define(version: 20151205223825) do
   end
 
   create_table "prediction_models", force: true do |t|
+    t.decimal  "base_rent",                precision: 30, scale: 20
     t.decimal  "bedroom_coefficient",      precision: 30, scale: 20
     t.decimal  "bathroom_coefficient",     precision: 30, scale: 20
-    t.decimal  "sqft_coefficient",         precision: 30, scale: 20
     t.decimal  "elevation_coefficient",    precision: 30, scale: 20
     t.datetime "created_at"
     t.datetime "updated_at"
