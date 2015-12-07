@@ -219,10 +219,11 @@ class Covariance < ActiveRecord::Base
       breakdown["neighborhood_id"] = nb.id
 
       p_match = /Period\(\'([0-9]+)/.match combination_string
-      breakdown["year"] = p_match[1].to_i
+      breakdown["year"] = nil
+      breakdown["year"] = p_match[1].to_i unless p_match.nil?
 
       l_match = /luxurious\[(.*)\]/.match combination_string
-      breakdown["is_luxurious"] = l_match[1] == "True"
+      breakdown["is_luxurious"] = l_match[1] == "True" unless l_match.nil?
 
       breakdown
     end
