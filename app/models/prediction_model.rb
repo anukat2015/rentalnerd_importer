@@ -9,8 +9,7 @@ class PredictionModel < ActiveRecord::Base
       neighborhood_coeffi_file = File.new( "./lib/tasks/model_files/#{model_neighborhood_name}" )
       model_covariance_file = File.new( "./lib/tasks/model_files/#{model_covariance_name}" )
 
-      PredictionModel.deactivate_area! area_name
-      pm = PredictionModel.new(area_name: area_name, active: true)      
+      pm = PredictionModel.new(area_name: area_name, active: false)      
 
       CSV.new( open( model_coeffi_file ), :headers => :first_row ).each do |row|
         case row["Effect"]        
@@ -54,6 +53,7 @@ class PredictionModel < ActiveRecord::Base
       pm.save!
       Covariance.import_covariances! pm.id, model_covariance_file
       PredictionNeighborhood.import_prediction_neighborhoods! pm.id, neighborhood_coeffi_file
+      pm.activate!
     end
 
     def deactivate_area! area_name
@@ -177,6 +177,12 @@ class PredictionModel < ActiveRecord::Base
     else
       0
     end    
+  end
+
+  def activate!
+    PredictionModel.deactivate_area! area_name    
+    update(active: true)
+    prediction_neighborhoods.update_all(active: true)
   end
 
   def deactivate!
