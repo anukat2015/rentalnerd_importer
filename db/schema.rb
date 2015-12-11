@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151207062723) do
+ActiveRecord::Schema.define(version: 20151211073951) do
 
   create_table "covariances", force: true do |t|
     t.integer  "prediction_model_id"
@@ -150,7 +150,7 @@ ActiveRecord::Schema.define(version: 20151207062723) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "neighborhood_id"
-    t.boolean  "active",                                        default: true
+    t.boolean  "active",                                        default: false
     t.decimal  "regular_coefficient", precision: 30, scale: 20
     t.decimal  "luxury_coefficient",  precision: 30, scale: 20
   end
