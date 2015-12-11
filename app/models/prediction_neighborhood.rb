@@ -22,8 +22,6 @@ class PredictionNeighborhood < ActiveRecord::Base
           pn.luxury_coefficient   = ImportFormatter.to_decimal row["luxurious"]
           pn.neighborhood_id      = nb.id
           pn.save!
-
-          nb.refresh_property_predictions!
         end
 
         binding.pry unless has_matching

@@ -93,7 +93,7 @@ class Covariance < ActiveRecord::Base
       when "garage"
         matrix_multiplication_result if property.garage if property.garage.present?
       when "age"
-        matrix_multiplication_result * ( Time.now.year - property.year_built ) if property.garage.present?
+        matrix_multiplication_result * ( Time.now.year - property.year_built ) if property.year_built.present?
       when "elevation"
         matrix_multiplication_result * property.elevation if property.elevation.present?
       when "dist_to_park"

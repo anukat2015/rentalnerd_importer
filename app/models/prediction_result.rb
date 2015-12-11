@@ -4,6 +4,8 @@ class PredictionResult < ActiveRecord::Base
   belongs_to :property_transaction_log
   has_many :neighborhoods, through: :property
 
+  after_validation :generate_covariance_interval, on: [:create, :update]
+
   class << self
     def prediction_results_by_cap_ratio(area)
       pm = PredictionModel.get_active_prediction_model area
@@ -41,6 +43,13 @@ class PredictionResult < ActiveRecord::Base
       end
     end
 
+  end
+
+  def generate_covariance_interval
+    covariance_interval = Covariance.compute_intervals self
+    self.pred_std = covariance_interval[:pred_std]
+    self.interval_l = covariance_interval[:interval_l]
+    self.interval_u = covariance_interval[:interval_u]
   end
 
 end

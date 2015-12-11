@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151211073951) do
+ActiveRecord::Schema.define(version: 20151211212454) do
 
   create_table "covariances", force: true do |t|
     t.integer  "prediction_model_id"
@@ -163,10 +163,13 @@ ActiveRecord::Schema.define(version: 20151211073951) do
     t.datetime "updated_at"
     t.float    "error_level"
     t.float    "listed_rent"
-    t.string   "transaction_type",            default: "rental"
+    t.string   "transaction_type",                                      default: "rental"
     t.float    "listed_sale"
     t.integer  "property_transaction_log_id"
     t.float    "cap_rate"
+    t.decimal  "pred_std",                    precision: 30, scale: 20
+    t.decimal  "interval_l",                  precision: 30, scale: 20
+    t.decimal  "interval_u",                  precision: 30, scale: 20
   end
 
   create_table "properties", force: true do |t|
