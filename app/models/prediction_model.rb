@@ -1,6 +1,7 @@
 class PredictionModel < ActiveRecord::Base
   has_many  :prediction_neighborhoods, dependent: :destroy
   has_many  :prediction_results, dependent: :destroy
+  has_many  :neighborhoods, through: :prediction_neighborhoods
 
   class << self
 
@@ -69,6 +70,7 @@ class PredictionModel < ActiveRecord::Base
     def get_active_prediction_model area_name
       PredictionModel.where(area_name: area_name, active: true).limit(1).first
     end
+
   end
 
   def predicted_rent property_id
@@ -183,6 +185,7 @@ class PredictionModel < ActiveRecord::Base
     PredictionModel.deactivate_area! area_name    
     update(active: true)
     prediction_neighborhoods.update_all(active: true)
+    refresh_property_predictions
   end
 
   def deactivate!
@@ -195,5 +198,11 @@ class PredictionModel < ActiveRecord::Base
       pr.property_transaction_log.generate_prediction_results unless pr.property_transaction_log.nil?
     end
   end
+
+  def refresh_property_predictions
+    neighborhoods.each do |nb|
+      nb.refresh_property_predictions! 
+    end
+  end  
 
 end
