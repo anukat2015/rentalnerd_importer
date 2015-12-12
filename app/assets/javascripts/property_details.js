@@ -13,7 +13,8 @@ function mouseOver(d) {
     data: { property_id:  sid},
     dataType: 'json',
     success: function (data) {
-       draw(data);
+       draw(data.waterfall);
+       cash_flows(data.cash_flow);
     },
     error: function (result) {
        error();
@@ -39,13 +40,39 @@ function highlight(d) {
   d.prependTo( $("table#cap_rate_table tbody") );
 }
  
+
+function cash_flows(data) {
+  console.log(data)
+  // empty the last table
+  $("#cash_yield_table tbody").empty()
+
+  // calcs
+  piti = data.rent - data.pmt - data.taxes - data.insurance
+  cash_yield = ((data.rent - piti) * 12) / (data.price - data.loan_amt)
+
+  $('#cash_yield_table tbody').append('<tr><td>Price</td><td>' + data.price.formatMoney(0) + '</td></tr>');
+  $('#cash_yield_table tbody').append('<tr><td>Downpayment</td><td>' + (data.price - data.loan_amt).formatMoney(0) + '</td></tr>');
+
+  $('#cash_yield_table tbody').append('<tr><td>Rent</td><td>' + data.rent.formatMoney(0) + '</td></tr>');
+  $('#cash_yield_table tbody').append('<tr><td>Payment</td><td>' + data.pmt.formatMoney(0) + '</td></tr>');
+  $('#cash_yield_table tbody').append('<tr><td>Taxes</td><td>' + data.taxes.formatMoney(0) + '</td></tr>');
+  $('#cash_yield_table tbody').append('<tr><td>Insurance</td><td>' + data.insurance.formatMoney(0) + '</td></tr>');
+  $('#cash_yield_table tbody').append('<tr><td>PITI</td><td>' + piti.formatMoney(0) + '</td></tr>');
+
+  $('#cash_yield_table tbody').append('<tr><td>Net Cash Flow</td><td>' + (data.rent - piti).formatMoney(0) + '</td></tr>');
+
+  $('#cash_yield_table tbody').append('<tr><td>Net Cash Yield</td><td>' + Math.round(cash_yield * 10000)/100+ '%</td></tr>');
+
+
+
+}
 function draw(data) {
 
   //empty the last chart
   $("#waterfall").empty()
 
   var margin = {top: 20, right: 30, bottom: 30, left: 40},
-      width = 960 - margin.left - margin.right,
+      width = 660 - margin.left - margin.right,
       height = 300 - margin.top - margin.bottom,
       padding = 0.3;
 
@@ -136,3 +163,14 @@ function draw(data) {
 function error() {
     console.log("error")
 }
+
+Number.prototype.formatMoney = function(c, d, t){
+var n = this, 
+    c = isNaN(c = Math.abs(c)) ? 2 : c, 
+    d = d == undefined ? "." : d, 
+    t = t == undefined ? "," : t, 
+    s = n < 0 ? "-" : "", 
+    i = parseInt(n = Math.abs(+n || 0).toFixed(c)) + "", 
+    j = (j = i.length) > 3 ? j % 3 : 0;
+   return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
+ };

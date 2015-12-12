@@ -49,6 +49,16 @@ class Property < ActiveRecord::Base
     self.lookup_address = "#{address}, #{temp_neig}"    
   end
 
+  def get_latest_transaction_price transaction_type
+    ptl = property_transaction_logs.where(transaction_type: transaction_type).order(created_at: :desc).limit(1).first
+    if ptl.present?
+      ptl.price
+    else
+      nil
+    end
+
+  end
+
   def set_elevation
     puts "\t\tsetting elevation for property #{id}"
     url_string = "https://maps.googleapis.com/maps/api/elevation/json?locations=#{latitude},#{longitude}"
