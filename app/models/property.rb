@@ -125,4 +125,22 @@ class Property < ActiveRecord::Base
     end
   end
 
+  def generate_prediction_result
+    pns = get_active_prediction_neighborhoods
+    generated_results = []
+    pns.each do |pn|
+      pm = pn.prediction_model
+      curr_predicted_rent = pm.predicted_rent id
+
+      pr = PredictionResult.create!(
+        property_id: id,
+        prediction_model_id: pm.id,
+        predicted_rent: curr_predicted_rent
+      )
+      generated_results << pr
+        
+    end
+    generated_results
+  end
+
 end
