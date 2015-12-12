@@ -9,9 +9,17 @@
   %>  
 <% end %>
 
-<div class="tooltip" id="tooltip"></div>
+<div class="row">
+  <div class="span8">
+    <svg id="waterfall"></svg>
+  </div>
+  <div class="span4">
+    <table class="table" id="cash_yield_table">
+    </table>
+  </div>
+</div>
+      
 
-<svg id="waterfall"></svg>
 
 <table class="table table-fixed-header" id="cap_rate_table">
   <thead class="header">
@@ -25,6 +33,7 @@
       <th>Predicted Rent</th>
       <th>Date Listed</th>
       <th>Cap Rate</th>
+      <th>Cash Yield</th>
     </tr>    
   </thead>
   <tbody>
@@ -51,6 +60,11 @@
         <td> <%= prediction.property_transaction_log.date_listed %></td>
         <td> <%= 
             number_with_precision( prediction.cap_rate, :precision => 2, :delimiter => ',') 
+          %>%
+        </td>
+        <td> <%= 
+          #CashFlow.cash_yield(prediction.property_transaction_log.price, prediction.predicted_rent)
+            # number_with_precision( CashFlow.cash_yield(prediction.property_transaction_log.price, prediction.predicted_rent), :precision => 2, :delimiter => ',') 
           %>%
         </td>
       </tr>

@@ -40,7 +40,7 @@ class PropertiesController < ApplicationController
       format.json {
         render :json => [ 
       {
-        'name' => "#{prop.bedrooms} Bedrooms",
+        'name' => "#{prop.bedrooms.to_i} Bedrooms",
         'value' => p_params[:bedrooms].to_f
       },
       {
