@@ -41,43 +41,43 @@ class PropertiesController < ApplicationController
         render :json => [ 
       {
         'name' => "#{prop.bedrooms} Bedrooms",
-        'value' => p_params[:bedrooms]
+        'value' => p_params[:bedrooms].to_f
       },
       {
         'name' => "#{prop.bathrooms} Bathrooms",
-        'value' => p_params[:bathrooms]
+        'value' => p_params[:bathrooms].to_f
       },
       {
         'name' =>  "#{prop.sqft} Sq Ft",
-        'value' => p_params[:sqft]
+        'value' => p_params[:sqft].to_f
       },
       {
         'name' => "#{prop.level}th Level",
-        'value' => p_params[:level]
+        'value' => p_params[:level].to_f
       },
       {
         'name' => "Built in #{prop.year_built}",
-        'value' => p_params[:age]
+        'value' => p_params[:age].to_f
       },
       {
         'name' => "#{prop.elevation}m Elevation",
-        'value' => p_params[:elevation]
+        'value' => p_params[:elevation].to_f
       },
       {
         'name' => prop.neighborhood,
-        'value' => p_params[:neighborhood]
+        'value' => p_params[:neighborhood].to_f
       },
       {
         'name' => "Luxury Bldg #{prop.luxurious}",
-        'value' => p_params[:luxurious]
+        'value' => p_params[:luxurious].to_f
       },
       {
         'name' => "#{prop.dist_to_park}m to Nearest Park",
-        'value' => p_params[:dist_to_park]
+        'value' => p_params[:dist_to_park].to_f
       },
       {
         'name' => "Has a Garage #{prop.garage}",
-        'value' => p_params[:garage]
+        'value' => p_params[:garage].to_f
       }
       ]
     }
