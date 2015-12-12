@@ -155,35 +155,34 @@ class Covariance < ActiveRecord::Base
       CSV.new( open( model_covariance_file ), :headers => :first_row ).each do |record|
 
         row_key = record[0]
-        puts "\timporting covariance: #{row_key}"
+        puts "\t#{$.} importing covariance: #{row_key}"
         row_type = self.label_type row_key
         row_combi = self.breakdown_combination row_key        
 
-        record.each do |col_key, value|
-          if col_key.present?
-            col_type = self.label_type col_key
-            col_combi = self.breakdown_combination col_key
+        ActiveRecord::Base.transaction do
+          record.each do |col_key, value|
+            if col_key.present?
+              col_type = self.label_type col_key
+              col_combi = self.breakdown_combination col_key
 
-            cv = Covariance.new
-            cv.prediction_model_id  = prediction_model_id
-            cv.row_type             = row_type
-            cv.row_neighborhood_id  = row_combi["neighborhood_id"]
-            cv.row_year             = row_combi["year"]
-            cv.row_is_luxurious     = row_combi["is_luxurious"]
-
-            cv.col_type             = col_type
-            cv.col_neighborhood_id  = col_combi["neighborhood_id"]
-            cv.col_year             = col_combi["year"]
-            cv.col_is_luxurious     = col_combi["is_luxurious"]            
-
-            cv.row_raw              = row_key
-            cv.col_raw              = col_key
-
-            cv.coefficient          = ImportFormatter.to_decimal value
-            cv.save!
-
-          end
+              Covariance.create(
+                prediction_model_id: prediction_model_id,
+                row_type: row_type,
+                row_neighborhood_id: row_combi["neighborhood_id"],
+                row_year: row_combi["year"],
+                row_is_luxurious: row_combi["is_luxurious"],
+                col_type: col_type,
+                col_neighborhood_id: col_combi["neighborhood_id"],
+                col_year: col_combi["year"],
+                col_is_luxurious: col_combi["is_luxurious"],
+                row_raw: row_key,
+                col_raw: col_key,
+                coefficient: ImportFormatter.to_decimal(value)
+              )
+            end
+          end          
         end
+
       end
     end
 
