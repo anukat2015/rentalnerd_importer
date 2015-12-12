@@ -30,8 +30,6 @@ ActiveRecord::Schema.define(version: 20151211212454) do
     t.datetime "updated_at"
   end
 
-  add_index "covariances", ["prediction_model_id", "col_type", "col_neighborhood_id", "col_year"], name: "normal_rows", length: {"prediction_model_id"=>nil, "col_type"=>191, "col_neighborhood_id"=>nil, "col_year"=>nil}, using: :btree
-
   create_table "import_diffs", force: true do |t|
     t.text     "address"
     t.string   "neighborhood"
