@@ -1,5 +1,8 @@
 class Neighborhood < ActiveRecord::Base
   has_many :neighborhood_vertices, dependent: :destroy, after_add: :recompute_max_min
+  has_many :prediction_neighborhoods, dependent: :destroy
+  has_many :property_neighborhoods
+  has_many :properties, through: :property_neighborhoods
 
   # Given a property returns a list of neighborhoods it might potentiall belong to
   def self.guess property
@@ -9,7 +12,15 @@ class Neighborhood < ActiveRecord::Base
     .where( " min_longitude <= ? ", property.longitude )
   end
 
-  def add_vertice vertex
+  def refresh_property_predictions!
+    puts "\t\trefreshing predictions for neighborhood: #{id}"
+    properties.each do |pp|
+      puts "\t\t\trefreshing predictions for property: #{pp.id}"
+      pp.reset_prediction_results
+    end
+  end
+
+  def add_vertex vertex
     return if vertex.neighborhood_id == id && 
       vertex.vertex_order.present?
 

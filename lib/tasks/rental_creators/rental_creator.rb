@@ -10,6 +10,12 @@ module RentalCreator
   end
 
   def create_import_log(row)
+
+    if discard? row
+      puts "\t\tdiscarding record for: " + row["origin_url"]
+      return 
+    end
+
     puts "\tcreating new import_log: " + row["origin_url"]
     import_log = ImportLog.create
     import_log[:address]          = row["address"]
@@ -18,14 +24,49 @@ module RentalCreator
     import_log[:bathrooms]        = ImportFormatter.to_float row["bathrooms"]
     import_log[:price]            = ImportFormatter.to_float row["price"]
     import_log[:sqft]             = ImportFormatter.to_float row["sqft"]
+    import_log[:garage]           = row["garage"]
+    import_log[:year_built]       = row["year_built"]
     import_log[:date_closed]      = ImportFormatter.to_date row["date_closed"]
     import_log[:date_listed]      = ImportFormatter.to_date row["date_listed"]
+    import_log[:date_transacted]  = import_log[:date_closed] || import_log[:date_listed]
     import_log[:source]           = row["source"]
     import_log[:origin_url]       = row["origin_url"]
     import_log[:import_job_id]    = row["import_job_id"]
     import_log[:transaction_type] = row["transaction_type"] || DEFAULT_TRANSACTION_TYPE
+    import_log[:sfh]              = is_single_family? row
     import_log.save!
     import_log
+  end
+
+  def discard? row
+    if ImportFormatter.to_float(row["sqft"]) == 0
+      puts "\tsqft is 0"
+      return true       
+    elsif ImportFormatter.to_float(row["price"]) == 0
+      puts "\tprice is 0"
+      return true 
+    elsif row["address"].include? "Undisclosed Address"
+      puts "\taddress is undisclosed"
+      return true 
+    elsif ![*0..9].map { |n| n.to_s}.include? row["address"][0]
+      puts "\taddress does not have street number"
+      return true 
+    else
+      return false      
+    end
+
+  end
+
+  # To be overwritten: Determines if record corresponds to a single family home
+  #
+  # Params: 
+  #   CSV::ROW
+  #
+  # Returns:
+  #   Boolean
+  #
+  def is_single_family?( csv_row )
+    false
   end
 
   def generate_import_diffs( curr_import_job_id )
@@ -35,49 +76,56 @@ module RentalCreator
   end
 
   def generate_created_and_modified_diffs( curr_import_job_id )
-    puts "\tProcessing created, updated import_diffs"
-    previous_import_job_id = self.get_previous_batch_id curr_import_job_id
-    
-    ImportLog.where( import_job_id: curr_import_job_id ).each do |import_log|
-      
-      # There was no previous batch ever imported
-      if previous_import_job_id.nil? == 1
-        self.create_import_diff( import_log, "created", import_log[:id] )
+    puts "\n\tProcessing created, updated import_diffs"
+    previous_import_job_id = self.get_previous_batch_id curr_import_job_id 
 
-      # There was a previous batch ever imported
-      else
-        previous_log = self.get_matching_record_from_batch import_log, previous_import_job_id
+    # There was no previous batch ever imported
+    if previous_import_job_id.nil? == true
+      get_sorted_import_logs( curr_import_job_id ).each do |import_log|
+        self.create_import_diff( curr_import_job_id, import_log, "created", import_log[:id] )
+      end
+
+    # There was a previous batch
+    else
+      get_sorted_import_logs( curr_import_job_id ).each do |import_log|
+        # There was a previous batch ever imported
+        previous_log = self.get_matching_import_log_from_batch import_log, previous_import_job_id
 
         if previous_log.nil?
-          # binding.pry
           puts "\t\tcould not find "+ import_log[:origin_url] +" in Job: " + previous_import_job_id.to_s
-          self.create_import_diff( import_log, "created", import_log[:id], nil )
+          self.create_import_diff( curr_import_job_id, import_log, "created", import_log[:id], nil )
 
         elsif self.is_changed? previous_log, import_log
-          self.create_import_diff( import_log, "updated", import_log[:id], previous_log[:id] )
+          self.create_import_diff( curr_import_job_id, import_log, "updated", import_log[:id], previous_log[:id] )
 
         end
-      end 
-    end    
+      end
+    end
   end
 
   # To Be Completed
   def generate_deleted_diffs( curr_import_job_id )
-    puts "\tProcessing deleted import_diffs"
+    puts "\n\tProcessing deleted import_diffs"
     previous_import_job_id = self.get_previous_batch_id curr_import_job_id
 
     return if previous_import_job_id.nil?
 
-    deleted_import_logs = []
-    ImportLog.where( import_job_id: previous_import_job_id ).each do |prev_log|
-      current_log = self.get_matching_record_from_batch prev_log, curr_import_job_id
-
+    get_sorted_import_logs( previous_import_job_id ).each do |prev_log|
+      current_log = self.get_matching_import_log_from_batch prev_log, curr_import_job_id
       if current_log.nil?
-        self.create_import_diff( prev_log, "deleted", nil, prev_log[:id] )
+        temp_log = prev_log.dup
+        temp_log[:date_listed] = nil
+        temp_log[:date_closed] = Time.now
+        self.create_import_diff( curr_import_job_id, temp_log, "deleted", nil, prev_log[:id] )
       end
 
     end
 
+  end
+
+  # Returns the import_logs belonging to an import job in ascending order
+  def get_sorted_import_logs previous_import_job_id
+    ImportLog.where( import_job_id: previous_import_job_id ).order( date_transacted: :asc)
   end
 
   def get_previous_batch_id job_id
@@ -94,31 +142,32 @@ module RentalCreator
   #     - updated
   #     - deleted
   #
-  def create_import_diff(import_log, diff_type, new_log_id, old_log_id=nil)
-    import_diff = ImportDiff.where( 
-      origin_url: import_log[:origin_url], 
-      import_job_id: import_log[:import_job_id],
-      source: import_log[:source]
-    ).first
+  def create_import_diff(curr_job_id, import_log, diff_type, new_log_id, old_log_id=nil)
+    import_diff = get_import_diff curr_job_id, import_log
 
     if import_diff.nil?
-      puts "\trecord was #{diff_type} : " + import_log[:origin_url]
+      puts "\t\trecord was #{diff_type} : " + import_log[:origin_url]
       import_diff = ImportDiff.create
-      import_diff[:address]      = import_log[:address]
-      import_diff[:neighborhood] = import_log[:neighborhood]
-      import_diff[:bedrooms]     = import_log[:bedrooms]
-      import_diff[:bathrooms]    = import_log[:bathrooms]
-      import_diff[:price]        = import_log[:price]
-      import_diff[:sqft]         = import_log[:sqft]
-      import_diff[:date_closed]  = import_log[:date_closed]
-      import_diff[:date_listed]  = import_log[:date_listed]
-      import_diff[:source]       = import_log[:source]
-      import_diff[:origin_url]   = import_log[:origin_url]
-      import_diff[:import_job_id]        = import_log[:import_job_id]
-      import_diff[:transaction_type] = import_log[:transaction_type]
-      import_diff[:diff_type]    = diff_type
-      import_diff[:old_log_id]    = old_log_id
-      import_diff[:new_log_id]    = new_log_id
+      import_diff[:address]           = import_log[:address]
+      import_diff[:neighborhood]      = import_log[:neighborhood]
+      import_diff[:bedrooms]          = import_log[:bedrooms]
+      import_diff[:bathrooms]         = import_log[:bathrooms]
+      import_diff[:price]             = import_log[:price]
+      import_diff[:sqft]              = import_log[:sqft]
+      import_diff[:garage]            = import_log[:garage]
+      import_diff[:year_built]        = import_log[:year_built]
+      import_diff[:level]             = import_log[:level]
+      import_diff[:date_closed]       = import_log[:date_closed]
+      import_diff[:date_listed]       = import_log[:date_listed]
+      import_diff[:date_transacted]   = import_log[:date_transacted]
+      import_diff[:source]            = import_log[:source]
+      import_diff[:origin_url]        = import_log[:origin_url]
+      import_diff[:import_job_id]     = curr_job_id
+      import_diff[:transaction_type]  = import_log[:transaction_type]
+      import_diff[:sfh]               = import_log[:sfh]
+      import_diff[:diff_type]         = diff_type
+      import_diff[:old_log_id]        = old_log_id
+      import_diff[:new_log_id]        = new_log_id
       import_diff.save!
       import_diff        
     end
@@ -131,6 +180,7 @@ module RentalCreator
     ImportDiff.where( import_job_id: job_id ).each do |import_diff|
       create_property import_diff
     end
+    LuxuryAddress.set_property_grades    
 
   end
 
@@ -138,22 +188,31 @@ module RentalCreator
 
     property = get_matching_property import_diff[:origin_url]
     if property.nil?
-      puts "\tNew property detected: #{import_diff[:origin_url]}\n\tSource: #{import_diff[:source]}"
+      puts "\n\tNew property detected: #{import_diff[:origin_url]}\n\tSource: #{import_diff[:source]}"
       property = Property.create!(
         address:        import_diff[:address],
         neighborhood:   import_diff[:neighborhood],
         bedrooms:       import_diff[:bedrooms],
         bathrooms:      import_diff[:bathrooms],
         sqft:           import_diff[:sqft],
+        year_built:     import_diff[:year_built],
+        garage:         import_diff[:garage],
         source:         import_diff[:source],
-        origin_url:     import_diff[:origin_url]
+        origin_url:     import_diff[:origin_url],
+        level:          import_diff[:level],
+        sfh:            import_diff[:sfh]
       )
     else
+      puts "\n\tUpdating property: #{import_diff[:origin_url]}\n\tSource: #{import_diff[:source]}"
       property.address      = import_diff[:address]
       property.neighborhood = import_diff[:neighborhood]
       property.bedrooms     = import_diff[:bedrooms]
       property.bathrooms    = import_diff[:bathrooms]
       property.sqft         = import_diff[:sqft]
+      property.year_built   = import_diff[:year_built]
+      property.garage       = import_diff[:garage]
+      property.level        = import_diff[:level]
+      property.sfh          = import_diff[:sfh]
       property.save!
     end
 
@@ -218,7 +277,7 @@ module RentalCreator
 
   # Method to be overwritten
   # Returns the matching record from the previous batch
-  def get_matching_record_from_batch import_log, job_id
+  def get_matching_import_log_from_batch import_log, job_id
     ImportLog.where( 
       origin_url: import_log[:origin_url], 
       import_job_id: job_id,
@@ -229,9 +288,17 @@ module RentalCreator
   # Method to be overwritten
   # Returns true if current record has changed as compared to same record in previous batch
   def is_changed? old_log, new_log
-
-    true
+    false
   end
 
+  # Method to be overwritten
+  # Gets the corresponding import_diff given an import log
+  def get_import_diff curr_job_id, import_log
+    import_diff = ImportDiff.where( 
+      origin_url: import_log[:origin_url], 
+      import_job_id: curr_job_id,
+      source: import_log[:source]
+    ).first    
+  end
 
 end

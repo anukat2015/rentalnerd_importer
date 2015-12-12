@@ -1,8 +1,14 @@
 class PropertyTransactionLog < ActiveRecord::Base
 
+  belongs_to :property
+  has_one :property_transaction
+  has_one :prediction_result
+  has_one :neighborhoods, through: :property
+
   after_validation :set_days_on_market
   after_validation :set_transaction_status
-  after_commit :update_property_transaction  
+  after_commit :update_property_transaction, on: [:create, :update]
+  after_commit :generate_prediction_results, on: [:create, :update]
 
   TRANSACTION_TYPES = {
     rental: "rental",
@@ -34,7 +40,7 @@ class PropertyTransactionLog < ActiveRecord::Base
         PropertyTransactionLog.where( property_id: property_id )
           .where(transaction_type: transaction_type)        
           .where(" date_closed is NULL ")
-          .where(" date_listed < ? ", rented_date)
+          .where(" date_listed <= ? ", rented_date)
           .order(" date_listed desc ")
           .limit(1)
           .first
@@ -43,7 +49,7 @@ class PropertyTransactionLog < ActiveRecord::Base
         PropertyTransactionLog.where( property_id: property_id )
           .where(transaction_type: transaction_type)
           .where(" date_listed is NULL ")
-          .where(" date_closed > ? ", listed_date)
+          .where(" date_closed >= ? ", listed_date)
           .order(" date_closed asc ")
           .limit(1)
           .first
@@ -84,17 +90,16 @@ class PropertyTransactionLog < ActiveRecord::Base
   end
 
   def update_property_transaction
-
     if is_latest_transaction?
       pt = PropertyTransaction.where(
         property_id: property_id,
         transaction_type: transaction_type
-      ).first_or_create 
+      ).first_or_create
+
       pt.property_transaction_log_id = self.id
       pt.save!
       
     end
-
   end
 
   def is_latest_transaction?
@@ -106,5 +111,91 @@ class PropertyTransactionLog < ActiveRecord::Base
     return true if greater_transaction.nil?
     return false      
   end
+
+  def get_most_recent_date
+    most_recent_date = date_closed || date_listed
+    if date_listed.present? && date_closed.present?
+      most_recent_date =  [ date_listed, date_closed ].max
+    end
+    most_recent_date
+  end
+
+  def generate_prediction_results
+    pns = property.get_active_prediction_neighborhoods
+
+    if pns.size == 0
+      SlackPropertyWarning.perform_async property.id
+      return
+    end
+
+    most_recent_date = get_most_recent_date
+
+    if most_recent_date.nil?
+      SlackTransactionWarning.perform_async property.id
+      return
+
+    elsif most_recent_date < Time.now - 30.days
+      return
+    end
+
+    pns.each do |pn|
+      pm = pn.prediction_model
+
+      pr = PredictionResult.where(
+        property_id: property.id,
+        prediction_model_id: pm.id,
+        transaction_type: transaction_type,
+        property_transaction_log_id: self.id
+      ).first
+      
+      curr_predicted_rent = pm.predicted_rent(property.id)
+      curr_transaction_type = transaction_type
+
+      if transaction_type == "rental"
+        curr_listed_rent = price
+        curr_listed_sale = nil
+        curr_error_level = curr_predicted_rent - price
+        cap_rate         = nil
+
+      elsif transaction_type == "sales"
+        curr_listed_rent = nil
+        curr_listed_sale = price
+        curr_error_level = nil
+        cap_rate         = ( curr_predicted_rent * 12 / curr_listed_sale * 100 ).round(2)
+      end
+
+      if pr.nil?
+        pr = PredictionResult.create!(
+          property_id: property.id,
+          prediction_model_id: pm.id,
+          predicted_rent: curr_predicted_rent,
+          error_level: curr_error_level,
+          listed_rent: curr_listed_rent,
+          listed_sale: curr_listed_sale,
+          transaction_type: curr_transaction_type,
+          property_transaction_log_id: self.id,
+          cap_rate: cap_rate
+        )
+        puts "\t\t\t\t\tCreated prediction result: #{pr.id}"                
+        SlackPublisher.perform_async pr.id
+
+      # When predicted rent is not the same as 
+      elsif pr.predicted_rent != curr_predicted_rent
+        puts "\t\t\t\t\tUpdate prediction result: #{pr.id}"        
+        pr.predicted_rent = curr_predicted_rent
+        pr.error_level = curr_predicted_rent - price
+        pr.listed_rent = curr_listed_rent
+        pr.listed_sale = curr_listed_sale
+        pr.transaction_type = curr_transaction_type
+        pr.cap_rate = cap_rate
+        pr.error_level = curr_error_level
+
+        pr.save!
+        SlackPublisher.perform_async pr.id
+      end      
+    end
+
+  end
+
 
 end

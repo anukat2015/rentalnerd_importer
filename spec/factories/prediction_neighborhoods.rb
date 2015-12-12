@@ -1,8 +1,10 @@
 FactoryGirl.define do
   factory :prediction_neighborhood, :class => 'PredictionNeighborhood' do
+    neighborhood
     prediction_model
-    prediction_neighborhood_name "East Bay (Walnut Creek)"
-    prediction_neighborhood_coefficient 0.926041
+    name "East Bay (Walnut Creek)"
+    coefficient 0.926041
+    active true
   end
 
 end

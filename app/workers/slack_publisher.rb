@@ -10,6 +10,7 @@ class SlackPublisher
     pp = Property.find pr.property_id
 
     payload = {}
+    slack_end_point = nil
 
     if pr.transaction_type == "rental"
       payload[:text] =  "Property Id: #{pp.id},\n" +
@@ -17,21 +18,27 @@ class SlackPublisher
                         "Neighborhood: #{pp.neighborhood},\n" + 
                         "Listed Rent: #{pr.listed_rent},\n" + 
                         "Predicted Rent: #{pr.predicted_rent},\n" +  
-                        "Error Level: #{pr.error_level}\n"
+                        "Error Level: #{pr.error_level},\n" +
+                        "URL: #{pp.origin_url}%\n"
+
+      slack_end_point = ENV['SLACK_RENTAL_PREDICTIONS_CHANNEL']
         
     elsif pr.transaction_type == "sales"
-      cap = ( pr.predicted_rent * 12 / pr.listed_sale * 100 ).round(2)
       payload[:text] =  "Property Id: #{pp.id},\n" +
                         "Address: #{pp.address},\n" +
                         "Neighborhood: #{pp.neighborhood},\n" + 
                         "Listed Sale Price: #{pr.listed_sale},\n" + 
                         "Predicted Rent: #{pr.predicted_rent},\n" + 
-                        "CAP rate: #{cap}%\n"
+                        "CAP rate: #{pr.cap_rate}%,\n" + 
+                        "URL: #{pp.origin_url}%\n"
+
+      slack_end_point = ENV['SLACK_CAP_PREDICTIONS_CHANNEL']
 
     end
     
-    HTTParty.post( ENV['SLACK_CHANNEL'], 
+    HTTParty.post( slack_end_point,
       :body => payload.to_json,
-      :headers => { 'Content-Type' => 'application/json' } )    
+      :headers => { 'Content-Type' => 'application/json' } 
+    )
   end
 end

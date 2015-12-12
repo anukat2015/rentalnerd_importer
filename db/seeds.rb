@@ -14,9 +14,15 @@
 # Rake::Task["db:reseed_users_schools_districts"].execute
 
 # Version 2:
-Rake::Task["db:import_prediction_model"].execute
+
 
 # Miscellaneous
-Rake::Task["db:import_neighborhoods"].execute
+Rake::Task["db:import_neighborhoods_sf"].execute
+Rake::Task["db:import_neighborhoods_ph"].execute
+
+Rake::Task["db:import_prediction_model_sf"].execute
+Rake::Task["db:import_prediction_model_ph"].execute
+
+Rake::Task["db:import_luxurious_addresses"].execute
 
 Rails.cache.clear

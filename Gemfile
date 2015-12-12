@@ -26,7 +26,7 @@ gem 'sdoc', '~> 0.4.0',          group: :doc
 # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
 gem 'spring',        group: :development
 
-gem 'mysql2'
+gem 'mysql2', '~> 0.3.18'
 gem 'pry'
 gem 'sidekiq'
 gem 'sinatra', require: false # required for sidekiq
@@ -34,6 +34,10 @@ gem 'guard'
 gem 'geocoder'
 gem 'awesome_print'
 gem 'httparty'
+gem "therubyracer"
+gem "less-rails" 
+gem "twitter-bootstrap-rails", '2.2.8'
+gem "d3-rails"
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 

@@ -1,0 +1,60 @@
+#property_details { 
+  display: block;
+  margin:0 auto; 
+  position:relative; 
+  z-index:10; 
+  background: #eeeeee; 
+  border:2px solid #cccccc; 
+  border-radius:10px; 
+}
+
+#tooltip {
+    position: absolute;
+    border-width: 4px;
+    border-color: black;
+    background-color: grey;
+    width: 200px;
+    height: 200px;
+    display: none;
+}
+
+tr:hover {
+  background: #FCF; 
+}
+
+tr.selected {
+  background: #ECE; 
+}
+
+.bar.total rect {
+  fill: steelblue;
+}
+
+.bar.positive rect {
+  fill: darkolivegreen;
+}
+.bar.negative rect {
+  fill: crimson;
+}
+
+.bar line.connector {
+  stroke: grey;
+  stroke-dasharray: 3;
+}
+
+.bar text {
+  fill: white;
+  font: 12px sans-serif;
+  text-anchor: middle;
+}
+
+.axis text {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
