@@ -10,11 +10,19 @@
 <% end %>
 
 <div class="row">
-  <div class="span8">
+  <div class="span9">
     <svg id="waterfall"></svg>
   </div>
-  <div class="span4">
+  <div class="span3">
     <table class="table" id="cash_yield_table">
+      <thead class="header">
+        <tr>
+          <td>Description</td>
+          <td>$</td>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
     </table>
   </div>
 </div>
@@ -63,8 +71,7 @@
           %>%
         </td>
         <td> <%= 
-          #CashFlow.cash_yield(prediction.property_transaction_log.price, prediction.predicted_rent)
-            # number_with_precision( CashFlow.cash_yield(prediction.property_transaction_log.price, prediction.predicted_rent), :precision => 2, :delimiter => ',') 
+           number_with_precision( CashFlow.cash_yield(prediction.property_transaction_log.price, prediction.predicted_rent), :precision => 2, :delimiter => ',') 
           %>%
         </td>
       </tr>

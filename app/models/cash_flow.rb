@@ -30,8 +30,10 @@ class CashFlow < ActiveRecord::Base
 	end
 
 	def self.loan_amt(price, rent, rate, term)
-		pmt = payment(rate, 1, term)
-		loan_amt = [0.7 * (rent - taxes(price) - insurance(price)) / pmt, 0.7 * price].min
+		unless price.nil? or price == 0 or rent.nil? or rent == 0
+			pmt = payment(rate, 1, term)
+			loan_amt = [0.7 * (rent - taxes(price) - insurance(price)) / pmt, 0.7 * price].min
+		end
 	end
 
 	def self.net_return(price, loan_amt, noi)
@@ -46,7 +48,7 @@ class CashFlow < ActiveRecord::Base
 		end
 		taxes = taxes(price)
 		insurance = insurance(price)
-		rate = 6
+		rate = 6.0
 		term = 30
 		loan_amt = loan_amt(price, rent, rate, term*12)
 		pmt = payment(rate, loan_amt, term*12)
