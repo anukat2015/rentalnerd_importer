@@ -85,23 +85,23 @@ class Covariance < ActiveRecord::Base
       #   matrix_multiplecation result 
       case row_type
       when "level"
-        matrix_multiplication_result * property.level if property.level.present?
+        return matrix_multiplication_result * property.level if property.level.present?
       when "bedrooms"
-        matrix_multiplication_result * property.bedrooms if property.bedrooms.present?
+        return matrix_multiplication_result * property.bedrooms if property.bedrooms.present?
       when "bathrooms"
-        matrix_multiplication_result * property.bathrooms if property.bathrooms.present?
+        return matrix_multiplication_result * property.bathrooms if property.bathrooms.present?
       when "garage"
-        matrix_multiplication_result if property.garage if property.garage.present?
+        return matrix_multiplication_result if property.garage if property.garage.present?
       when "age"
-        matrix_multiplication_result * ( Time.now.year - property.year_built ) if property.year_built.present?
+        return matrix_multiplication_result * ( Time.now.year - property.year_built ) if property.year_built.present?
       when "elevation"
-        matrix_multiplication_result * property.elevation if property.elevation.present?
+        return matrix_multiplication_result * property.elevation if property.elevation.present?
       when "dist_to_park"
-        matrix_multiplication_result * property.dist_to_park if property.dist_to_park.present?
+        return matrix_multiplication_result * property.dist_to_park if property.dist_to_park.present?
       when "combination"
-        matrix_multiplication_result * property.sqft if property.sqft.present?
+        return matrix_multiplication_result * property.sqft if property.sqft.present?
       end
-      0  
+      return 0  
     end
 
     def matching_cols_for_normal_row prediction_model_id, row_type, nid, year, is_luxurious
