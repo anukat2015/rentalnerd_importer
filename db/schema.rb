@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151211212454) do
+ActiveRecord::Schema.define(version: 20160105224128) do
 
   create_table "covariances", force: true do |t|
     t.integer  "prediction_model_id"
@@ -214,6 +214,7 @@ ActiveRecord::Schema.define(version: 20151211212454) do
     t.datetime "updated_at"
     t.integer  "property_id"
     t.string   "transaction_type"
+    t.boolean  "is_latest",          default: false
   end
 
   create_table "property_transactions", force: true do |t|

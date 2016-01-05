@@ -7,7 +7,7 @@ class PropertyTransactionLog < ActiveRecord::Base
 
   after_validation :set_days_on_market
   after_validation :set_transaction_status
-  after_commit :update_property_transaction, on: [:create, :update]
+  after_validation :set_is_latest, on: [:create, :update]
   after_commit :generate_prediction_results, on: [:create, :update]
 
   TRANSACTION_TYPES = {
@@ -89,16 +89,10 @@ class PropertyTransactionLog < ActiveRecord::Base
     end
   end
 
-  def update_property_transaction
+  def set_is_latest
     if is_latest_transaction?
-      pt = PropertyTransaction.where(
-        property_id: property_id,
-        transaction_type: transaction_type
-      ).first_or_create
-
-      pt.property_transaction_log_id = self.id
-      pt.save!
-      
+      PropertyTransactionLog.where(property_id: property_id, transaction_type: transaction_type).update_all(is_latest: false)      
+      self.is_latest = true
     end
   end
 

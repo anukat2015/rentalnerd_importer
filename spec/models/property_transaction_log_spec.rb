@@ -213,5 +213,52 @@ RSpec.describe PropertyTransactionLog, type: :model do
   end
 
   describe '#is_latest_transaction?'
+
+  describe '#set_is_latest', :focus do
+    it 'sets the most recent transaction is_latest to true for the same transaction_type' do
+      pt = create(:property)
+      ptl_1 = PropertyTransactionLog.create!(
+        property_id: pt.id,
+        price: 1000,
+        date_listed: 1.year.ago,
+        transaction_type: "rental"
+      )
+      ptl_1.is_latest.should == true
+
+      ptl_2 = PropertyTransactionLog.create!(
+        property_id: pt.id,
+        price: 1000,
+        date_listed: 1.day.ago,
+        transaction_type: "rental"
+      )
+
+      ptl_1.reload
+      ptl_1.is_latest.should == false
+      ptl_2.is_latest.should == true      
+
+    end
+
+    it 'does not override the transaction of a different type' do
+      pt = create(:property)
+      ptl_1 = PropertyTransactionLog.create!(
+        property_id: pt.id,
+        price: 1000,
+        date_listed: 1.year.ago,
+        transaction_type: "sales"
+      )
+      ptl_1.is_latest.should == true
+
+      ptl_2 = PropertyTransactionLog.create!(
+        property_id: pt.id,
+        price: 1000,
+        date_listed: 1.day.ago,
+        transaction_type: "rental"
+      )
+
+      ptl_1.reload
+      ptl_1.is_latest.should == true
+      ptl_2.is_latest.should == true            
+    end
+  end
   
 end
