@@ -15,8 +15,8 @@ class PredictionResult < ActiveRecord::Base
         transaction_status: "open", 
         transaction_type: "sales",
         is_latest: true,
-        property_id: pids,
-      ).where("price > 30000").pluck(:id)
+        property_id: pids
+      ).where("price > 30000").where(" date_listed > ?", 12.months.ago ).pluck(:id)
 
       where(property_transaction_log_id: tids, prediction_model_id: pm.id).order(cap_rate: :desc).includes( :property, :property_transaction_log )
     end
