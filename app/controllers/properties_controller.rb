@@ -43,6 +43,8 @@ class PropertiesController < ApplicationController
       pmt = CashFlow.payment(6.0, loan_amt, 30)
       taxes = CashFlow.taxes(price)
       insurance = CashFlow.insurance(price)
+      piti = CashFlow.piti( price, rent, pmt, taxes)
+      cash_yield = CashFlow.cash_yield(price, rent)
     end 
 
     respond_to do |format|
@@ -95,7 +97,9 @@ class PropertiesController < ApplicationController
           'loan_amt' => loan_amt.to_i,
           'pmt' => pmt.to_i,
           'taxes' => taxes.to_i,
-          'insurance' => insurance.to_i
+          'insurance' => insurance.to_i,
+          'piti' => piti.to_f,
+          'cash_yield' => cash_yield.to_f
         }
       
       }

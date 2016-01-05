@@ -102,7 +102,7 @@ class Property < ActiveRecord::Base
   def reset_prediction_results
     reset_property_transaction_logs
     property_transaction_logs.where(is_latest: true).each do |ptl|
-      puts "\t\t\t\tupdate prediction results for property transaction log: #{ptl.id}"
+      puts "\t\t\t\tupdate prediction results for property transaction log: #{ptl.id}, type: #{ptl.transaction_type}"
       ptl.generate_prediction_results
     end
   end

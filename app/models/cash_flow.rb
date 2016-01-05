@@ -52,8 +52,13 @@ class CashFlow < ActiveRecord::Base
 		term = 30
 		loan_amt = loan_amt(price, rent, rate, term*12)
 		pmt = payment(rate, loan_amt, term*12)
-  		piti = pmt + taxes + insurance
-	  	noi = rent - piti
+	  noi = rent - piti(price, rent, pmt, taxes)
 		cash_yield = net_return(price, loan_amt, noi)
 	end
+
+	def self.piti(price, rent, pmt, taxes)
+		insurance = insurance price
+		rent - pmt - taxes - insurance
+	end
+
 end

@@ -166,12 +166,12 @@ class PropertyTransactionLog < ActiveRecord::Base
           property_transaction_log_id: self.id,
           cap_rate: cap_rate
         )
-        puts "\t\t\t\t\tCreated prediction result: #{pr.id}"                
+        puts "\t\t\t\t\tCreated prediction result: #{pr.id}, type: #{transaction_type}"                
         SlackPublisher.perform_async pr.id
 
       # When predicted rent is not the same as 
       elsif pr.predicted_rent != curr_predicted_rent
-        puts "\t\t\t\t\tUpdate prediction result: #{pr.id}"        
+        puts "\t\t\t\t\tUpdate prediction result: #{pr.id}, type: #{transaction_type}"
         pr.predicted_rent = curr_predicted_rent
         pr.error_level = curr_predicted_rent - price
         pr.listed_rent = curr_listed_rent

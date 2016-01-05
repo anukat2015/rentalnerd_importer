@@ -13,7 +13,8 @@ class PredictionResult < ActiveRecord::Base
       pids = PropertyNeighborhood.where(neighborhood_id: nids).pluck(:property_id)
       tids = PropertyTransactionLog.where(
         transaction_status: "open", 
-        transaction_type: "sales", 
+        transaction_type: "sales",
+        is_latest: true,
         property_id: pids,
       ).where("price > 30000").pluck(:id)
 
