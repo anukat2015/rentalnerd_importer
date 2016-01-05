@@ -128,16 +128,6 @@ class PropertyTransactionLog < ActiveRecord::Base
       return
     end
 
-    most_recent_date = get_most_recent_date
-
-    if most_recent_date.nil?
-      SlackTransactionWarning.perform_async property.id
-      return
-
-    elsif most_recent_date < Time.now - 30.days
-      return
-    end
-
     pns.each do |pn|
       pm = pn.prediction_model
 

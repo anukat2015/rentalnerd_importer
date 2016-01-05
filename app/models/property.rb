@@ -49,14 +49,17 @@ class Property < ActiveRecord::Base
     self.lookup_address = "#{address}, #{temp_neig}"    
   end
 
-  def get_latest_transaction_price transaction_type
+  def get_latest_transaction transaction_type
     ptl = property_transaction_logs.where(transaction_type: transaction_type).order(created_at: :desc).limit(1).first
+  end
+
+  def get_latest_transaction_price transaction_type
+    ptl = get_latest_transaction transaction_type
     if ptl.present?
       ptl.price
     else
       nil
     end
-
   end
 
   def set_elevation
@@ -84,8 +87,21 @@ class Property < ActiveRecord::Base
     end
   end
 
+  # sets only the most recent sales and rental transaction logs associated with this property to true
+  # sets all other transaction logs associated with this property to false
+  def reset_property_transaction_logs
+    property_transaction_logs.update_all(is_latest: false)
+
+    ptl_sales = get_latest_transaction "sales"
+    ptl_sales.update(is_latest: true) unless ptl_sales.nil?
+
+    ptl_rental = get_latest_transaction "rental"
+    ptl_rental.update(is_latest: true) unless ptl_rental.nil?
+  end
+
   def reset_prediction_results
-    property_transaction_logs.each do |ptl|
+    reset_property_transaction_logs
+    property_transaction_logs.where(is_latest: true).each do |ptl|
       puts "\t\t\t\tupdate prediction results for property transaction log: #{ptl.id}"
       ptl.generate_prediction_results
     end
