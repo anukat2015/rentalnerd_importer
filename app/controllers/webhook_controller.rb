@@ -13,5 +13,9 @@ class WebhookController < ApplicationController
     render :json => {
       status: "success"
     }
+  rescue Exception => e
+    warner = SlackFatalErrorWarning.new
+    message = "Import failed for #{params[:krake_handle]}, Error Message: #{e.message}"
+    warner.perform message
   end
 end
