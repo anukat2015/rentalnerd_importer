@@ -172,9 +172,10 @@ class DataImporter
       row["event_date"]       = ImportFormatter.to_date_short_year row["event_date"]      
       
       row_count += 1
-
+      puts "\n\tprocessing row : #{row_count}"
       # If record is of type we want
       if accept_zillow_row row
+        puts "\t\tadding qualified record for: " + row["origin_url"]
         clean_row_count += 1        
         rows << row
 
