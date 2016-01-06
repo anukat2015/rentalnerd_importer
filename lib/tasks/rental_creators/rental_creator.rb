@@ -86,7 +86,7 @@ module RentalCreator
     if previous_import_job_id.nil? == true
       get_sorted_import_logs( curr_import_job_id ).each do |import_log|
         self.create_import_diff( curr_import_job_id, import_log, "created", import_log[:id] )
-        add_rows += 1
+        added_rows += 1
       end
 
     # There was a previous batch
@@ -98,7 +98,7 @@ module RentalCreator
         previous_log = self.get_matching_import_log_from_batch import_log, previous_import_job_id
 
         if previous_log.nil?
-          add_rows += 1
+          added_rows += 1
           puts "\t\tcould not find "+ import_log[:origin_url] +" in Job: " + previous_import_job_id.to_s
           self.create_import_diff( curr_import_job_id, import_log, "created", import_log[:id], nil )
 
