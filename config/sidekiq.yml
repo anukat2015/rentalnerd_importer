@@ -4,7 +4,7 @@
 :namespace: rni
 :verbose: true
 :logfile: log/sidekiq.log
-:concurrency:  2
+:concurrency:  1
 :strict: false
 :pidfile: tmp/pids/sidekiq.pid
 :poll_interval: 10

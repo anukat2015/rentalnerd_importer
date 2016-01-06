@@ -13,7 +13,7 @@ module RentalCreator
 
     if discard? row
       puts "\t\tdiscarding record for: " + row["origin_url"]
-      return false
+      return nil
     end
 
     puts "\t\tcreating new import_log: " + row["origin_url"]
