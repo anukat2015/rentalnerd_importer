@@ -3,7 +3,7 @@ require 'rake'
 class ImportWorker
   include Sidekiq::Worker
 
-  sidekiq_options queue: :high
+  sidekiq_options queue: :high, :retry => false
 
   def perform( repository_handle )
     RentalNerd::Application.load_tasks
@@ -38,7 +38,11 @@ class ImportWorker
       logger.debug "Performing task db:import_zillow_alameda_county"
       di = DataImporter.new
       di.import_zillow_alameda_county
-    end    
+    end
+
+  rescue Exception => e 
+    logger.debug "Import failed for #{repository_handle}"
+    SlackFatalErrorWarning.perform_async repository_handle
 
   end  
 
