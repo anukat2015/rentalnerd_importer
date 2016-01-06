@@ -39,6 +39,8 @@
       <th>Address</th>
       <th>Sale Price</th>
       <th>Predicted Rent</th>
+      <th>Lower Interval</th>
+      <th>Upper Interval</th>
       <th>Date Listed</th>
       <th>Cap Rate</th>
       <th>Cash Yield</th>
@@ -65,6 +67,8 @@
         %>
         </td>
         <td> <%= prediction.predicted_rent %></td>
+        <td> <%= prediction.interval_l %></td>
+        <td> <%= prediction.interval_u %></td>
         <td> <%= prediction.property_transaction_log.date_listed %></td>
         <td> <%= 
             number_with_precision( prediction.cap_rate, :precision => 2, :delimiter => ',') 
