@@ -41,7 +41,7 @@ class ImportWorker
     end
 
   rescue Exception => e 
-    logger.debug "Import failed for #{repository_handle}"
+    logger.debug "Import failed for #{repository_handle}, Error Message: #{e.message}"
     SlackFatalErrorWarning.perform_async repository_handle
 
   end  
