@@ -18,7 +18,6 @@ class Property < ActiveRecord::Base
 
   has_many :prediction_results, dependent: :destroy
   has_many :property_transaction_logs, dependent: :destroy
-  has_many :property_transactions, dependent: :destroy
   has_many :property_neighborhoods, dependent: :destroy
   has_many :neighborhoods, through: :property_neighborhoods
   has_many :prediction_neighborhoods, through: :neighborhoods

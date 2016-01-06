@@ -8,6 +8,5 @@ namespace :db do
     ActiveRecord::Base.connection.execute "TRUNCATE properties"
     ActiveRecord::Base.connection.execute "TRUNCATE property_neighborhoods"
     ActiveRecord::Base.connection.execute "TRUNCATE property_transaction_logs"
-    ActiveRecord::Base.connection.execute "TRUNCATE property_transactions"
   end
 end

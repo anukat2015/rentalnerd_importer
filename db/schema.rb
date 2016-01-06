@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160105224128) do
+ActiveRecord::Schema.define(version: 20160106003758) do
 
   create_table "covariances", force: true do |t|
     t.integer  "prediction_model_id"
@@ -61,6 +61,11 @@ ActiveRecord::Schema.define(version: 20160105224128) do
     t.string   "source"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "total_rows"
+    t.integer  "clean_rows"
+    t.integer  "added_rows"
+    t.integer  "modified_rows"
+    t.integer  "removed_rows"
   end
 
   create_table "import_logs", force: true do |t|
@@ -216,15 +221,5 @@ ActiveRecord::Schema.define(version: 20160105224128) do
     t.string   "transaction_type"
     t.boolean  "is_latest",          default: false
   end
-
-  create_table "property_transactions", force: true do |t|
-    t.integer  "property_id"
-    t.integer  "property_transaction_log_id"
-    t.string   "transaction_type",            limit: 8
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  add_index "property_transactions", ["property_id", "transaction_type"], name: "index_property_transactions_on_property_id_and_transaction_type", unique: true, using: :btree
 
 end

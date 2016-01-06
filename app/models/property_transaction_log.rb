@@ -1,7 +1,6 @@
 class PropertyTransactionLog < ActiveRecord::Base
 
   belongs_to :property
-  has_one :property_transaction
   has_one :prediction_result
   has_one :neighborhoods, through: :property
 

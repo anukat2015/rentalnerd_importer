@@ -15,13 +15,22 @@ class DataImporter
     )
     cri = ClimbsfRentedImporter.new
 
+    row_count = 0
+    clean_row_count = 0
     CSV.foreach( open(temp_file), :headers => :first_row ).each do |row|
       row["source"] = "climbsf_rented"
       row["origin_url"] = row["apartment page"]
       row["date_closed"] = row["date_rented"]
       row["import_job_id"] = job.id
-      cri.create_import_log row
+      puts "\n\tprocessing row: #{$.}"
+      created = cri.create_import_log row
+
+      clean_row_count += 1 if created.present?
+      row_count += 1
     end
+    job.update(clean_rows: clean_row_count )
+    job.update(total_rows: row_count )
+
     puts "\n\n\n"
 
     cri.generate_import_diffs job.id
@@ -41,12 +50,21 @@ class DataImporter
     )
     cri = ClimbsfRentingImporter.new
 
+    row_count = 0
+    clean_row_count = 0
+
     CSV.foreach( open(temp_file), :headers => :first_row ).each do |row|
       row["source"] = "climbsf_renting"
       row["origin_url"] = row["apartment page"]
       row["import_job_id"] = job.id
-      cri.create_import_log row
+      puts "\n\tprocessing row: #{$.}"
+      created = cri.create_import_log row
+      clean_row_count += 1 if created.present?
+      row_count += 1      
     end
+    job.update(clean_rows: clean_row_count )
+    job.update(total_rows: row_count )    
+
     puts "\n\n\n"
 
     cri.generate_import_diffs job.id
@@ -77,7 +95,7 @@ class DataImporter
     puts "Processing #{source_url}"
     temp_file = GetdataDownloader.get_file source_url
     CSV.foreach( open(temp_file), :headers => :first_row ).each do |row|
-      puts "\tProcessing #{row['apartment page']}"
+      puts "Processing #{row['apartment page']}"
       has_garage = false
       has_garage = row["parking"].include? "Garage" unless row["parking"].nil?
       Property.where( origin_url: row["apartment page"] ).update_all( garage: has_garage )
@@ -109,7 +127,11 @@ class DataImporter
 
     rows = []
 
+    row_count = 0
+    clean_row_count = 0
+
     CSV.foreach( open(temp_file), :headers => :first_row ).each do |row|      
+      binding.pry
       row["address"] = row["address"].gsub("Incomplete address or missing price?Sometimes listing partners send Zillow listings that do not include a full address or price.To get more details on this property, please contact the listing agent, brokerage, or listing provider.", "")
       row["source"] = source_name
       row["origin_url"] = row["apartment page"]
@@ -150,25 +172,31 @@ class DataImporter
       
       row["event_date"]       = ImportFormatter.to_date_short_year row["event_date"]      
       
+      row_count += 1
+
       # If record is of type we want
       if accept_zillow_row row
+        clean_row_count += 1        
         rows << row
 
       # If record is not of type we want
       else 
-        puts "\tdiscarding disqualified record for: " + row["origin_url"]
+        puts "\t\tdiscarding disqualified record for: " + row["origin_url"]
         Property.purge_records( row["origin_url"] )
         ImportLog.purge_records( row["origin_url"] )
         ImportDiff.purge_records( row["origin_url"] )
       end
       
     end
+    job.update(clean_rows: clean_row_count )
+    job.update(total_rows: row_count )
 
     sorted_rows = rows.sort do |row_1, row_2|
       row_1["event_date"] <=> row_2["event_date"]
     end
 
-    sorted_rows.each do |row|
+    sorted_rows.each_with_index do |row, index|
+      puts "\n\tprocessing row: #{index}"
       zi.create_import_log row
     end
 
@@ -186,19 +214,19 @@ class DataImporter
   #
   def accept_zillow_row(row)
     if row["event_date"].nil?
-      puts "\tevent_date cannot be nil"
+      puts "\t\tevent_date cannot be nil"
       return false
     elsif row["transaction_type_raw"].present? && row["transaction_type_raw"].downcase.strip == "auction"
-      puts "\ttransaction_type_raw cannot be auction"
+      puts "\t\ttransaction_type_raw cannot be auction"
       return false
     elsif row["ccrc"].present? && row["ccrc"].strip.length > 0
-      puts "\tcannot be retirement community"
+      puts "\t\tcannot be retirement community"
       return false
     elsif row["bmr"].present? && row["bmr"].strip.length > 0
-      puts "\tcannot be affordable housing type"
+      puts "\t\tcannot be affordable housing type"
       return false
     elsif row["event_name"].nil?
-      puts "\tevent_name cannot be nil"
+      puts "\t\tevent_name cannot be nil"
       SlackFatalErrorWarning.perform_async row["origin_url"]
       return false
     else

@@ -13,10 +13,10 @@ module RentalCreator
 
     if discard? row
       puts "\t\tdiscarding record for: " + row["origin_url"]
-      return 
+      return false
     end
 
-    puts "\tcreating new import_log: " + row["origin_url"]
+    puts "\t\tcreating new import_log: " + row["origin_url"]
     import_log = ImportLog.create
     import_log[:address]          = row["address"]
     import_log[:neighborhood]     = row["neighborhood"]
@@ -40,16 +40,16 @@ module RentalCreator
 
   def discard? row
     if ImportFormatter.to_float(row["sqft"]) == 0
-      puts "\tsqft is 0"
+      puts "\t\tsqft is 0"
       return true       
     elsif ImportFormatter.to_float(row["price"]) == 0
-      puts "\tprice is 0"
+      puts "\t\tprice is 0"
       return true 
     elsif row["address"].include? "Undisclosed Address"
-      puts "\taddress is undisclosed"
+      puts "\t\taddress is undisclosed"
       return true 
     elsif ![*0..9].map { |n| n.to_s}.include? row["address"][0]
-      puts "\taddress does not have street number"
+      puts "\t\taddress does not have street number"
       return true 
     else
       return false      
@@ -79,28 +79,43 @@ module RentalCreator
     puts "\n\tProcessing created, updated import_diffs"
     previous_import_job_id = self.get_previous_batch_id curr_import_job_id 
 
+    added_rows = 0
+    modified_rows = 0
+
     # There was no previous batch ever imported
     if previous_import_job_id.nil? == true
       get_sorted_import_logs( curr_import_job_id ).each do |import_log|
         self.create_import_diff( curr_import_job_id, import_log, "created", import_log[:id] )
+        add_rows += 1
       end
 
     # There was a previous batch
     else
-      get_sorted_import_logs( curr_import_job_id ).each do |import_log|
+
+      get_sorted_import_logs( curr_import_job_id ).each_with_index do |import_log, index|
+        puts "\n\t\tRow. #{index}: processing import log #{import_log.id}"
         # There was a previous batch ever imported
         previous_log = self.get_matching_import_log_from_batch import_log, previous_import_job_id
 
         if previous_log.nil?
+          add_rows += 1
           puts "\t\tcould not find "+ import_log[:origin_url] +" in Job: " + previous_import_job_id.to_s
           self.create_import_diff( curr_import_job_id, import_log, "created", import_log[:id], nil )
 
         elsif self.is_changed? previous_log, import_log
+          modified_rows += 1
+          puts "\t\tchange detected for "+ import_log[:origin_url] +" in Job: " + curr_import_job_id.to_s
           self.create_import_diff( curr_import_job_id, import_log, "updated", import_log[:id], previous_log[:id] )
 
+        else
+          puts "\t\tno change detected for "+ import_log[:origin_url] +" in Job: " + curr_import_job_id.to_s
+
         end
+
       end
     end
+    ImportJob.where(id: curr_import_job_id).update_all(added_rows: added_rows)
+    ImportJob.where(id: curr_import_job_id).update_all(modified_rows: modified_rows)
   end
 
   # To Be Completed
@@ -109,17 +124,23 @@ module RentalCreator
     previous_import_job_id = self.get_previous_batch_id curr_import_job_id
 
     return if previous_import_job_id.nil?
-
-    get_sorted_import_logs( previous_import_job_id ).each do |prev_log|
+    removed_rows = 0
+    get_sorted_import_logs( previous_import_job_id ).each_with_index do |prev_log, index|
+      puts "\n\t\tRow. #{index}: detecting for changes to log #{prev_log.id} from batch #{previous_import_job_id}"
       current_log = self.get_matching_import_log_from_batch prev_log, curr_import_job_id
       if current_log.nil?
+        removed_rows += 1
+        puts "\t\tcorresponding log does not exist in current batch #{curr_import_job_id}"
         temp_log = prev_log.dup
         temp_log[:date_listed] = nil
         temp_log[:date_closed] = Time.now
         self.create_import_diff( curr_import_job_id, temp_log, "deleted", nil, prev_log[:id] )
+      else
+        puts "\t\tcorresponding log exist in current batch #{curr_import_job_id}"
       end
 
     end
+    ImportJob.where(id: curr_import_job_id).update_all(removed_rows: removed_rows)
 
   end
 
