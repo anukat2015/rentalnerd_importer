@@ -67,8 +67,12 @@
         %>
         </td>
         <td> <%= prediction.predicted_rent %></td>
-        <td> <%= prediction.interval_l %></td>
-        <td> <%= prediction.interval_u %></td>
+        <td> <%= 
+            number_with_precision( prediction.interval_1, :precision => 2, :delimiter => ',') 
+          %></td>
+        <td> <%= 
+            number_with_precision( prediction.interval_u, :precision => 2, :delimiter => ',') 
+          %></td>
         <td> <%= prediction.property_transaction_log.date_listed %></td>
         <td> <%= 
             number_with_precision( prediction.cap_rate, :precision => 2, :delimiter => ',') 
