@@ -316,8 +316,8 @@ module RentalCreator
   # Gets the corresponding import_diff given an import log
   def get_import_diff curr_job_id, import_log
     import_diff = ImportDiff.where( 
-      origin_url: import_log[:origin_url], 
       import_job_id: curr_job_id,
+      origin_url: import_log[:origin_url],       
       source: import_log[:source]
     ).first    
   end

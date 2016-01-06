@@ -83,9 +83,9 @@ class ZillowImporter
   # Assumption each source can only have one transaction per date with the same exact price
   def get_matching_import_log_from_batch import_log, job_id
     ImportLog.where( 
-      source: import_log[:source],      
       import_job_id: job_id,
       origin_url: import_log[:origin_url],
+      source: import_log[:source],            
       transaction_type: import_log[:transaction_type],
       date_transacted: import_log[:date_transacted],
       price: import_log[:price]
@@ -97,9 +97,9 @@ class ZillowImporter
   # Assumption each source can only have one transaction per date with the same exact price
   def get_import_diff curr_job_id, import_log
     import_diff = ImportDiff.where( 
-      source: import_log[:source],      
       import_job_id: curr_job_id,
       origin_url: import_log[:origin_url],
+      source: import_log[:source],      
       transaction_type: import_log[:transaction_type],
       date_transacted: import_log[:date_transacted],
       price: import_log[:price]
@@ -142,7 +142,7 @@ class ZillowImporter
       origin_url: import_log[:origin_url]
     ).order(date_transacted: :desc).limit(1).first
 
-    return false if most_recent[:date_transacted] != import_log[:date_transacted]
+    return false if most_recent.present? && most_recent[:date_transacted] != import_log[:date_transacted]
 
     logs_on_date = ImportLog.where( 
       import_job_id: import_log[:import_job_id],
@@ -153,7 +153,7 @@ class ZillowImporter
     return true if logs_on_date.size == 1
     return true if !import_log[:date_listed].nil?
     return false
-    
+
   end
 
   def scam? url

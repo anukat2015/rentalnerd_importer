@@ -129,6 +129,7 @@ class DataImporter
 
     row_count = 0
     clean_row_count = 0
+    bad_records = []
 
     CSV.foreach( open(temp_file), :headers => :first_row ).each do |row|      
       row["address"] = row["address"].gsub("Incomplete address or missing price?Sometimes listing partners send Zillow listings that do not include a full address or price.To get more details on this property, please contact the listing agent, brokerage, or listing provider.", "")
@@ -182,12 +183,13 @@ class DataImporter
       # If record is not of type we want
       else 
         puts "\t\tdiscarding disqualified record for: " + row["origin_url"]
-        Property.purge_records( row["origin_url"] )
-        ImportLog.purge_records( row["origin_url"] )
-        ImportDiff.purge_records( row["origin_url"] )
+        bad_records << row["origin_url"]
       end
       
     end
+    Property.purge_records bad_records
+    ImportLog.purge_records bad_records
+    ImportDiff.purge_records bad_records
     job.update(clean_rows: clean_row_count )
     job.update(total_rows: row_count )
 

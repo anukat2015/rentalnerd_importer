@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160106003758) do
+ActiveRecord::Schema.define(version: 20160106072115) do
 
   create_table "covariances", force: true do |t|
     t.integer  "prediction_model_id"
@@ -57,6 +57,8 @@ ActiveRecord::Schema.define(version: 20160106003758) do
     t.boolean  "sfh",              default: false
   end
 
+  add_index "import_diffs", ["import_job_id", "origin_url", "source"], name: "fast_find", length: {"import_job_id"=>nil, "origin_url"=>191, "source"=>191}, using: :btree
+
   create_table "import_jobs", force: true do |t|
     t.string   "source"
     t.datetime "created_at"
@@ -89,6 +91,8 @@ ActiveRecord::Schema.define(version: 20160106003758) do
     t.integer  "level",            default: 1
     t.boolean  "sfh",              default: false
   end
+
+  add_index "import_logs", ["import_job_id", "origin_url", "source"], name: "fast_find", length: {"import_job_id"=>nil, "origin_url"=>191, "source"=>191}, using: :btree
 
   create_table "luxury_addresses", force: true do |t|
     t.string   "address"

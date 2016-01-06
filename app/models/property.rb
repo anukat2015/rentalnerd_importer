@@ -34,8 +34,8 @@ class Property < ActiveRecord::Base
   ]
 
   class << self
-    def purge_records origin_url
-      Property.destroy_all( origin_url: origin_url )
+    def purge_records origin_urls
+      Property.destroy_all( origin_url: origin_urls )
     end
   end
 
