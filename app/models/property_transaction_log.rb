@@ -131,48 +131,35 @@ class PropertyTransactionLog < ActiveRecord::Base
         property_transaction_log_id: self.id
       ).first
       
-      curr_predicted_rent = pm.predicted_rent(property.id)
       curr_transaction_type = transaction_type
 
       if transaction_type == "rental"
         curr_listed_rent = price
         curr_listed_sale = nil
-        curr_error_level = curr_predicted_rent - price
-        cap_rate         = nil
 
       elsif transaction_type == "sales"
         curr_listed_rent = nil
         curr_listed_sale = price
-        curr_error_level = nil
-        cap_rate         = ( curr_predicted_rent * 12 / curr_listed_sale * 100 ).round(2)
       end
 
       if pr.nil?
         pr = PredictionResult.create!(
           property_id: property.id,
           prediction_model_id: pm.id,
-          predicted_rent: curr_predicted_rent,
-          error_level: curr_error_level,
           listed_rent: curr_listed_rent,
           listed_sale: curr_listed_sale,
           transaction_type: curr_transaction_type,
-          property_transaction_log_id: self.id,
-          cap_rate: cap_rate
+          property_transaction_log_id: self.id
         )
         puts "\t\t\t\t\tCreated prediction result: #{pr.id}, type: #{transaction_type}"                
         SlackPublisher.perform_async pr.id
 
-      # When predicted rent is not the same as 
-      elsif pr.predicted_rent != curr_predicted_rent
+      # When predicted result was already generated
+      else
         puts "\t\t\t\t\tUpdate prediction result: #{pr.id}, type: #{transaction_type}"
-        pr.predicted_rent = curr_predicted_rent
-        pr.error_level = curr_predicted_rent - price
         pr.listed_rent = curr_listed_rent
         pr.listed_sale = curr_listed_sale
         pr.transaction_type = curr_transaction_type
-        pr.cap_rate = cap_rate
-        pr.error_level = curr_error_level
-
         pr.save!
         SlackPublisher.perform_async pr.id
       end      
