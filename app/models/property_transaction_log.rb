@@ -124,13 +124,6 @@ class PropertyTransactionLog < ActiveRecord::Base
     pns.each do |pn|
       pm = pn.prediction_model
 
-      pr = PredictionResult.where(
-        property_id: property.id,
-        prediction_model_id: pm.id,
-        transaction_type: transaction_type,
-        property_transaction_log_id: self.id
-      ).first
-      
       curr_transaction_type = transaction_type
 
       if transaction_type == "rental"
@@ -142,8 +135,8 @@ class PropertyTransactionLog < ActiveRecord::Base
         curr_listed_sale = price
       end
 
-      if pr.nil?
-        pr = PredictionResult.create!(
+      if prediction_result.nil? 
+        PredictionResult.create!(
           property_id: property.id,
           prediction_model_id: pm.id,
           listed_rent: curr_listed_rent,
@@ -151,19 +144,19 @@ class PropertyTransactionLog < ActiveRecord::Base
           transaction_type: curr_transaction_type,
           property_transaction_log_id: self.id
         )
-        puts "\t\t\t\t\tCreated prediction result: #{pr.id}, type: #{transaction_type}"                
-        SlackPublisher.perform_async pr.id
 
       # When predicted result was already generated
       else
-        puts "\t\t\t\t\tUpdate prediction result: #{pr.id}, type: #{transaction_type}"
-        pr.listed_rent = curr_listed_rent
-        pr.listed_sale = curr_listed_sale
-        pr.transaction_type = curr_transaction_type
-        pr.save!
-        SlackPublisher.perform_async pr.id
+        puts "\t\t\t\t\tUpdate prediction result: #{prediction_result.id}, type: #{transaction_type}"
+        prediction_result.listed_rent         = curr_listed_rent
+        prediction_result.listed_sale         = curr_listed_sale
+        prediction_result.prediction_model_id = pm.id
+        prediction_result.transaction_type    = curr_transaction_type
+        prediction_result.save!
       end      
     end
+  rescue Exception => e 
+    binding.pry
 
   end
 

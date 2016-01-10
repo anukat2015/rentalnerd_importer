@@ -48,8 +48,12 @@ class Property < ActiveRecord::Base
     self.lookup_address = "#{address}, #{temp_neig}"    
   end
 
-  def get_latest_transaction transaction_type
-    ptl = property_transaction_logs.where(transaction_type: transaction_type).order(created_at: :desc).limit(1).first
+  def get_latest_transaction transaction_type, is_latest_filter = nil
+    query = property_transaction_logs.where(transaction_type: transaction_type)
+    if is_latest_filter.present?
+      query = query.where(is_latest: true)
+    end
+    ptl = query.where(transaction_type: transaction_type).order(created_at: :desc).limit(1).first
   end
 
   def get_latest_transaction_price transaction_type
@@ -100,7 +104,7 @@ class Property < ActiveRecord::Base
 
   def reset_prediction_results
     reset_property_transaction_logs
-    property_transaction_logs.where(is_latest: true).each do |ptl|
+    property_transaction_logs.where(is_latest: true, transaction_status: "open" ).each do |ptl|
       puts "\t\t\t\tupdate prediction results for property transaction log: #{ptl.id}, type: #{ptl.transaction_type}"
       ptl.generate_prediction_results
     end

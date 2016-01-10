@@ -45,12 +45,6 @@ function cash_flows(data) {
   console.log(data)
   // empty the last table
   $("#cash_yield_table tbody").empty()
-
-  // calcs
-  // piti = data.rent - data.pmt - data.taxes - data.insurance
-  piti = data.piti
-  cash_yield = ((data.rent - piti) * 12) / (data.price - data.loan_amt)
-
   $('#cash_yield_table tbody').append('<tr><td>Price</td><td>' + data.price.formatMoney(0) + '</td></tr>');
   $('#cash_yield_table tbody').append('<tr><td>Downpayment</td><td>' + (data.price - data.loan_amt).formatMoney(0) + '</td></tr>');
 
@@ -58,14 +52,10 @@ function cash_flows(data) {
   $('#cash_yield_table tbody').append('<tr><td>Payment</td><td>' + data.pmt.formatMoney(0) + '</td></tr>');
   $('#cash_yield_table tbody').append('<tr><td>Taxes</td><td>' + data.taxes.formatMoney(0) + '</td></tr>');
   $('#cash_yield_table tbody').append('<tr><td>Insurance</td><td>' + data.insurance.formatMoney(0) + '</td></tr>');
-  $('#cash_yield_table tbody').append('<tr><td>PITI</td><td>' + piti.formatMoney(0) + '</td></tr>');
+  $('#cash_yield_table tbody').append('<tr><td>PITI</td><td>' + data.piti.formatMoney(0) + '</td></tr>');
 
-  $('#cash_yield_table tbody').append('<tr><td>Net Cash Flow</td><td>' + (data.rent - piti).formatMoney(0) + '</td></tr>');
-
-  $('#cash_yield_table tbody').append('<tr><td>Net Cash Yield - JS</td><td>' + Math.round(cash_yield * 10000)/100+ '%</td></tr>');
-  $('#cash_yield_table tbody').append('<tr><td>Net Cash Yield - Ruby </td><td>' + Math.round(data.cash_yield * 100)/100+ '%</td></tr>');
-
-
+  $('#cash_yield_table tbody').append('<tr><td>Net Cash Flow</td><td>' + (data.rent - data.piti).formatMoney(0) + '</td></tr>');
+  $('#cash_yield_table tbody').append('<tr><td>Net Cash Yield</td><td>' + Math.round(data.cash_yield * 100)/100+ '%</td></tr>');
 
 }
 function draw(data) {

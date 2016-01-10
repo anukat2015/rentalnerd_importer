@@ -106,12 +106,14 @@ class Covariance < ActiveRecord::Base
 
     def matching_cols_for_normal_row prediction_model_id, row_type, nid, year, is_luxurious
       year = Time.now.year      
+      puts "query 1"
       cv_norm = Covariance.where( 
         prediction_model_id: prediction_model_id,
         row_type: row_type,
         col_type: NORMAL_VARIANCE_FEATURES
       )
 
+      puts "query 2"
       cv_special = Covariance.where( 
         prediction_model_id: prediction_model_id,
         row_type: row_type,
@@ -127,6 +129,7 @@ class Covariance < ActiveRecord::Base
     def matching_cols_for_combination_row prediction_model_id, nid, year, is_luxurious
       year = Time.now.year
 
+      puts "query 3"
       cv_norm = Covariance.where( 
         prediction_model_id: prediction_model_id,
         row_type: "combination",
@@ -136,6 +139,7 @@ class Covariance < ActiveRecord::Base
         col_type: NORMAL_VARIANCE_FEATURES
       )
 
+      puts "query 4"
       cv_special = Covariance.where( 
         prediction_model_id: prediction_model_id,
         row_type: "combination",
@@ -152,38 +156,52 @@ class Covariance < ActiveRecord::Base
     end    
 
     def import_covariances! prediction_model_id, model_covariance_file
+      covariances = []    
+      total_records = 0  
+      total_rows = 0
+      import_batch_size = 5000
       CSV.new( open( model_covariance_file ), :headers => :first_row ).each do |record|
-
+        
         row_key = record[0]
-        puts "\t#{$.} importing covariance: #{row_key}"
+        total_rows += 1
+        puts "\t\tRow #{total_rows}: importing covariance: #{row_key}"
         row_type = self.label_type row_key
-        row_combi = self.breakdown_combination row_key        
+        row_combi = self.breakdown_combination row_key
 
         ActiveRecord::Base.transaction do
           record.each do |col_key, value|
             if col_key.present?
+              total_records += 1
               col_type = self.label_type col_key
               col_combi = self.breakdown_combination col_key
+              covariance = {}
+              covariance[:prediction_model_id] = prediction_model_id
+              covariance[:row_type] = row_type
+              covariance[:row_neighborhood_id] = row_combi["neighborhood_id"]
+              covariance[:row_year] = row_combi["year"]
+              covariance[:row_is_luxurious] = row_combi["is_luxurious"]
+              covariance[:col_type] = col_type
+              covariance[:col_neighborhood_id] = col_combi["neighborhood_id"]
+              covariance[:col_year] = col_combi["year"]
+              covariance[:col_is_luxurious] = col_combi["is_luxurious"]
+              covariance[:row_raw] = row_key
+              covariance[:col_raw] = col_key
+              covariance[:coefficient] = ImportFormatter.to_decimal(value)
+              covariances << covariance
+                
+            end
 
-              Covariance.create(
-                prediction_model_id: prediction_model_id,
-                row_type: row_type,
-                row_neighborhood_id: row_combi["neighborhood_id"],
-                row_year: row_combi["year"],
-                row_is_luxurious: row_combi["is_luxurious"],
-                col_type: col_type,
-                col_neighborhood_id: col_combi["neighborhood_id"],
-                col_year: col_combi["year"],
-                col_is_luxurious: col_combi["is_luxurious"],
-                row_raw: row_key,
-                col_raw: col_key,
-                coefficient: ImportFormatter.to_decimal(value)
-              )
+            if covariances.size >= import_batch_size
+              puts "\n\t\tImporting Covariance Batch #{total_records - import_batch_size} - #{total_records}\n"
+              Covariance.create(covariances)
+              covariances = []
             end
           end          
         end
 
       end
+      Covariance.create(covariances)
+      covariances = []
     end
 
     def label_type covariance_label

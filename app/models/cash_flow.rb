@@ -47,7 +47,9 @@ class CashFlow < ActiveRecord::Base
 			return "N/A"
 		end
 		taxes = taxes(price)
+		puts "taxes #{taxes}"
 		insurance = insurance(price)
+		puts "insurance #{insurance}"
 		rate = 6.0
 		term = 30
 		loan_amt = loan_amt(price, rent, rate, term*12)

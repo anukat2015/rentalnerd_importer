@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160106072115) do
+ActiveRecord::Schema.define(version: 20160110013501) do
 
   create_table "covariances", force: true do |t|
     t.integer  "prediction_model_id"
@@ -30,7 +30,7 @@ ActiveRecord::Schema.define(version: 20160106072115) do
     t.datetime "updated_at"
   end
 
-  add_index "covariances", ["prediction_model_id", "col_type", "col_neighborhood_id", "col_year"], name: "normal_rows", length: {"prediction_model_id"=>nil, "col_type"=>191, "col_neighborhood_id"=>nil, "col_year"=>nil}, using: :btree
+  add_index "covariances", ["prediction_model_id", "row_type", "col_type", "col_neighborhood_id", "col_year"], name: "normal_rows", length: {"prediction_model_id"=>nil, "row_type"=>191, "col_type"=>191, "col_neighborhood_id"=>nil, "col_year"=>nil}, using: :btree
 
   create_table "import_diffs", force: true do |t|
     t.text     "address"
@@ -181,6 +181,9 @@ ActiveRecord::Schema.define(version: 20160106072115) do
     t.decimal  "interval_u",                  precision: 30, scale: 20
   end
 
+  add_index "prediction_results", ["property_id", "transaction_type"], name: "fast_find", length: {"property_id"=>nil, "transaction_type"=>191}, using: :btree
+  add_index "prediction_results", ["property_transaction_log_id"], name: "ptl_id", using: :btree
+
   create_table "properties", force: true do |t|
     t.text     "address"
     t.string   "neighborhood"
@@ -225,5 +228,17 @@ ActiveRecord::Schema.define(version: 20160106072115) do
     t.string   "transaction_type"
     t.boolean  "is_latest",          default: false
   end
+
+  add_index "property_transaction_logs", ["property_id", "transaction_type", "is_latest"], name: "fast_find", length: {"property_id"=>nil, "transaction_type"=>191, "is_latest"=>nil}, using: :btree
+
+  create_table "property_transactions", force: true do |t|
+    t.integer  "property_id"
+    t.integer  "property_transaction_log_id"
+    t.string   "transaction_type",            limit: 8
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "property_transactions", ["property_id", "transaction_type"], name: "index_property_transactions_on_property_id_and_transaction_type", unique: true, using: :btree
 
 end

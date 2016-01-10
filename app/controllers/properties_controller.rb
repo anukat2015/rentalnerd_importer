@@ -21,11 +21,14 @@ class PropertiesController < ApplicationController
   def waterfall
     @property_id = params["property_id"] || 6063
     prop = Property.find params["property_id"]
+
+    ptl = prop.get_latest_transaction("sales", true)
     
     pm = prop.get_active_prediction_model
     p_params =  pm.prediction_waterfall_params prop.id
 
-    rent = pm.predicted_rent(@property_id)
+    rent = ptl.prediction_result.interval_l
+
     price = prop.get_latest_transaction_price("sales")
     
     unless price.nil? or price == 0 or rent.nil? or rent == 0

@@ -12,14 +12,6 @@ class Neighborhood < ActiveRecord::Base
     .where( " min_longitude <= ? ", property.longitude )
   end
 
-  def refresh_property_predictions!
-    puts "\t\trefreshing predictions for neighborhood: #{id}"
-    properties.each do |pp|
-      puts "\t\t\trefreshing predictions for property: #{pp.id}"
-      pp.reset_prediction_results
-    end
-  end
-
   def add_vertex vertex
     return if vertex.neighborhood_id == id && 
       vertex.vertex_order.present?

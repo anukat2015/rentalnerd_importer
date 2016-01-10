@@ -11,6 +11,7 @@ class PredictionModel < ActiveRecord::Base
       model_covariance_file = File.new( "./lib/tasks/model_files/#{model_covariance_name}" )
 
       pm = PredictionModel.new(area_name: area_name, active: false)      
+      puts "\tprediction model created #{pm.id}"
 
       CSV.new( open( model_coeffi_file ), :headers => :first_row ).each do |row|
         case row["Effect"]        
@@ -209,9 +210,22 @@ class PredictionModel < ActiveRecord::Base
   end
 
   def refresh_property_predictions
-    neighborhoods.each do |nb|
-      nb.refresh_property_predictions! 
+    nids = neighborhoods.pluck(:id)
+    pids = PropertyNeighborhood.where(neighborhood_id: nids).pluck(:property_id)
+    filtered_pids = PropertyTransactionLog.where(
+        transaction_status: "open", 
+        is_latest: true,
+        property_id: pids
+      ).where(" date_listed > ?", 12.months.ago )
+      .pluck(:property_id)
+
+    counter = 0
+    Property.where(id: filtered_pids).find_each do |pp|
+      counter += 1
+      puts "\t\t\t #{counter} / #{filtered_pids.size} : refreshing predictions for property: #{pp.id}"
+      pp.reset_prediction_results
     end
+
   end  
 
 end
