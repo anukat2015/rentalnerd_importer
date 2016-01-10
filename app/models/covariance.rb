@@ -106,14 +106,13 @@ class Covariance < ActiveRecord::Base
 
     def matching_cols_for_normal_row prediction_model_id, row_type, nid, year, is_luxurious
       year = Time.now.year      
-      puts "query 1"
+      
       cv_norm = Covariance.where( 
         prediction_model_id: prediction_model_id,
         row_type: row_type,
         col_type: NORMAL_VARIANCE_FEATURES
       )
 
-      puts "query 2"
       cv_special = Covariance.where( 
         prediction_model_id: prediction_model_id,
         row_type: row_type,
@@ -129,7 +128,6 @@ class Covariance < ActiveRecord::Base
     def matching_cols_for_combination_row prediction_model_id, nid, year, is_luxurious
       year = Time.now.year
 
-      puts "query 3"
       cv_norm = Covariance.where( 
         prediction_model_id: prediction_model_id,
         row_type: "combination",
@@ -139,7 +137,6 @@ class Covariance < ActiveRecord::Base
         col_type: NORMAL_VARIANCE_FEATURES
       )
 
-      puts "query 4"
       cv_special = Covariance.where( 
         prediction_model_id: prediction_model_id,
         row_type: "combination",

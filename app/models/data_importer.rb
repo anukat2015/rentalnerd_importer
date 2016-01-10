@@ -167,10 +167,9 @@ class DataImporter
       when "Listing removed"
         row["price"]        = row["event_price"] 
         row["date_closed"]  = row["event_date"]
-        row["date_listed"]  = row["event_date"]
       end
       
-      row["event_date"]       = ImportFormatter.to_date_short_year row["event_date"]      
+      row["event_date"]       = ImportFormatter.to_date row["event_date"]      
       
       row_count += 1
       puts "\n\tprocessing row : #{row_count}"

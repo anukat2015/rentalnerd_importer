@@ -32,12 +32,12 @@ class ZillowImporter
     new_import_log = create_import_log_without_zillow_special row
 
     if new_import_log.present?
-      new_import_log[:date_closed]  = ImportFormatter.to_date_short_year row["date_closed"]
-      new_import_log[:date_listed]  = ImportFormatter.to_date_short_year row["date_listed"]
+      new_import_log[:date_closed]  = ImportFormatter.to_date row["date_closed"]
+      new_import_log[:date_listed]  = ImportFormatter.to_date row["date_listed"]
       new_import_log[:date_transacted]  = new_import_log[:date_closed] || new_import_log[:date_listed]
       new_import_log.save!
-    end
 
+    end
   end
 
   alias_method_chain :create_import_log, :zillow_special
