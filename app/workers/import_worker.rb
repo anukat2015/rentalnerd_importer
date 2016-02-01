@@ -27,17 +27,18 @@ class ImportWorker
       di = DataImporter.new
       di.import_zillow_sf      
 
-    # Zillow Phoenix
-    when "n53_70da17e3370067399d5095287282d302eses"
-      logger.debug "Performing task db:import_zillow_ph"
-      di = DataImporter.new
-      di.import_zillow_ph
-
     # Zillow Alameda County
     when "n86_19de2d95d00239a0c9263ec9252b66bbeses"
       logger.debug "Performing task db:import_zillow_alameda_county"
       di = DataImporter.new
       di.import_zillow_alameda_county
+
+    else
+      if DataImporter.is_phoenix_repository?( repository_handle )
+        logger.debug "Performing task db:import_zillow_ph #{repository_handle}"
+        di = DataImporter.new
+        di.import_zillow_ph repository_handle      
+      end
     end
 
   rescue Exception => e 
@@ -46,5 +47,7 @@ class ImportWorker
     SlackFatalErrorWarning.perform_async message
 
   end  
+
+
 
 end

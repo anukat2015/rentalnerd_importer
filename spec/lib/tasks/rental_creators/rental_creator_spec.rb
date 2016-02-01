@@ -410,4 +410,35 @@ RSpec.describe RentalCreator do
     end        
   end
 
+  describe '#get_previous_batch_id', :focus do
+    it 'returns previous batch id when source provided matches' do
+      ij_1 = create(:import_job, source: 'somewhere')
+      ij_2 = create(:import_job, source: 'somewhere')
+      p_id = ic.get_previous_batch_id ij_2
+      p_id.should == ij_1.id
+    end
+
+    it 'returns NIL when source provided matches nothing' do
+      ij_1 = create(:import_job, source: 'somewhere')
+      ic.get_previous_batch_id(ij_1).should be_nil
+    end    
+
+    it 'returns previous batch id when source and task_key provided matches' do
+      ij_1 = create(:import_job, source: 'somewhere')
+      ij_2 = create(:import_job, source: 'somewhere', task_key: 'secret')
+      ij_3 = create(:import_job, source: 'somewhere')
+      ij_4 = create(:import_job, source: 'somewhere', task_key: 'secret')
+      ic.get_previous_batch_id( ij_4 ).should == ij_2.id
+      ic.get_previous_batch_id( ij_3 ).should == ij_2.id
+    end
+
+    it 'returns previous batch id when source and task_key provided matches' do
+      ij_1 = create(:import_job, source: 'somewhere', task_key: 'secret')
+      ij_2 = create(:import_job, source: 'lost', task_key: 'secret')
+      ij_3 = create(:import_job, source: 'lost')
+      ij_4 = create(:import_job, source: 'somewhere', task_key: 'secret')
+      ic.get_previous_batch_id( ij_4 ).should == ij_1.id
+    end    
+  end
+
 end

@@ -10,9 +10,9 @@ require './lib/tasks/getdata_downloader'
 
 namespace :db do
   desc "imports ClimbSF data for those that have already been listed"  
-  task :import_zillow_ph => :environment do 
+  task :import_zillow_ph_all => :environment do 
     di = DataImporter.new
-    di.import_zillow_ph
+    di.import_zillow_ph "n53_70da17e3370067399d5095287282d302eses"
   end
 
   desc "imports ClimbSF data for those that have already been listed"  

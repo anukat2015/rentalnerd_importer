@@ -150,8 +150,14 @@ module RentalCreator
   end
 
   def get_previous_batch_id job_id
-    source = get_source_from_job job_id
-    previous_import_job_id = ImportJob.where(source: source).where( "id < ?", job_id ).pluck(:id).reverse.first
+    curr_job = ImportJob.where( id: job_id ).first
+    if curr_job.task_key.present?
+      previous_import_job_id = ImportJob.where(source: curr_job.source, task_key: curr_job.task_key)
+        .where( "id < ?", job_id ).pluck(:id).reverse.first      
+    else
+      previous_import_job_id = ImportJob.where(source: curr_job.source)
+        .where( "id < ?", job_id ).pluck(:id).reverse.first
+    end
   end
 
   # Creates a new import_diff entry
@@ -197,7 +203,6 @@ module RentalCreator
   def generate_properties job_id
 
     puts "\nProcessing properties for job #{job_id}"
-    source = get_source_from_job job_id
     ImportDiff.where( import_job_id: job_id ).each do |import_diff|
       create_property import_diff
     end

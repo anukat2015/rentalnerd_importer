@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160110013501) do
+ActiveRecord::Schema.define(version: 20160201045509) do
 
   create_table "covariances", force: true do |t|
     t.integer  "prediction_model_id"
@@ -68,6 +68,7 @@ ActiveRecord::Schema.define(version: 20160110013501) do
     t.integer  "added_rows"
     t.integer  "modified_rows"
     t.integer  "removed_rows"
+    t.string   "task_key"
   end
 
   create_table "import_logs", force: true do |t|
