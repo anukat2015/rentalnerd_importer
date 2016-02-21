@@ -13,20 +13,11 @@ class ZillowImporter
     row["year_built"] = row["year built"].to_i unless row["year built"].to_i == 0
 
     row["price"] = /[0-9,]+/.match(row["price"]).to_s
+
+    # When Price change, Back on market or Listing removed
     if row["transaction_type"].nil?
-
-      immediate_prior_transaction = ImportLog.where( 
-        import_job_id: row["import_job_id"], 
-        origin_url: row["origin_url"]
-      ).last
-
-      unless immediate_prior_transaction.nil?
-        row["transaction_type"] = immediate_prior_transaction.transaction_type
-      else
-        row["transaction_type"] = "rental"
-        row["transaction_type"] = "sales" if ImportFormatter.to_float( row["price"] ) > 50000
-      end
-
+      row["transaction_type"] = "rental"
+      row["transaction_type"] = "sales" if ImportFormatter.to_float( row["price"] ) > 30000
     end
 
     new_import_log = create_import_log_without_zillow_special row

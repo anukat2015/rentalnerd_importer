@@ -86,36 +86,32 @@ RSpec.describe ZillowImporter do
       ImportLog.all.first.transaction_type.should == "sales"
     end
 
-    it 'creates an import log using transaction_type indicated in previous log if it does not have a transaction_type' do
+    it 'creates an import log setting transaction_type as rental if it does not have a transaction_type and has price less than 30000' do
       event_date = ( Time.now - 1.year ).strftime("%m/%d/%y")
       row1 = generate_row event_date: event_date, date_listed: event_date, date_transacted: event_date, transaction_type: "sales"
       zi.create_import_log row1
 
       event_date = ( Time.now ).strftime("%m/%d/%y")
-      row2 = generate_row event_date: event_date, date_listed: event_date, date_transacted: event_date
+      row2 = generate_row event_date: event_date, date_listed: event_date, date_transacted: event_date, price: "29999"
       row2["transaction_type"] = nil
       zi.create_import_log row2
       ImportLog.all.size.should == 2
       ImportLog.all.first.transaction_type.should == "sales"
-      ImportLog.all.second.transaction_type.should == "sales"
+      ImportLog.all.second.transaction_type.should == "rental"
     end
 
-    it 'creates an import log using transaction_type indicated in previous log if it does not have a transaction_type' do
+    it 'creates an import log setting transaction_type as sales if it does not have a transaction_type and has price above 30000' do
       event_date = ( Time.now - 1.year ).strftime("%m/%d/%y")
       row1 = generate_row event_date: event_date, date_listed: event_date, date_transacted: event_date, transaction_type: "rental"
       zi.create_import_log row1
 
-      event_date = ( Time.now - 6.months ).strftime("%m/%d/%y")
-      row2 = generate_row event_date: event_date, date_listed: event_date, date_transacted: event_date, transaction_type: "sales"
-      zi.create_import_log row2    
-
       event_date = ( Time.now ).strftime("%m/%d/%y")
-      row3 = generate_row event_date: event_date, date_listed: event_date, date_transacted: event_date, price: "666"
-      row3["transaction_type"] = nil
-      zi.create_import_log row3
-      ImportLog.all.size.should == 3
-      ImportLog.all.last.transaction_type.should == "sales"
-      ImportLog.all.last.price.should == 666
+      row2 = generate_row event_date: event_date, date_listed: event_date, date_transacted: event_date, price: "30001"
+      row2["transaction_type"] = nil
+      zi.create_import_log row2
+      ImportLog.all.size.should == 2
+      ImportLog.all.first.transaction_type.should == "rental"
+      ImportLog.all.second.transaction_type.should == "sales"
     end
 
     it 'sets year built to actual value if it exist' do
