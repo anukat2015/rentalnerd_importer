@@ -92,6 +92,7 @@ class DataImporter
     puts "\n\n\n"
 
     cri.generate_import_diffs job.id
+    cri.set_normalcy! job_id
     cri.generate_properties job.id
     cri.generate_transactions job.id
     temp_file.close!    
@@ -126,6 +127,7 @@ class DataImporter
     puts "\n\n\n"
 
     cri.generate_import_diffs job.id
+    cri.set_normalcy! job_id
     cri.generate_properties job.id
     cri.generate_transactions job.id
     temp_file.close!        
@@ -271,7 +273,8 @@ class DataImporter
       zi.create_import_log row
     end
 
-    zi.generate_import_diffs job.id    
+    zi.generate_import_diffs job.id
+    zi.set_normalcy! job_id
     zi.generate_properties job.id
     zi.generate_transactions job.id
     temp_file.close!     
