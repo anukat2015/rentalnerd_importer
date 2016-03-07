@@ -151,13 +151,7 @@ module RentalCreator
 
   def get_previous_batch_id job_id
     curr_job = ImportJob.where( id: job_id ).first
-    if curr_job.task_key.present?
-      previous_import_job_id = ImportJob.where(source: curr_job.source, task_key: curr_job.task_key)
-        .where( "id < ?", job_id ).pluck(:id).reverse.first      
-    else
-      previous_import_job_id = ImportJob.where(source: curr_job.source)
-        .where( "id < ?", job_id ).pluck(:id).reverse.first
-    end
+    curr_job.get_previous_job_id
   end
 
   # Creates a new import_diff entry
@@ -200,7 +194,17 @@ module RentalCreator
     end
   end
 
+  def set_normalcy!( job_id )
+    curr_job = ImportJob.find job_id
+    curr_job.set_normalcy!
+  end
+
   def generate_properties job_id
+    curr_job = ImportJob.find job_id
+
+    if curr_job.is_abnormal?
+      raise "Property generation not allowed because ImportJob (ID: #{job_id}) was abnormal"
+    end
 
     puts "\nProcessing properties for job #{job_id}"
     ImportDiff.where( import_job_id: job_id ).each do |import_diff|
@@ -245,6 +249,11 @@ module RentalCreator
   end
 
   def generate_transactions job_id
+
+    if curr_job.is_abnormal?
+      raise "Property Transactions not allowed because ImportJob (ID: #{job_id}) was abnormal"
+    end
+
     puts "\nProcessing transactions for job #{job_id}"
     source = get_source_from_job job_id
     ImportDiff.where( import_job_id: job_id ).each do |import_diff|
