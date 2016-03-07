@@ -104,21 +104,26 @@ class ZillowImporter
   def create_import_diff( curr_import_job_id, import_log, diff_type, new_log_id, old_log_id=nil )
     to_proceed = true
     if diff_type == "deleted"
-      to_proceed = most_recent_transaction_for_property_in_batch? import_log
+      is_most_recent = most_recent_transaction_for_property_in_batch? import_log
 
-      is_scam = scam?( import_log["origin_url"] )
-      
-      if is_scam
-        puts "\tdiscarding scam record for: " + import_log["origin_url"]
-        Property.purge_records( import_log["origin_url"] ) 
-        ImportLog.purge_records( import_log["origin_url"] ) 
-        ImportDiff.purge_records( import_log["origin_url"] ) 
-      end
-
-      to_proceed = to_proceed && !is_scam
+      is_scam = purge_scam!( import_log["origin_url"] )
+      is_closed = is_really_closed?( import_log['transaction_type'], import_log["origin_url"] )
+      to_proceed = is_most_recent && !is_scam && is_closed
     end
     return unless to_proceed
     super( curr_import_job_id, import_log, diff_type, new_log_id, old_log_id=nil )
+  end
+
+  def purge_scam!( origin_url)
+    is_scam = scam?( origin_url )
+    
+    if is_scam
+      puts "\tdiscarding scam record for: " + origin_url
+      Property.purge_records( origin_url ) 
+      ImportLog.purge_records( origin_url ) 
+      ImportDiff.purge_records( origin_url ) 
+    end 
+    is_scam   
   end
 
   # Returns true if this import_log represents the most recent transaction that occurred for a piece of property
@@ -127,27 +132,26 @@ class ZillowImporter
   # Hierarchy of logs from most recent to most dated
   #   date_listed not null
   #   date_closed not null
-  def most_recent_transaction_for_property_in_batch? import_log
+  def most_recent_transaction_for_property_in_batch?( import_log )
     most_recent = ImportLog.select(:date_transacted).where( 
       import_job_id: import_log[:import_job_id],
       origin_url: import_log[:origin_url]
     ).order(date_transacted: :desc).limit(1).first
 
-    return false if most_recent.present? && most_recent[:date_transacted] != import_log[:date_transacted]
+    # Returns false if the import_log does not have the same date_transacted as the most recent log in record
+    if most_recent.nil?
+      raise "cannot find any corresponding import_log in batch"
+    elsif most_recent.present? && most_recent[:date_transacted] != import_log[:date_transacted]
+      return false
 
-    logs_on_date = ImportLog.where( 
-      import_job_id: import_log[:import_job_id],
-      origin_url: import_log[:origin_url],
-      date_transacted: import_log[:date_transacted]
-    )
-
-    return true if logs_on_date.size == 1
-    return true if !import_log[:date_listed].nil?
-    return false
+    # transaction date matches to the most recent one
+    elsif most_recent.present? && most_recent[:date_transacted] == import_log[:date_transacted]
+      return true
+    end
 
   end
 
-  def scam? url
+  def scam?( url )
     uri = URI( url)
     res = Net::HTTP.get_response(uri)
     if res.code == "200"
@@ -158,8 +162,78 @@ class ZillowImporter
     return false
   end
 
-  def purge_scam_records scam_url
+  def purge_scam_records( scam_url )
     Property.destroy_all( origin_url: scam_url )
   end
+
+  def check_property_transaction_log_for_false_positive( ptl_id )
+    ptl = PropertyTransactionLog.find( ptl_id )
+
+    return if ptl.nil?
+    puts "Property Transaction Log (ID:#{ptl.id}), type:#{ptl.transaction_type}, price: #{ptl.price} "
+
+    if purge_scam!(ptl.property.origin_url)
+      puts "\tWe detected a scam"
+
+    elsif ptl.is_latest_transaction_on_page?()
+      should_close = is_really_closed? ptl.transaction_type, ptl.property.origin_url
+      if !should_close 
+        puts "\tProperty Transaction Log (ID: #{ptl_id}) Detected false positive!"
+        puts "\t\tOrigin date_closed: #{ptl.date_closed}"
+        ptl.date_closed = nil
+      end
+      ptl.save!
+    else
+      puts "\tIs not the latest transaction on the page"
+    end
+
+  end
+
+  def is_really_closed?( transaction_type, url )
+    property_status = current_property_page_status url
+    puts "\tActual zillow\n\t\tproperty: #{url} \n\t\tstatus: #{property_status}"
+    case transaction_type
+    when "rental"
+      if /Sold/.match(property_status)
+        true
+      elsif /Off Market/.match(property_status)
+        true
+      elsif /For Sale/.match(property_status)
+        true
+      elsif /Pending/.match(property_status)
+        true
+      elsif /For Rent/.match(property_status)
+        false
+      else
+        raise "Unknown property status type for transaction"
+      end
+
+    when "sales"
+      if /Sold/.match(property_status)
+        true
+      elsif /Off Market/.match(property_status)
+        true
+      elsif /Pending/.match(property_status)
+        true        
+      elsif /For Sale/.match(property_status)
+        false
+      else
+        raise "Unknown property status type for transaction"
+      end
+
+    else
+      raise "Unknown property transaction_type"
+    end
+  end
+
+  def current_property_page_status( url )
+    page = Nokogiri::HTML( HTTParty.get( url ) )
+    status_div = page.css(".status-icon-row").first
+    if status_div.present?
+      status_div.text.strip()
+    else
+      nil
+    end
+  end    
 
 end

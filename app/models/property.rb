@@ -37,6 +37,17 @@ class Property < ActiveRecord::Base
     def purge_records origin_urls
       Property.destroy_all( origin_url: origin_urls )
     end
+
+    def most_recent_transaction_date origin_url
+      property = Property.where(origin_url: origin_url).first
+      if property.present?
+        ptl = PropertyTransactionLog.get_most_recent_transaction_log property.id
+        if ptl.present?
+          ptl.get_most_recent_date
+        end
+      end
+      
+    end
   end
 
   def cleanup_address

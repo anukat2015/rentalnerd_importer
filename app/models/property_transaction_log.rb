@@ -67,8 +67,25 @@ class PropertyTransactionLog < ActiveRecord::Base
 
     end
 
-  end
+    def get_most_recent_transaction_log property_id
+      PropertyTransactionLog.find_by_sql("
+        SELECT
+        property_transaction_logs.*,
+        CASE 
+          WHEN date_closed IS NOT NULL AND date_listed IS NOT NULL AND date_closed > date_listed THEN date_closed 
+          WHEN date_closed IS NOT NULL AND date_listed IS NOT NULL AND date_closed < date_listed THEN date_listed
+          WHEN date_listed IS NOT NULL THEN date_listed 
+          WHEN date_closed IS NOT NULL THEN date_closed 
+        END as 'date_transacted'
+        FROM property_transaction_logs
+        WHERE
+          property_id = #{property_id}
+        ORDER BY date_transacted DESC
+        limit 1
+      ").first      
+    end
 
+  end
 
   def set_days_on_market
     if !date_listed.nil? && !date_closed.nil?
@@ -89,13 +106,13 @@ class PropertyTransactionLog < ActiveRecord::Base
   end
 
   def set_is_latest
-    if is_latest_transaction?
+    if is_latest_transaction_for_type?
       PropertyTransactionLog.where(property_id: property_id, transaction_type: transaction_type).update_all(is_latest: false)      
       self.is_latest = true
     end
   end
 
-  def is_latest_transaction?
+  def is_latest_transaction_for_type?
     date_to_check = date_closed || date_listed || -1
     greater_transaction = PropertyTransactionLog.where(property_id: property_id)
       .where( transaction_type: transaction_type)
@@ -104,6 +121,15 @@ class PropertyTransactionLog < ActiveRecord::Base
     return true if greater_transaction.nil?
     return false      
   end
+
+  def is_latest_transaction_on_page?
+    date_to_check = date_closed || date_listed || -1
+    greater_transaction = PropertyTransactionLog.where(property_id: property_id)
+      .where(" date_closed > ? or date_listed > ? ", date_to_check, date_to_check)
+      .first    
+    return true if greater_transaction.nil?
+    return false
+  end  
 
   def get_most_recent_date
     most_recent_date = date_closed || date_listed
@@ -159,6 +185,5 @@ class PropertyTransactionLog < ActiveRecord::Base
     binding.pry
 
   end
-
 
 end

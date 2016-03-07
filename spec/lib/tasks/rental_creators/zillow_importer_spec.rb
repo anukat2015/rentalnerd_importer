@@ -56,6 +56,14 @@ RSpec.describe ZillowImporter do
     stub_request(:get, /.*maps.googleapis.com.*elevation.*/).to_return(:status => 200, :body => rni_fixture("google_elevation.json"), :headers => {})
   end
 
+  def zillow_check_request
+    stub_request(:get, /.*zillow.com.*for_rent.*/).to_return(:status => 200, :body => rni_fixture("zillow_for_rent.html"), :headers => {})
+    stub_request(:get, /.*zillow.com.*for_sale.*/).to_return(:status => 200, :body => rni_fixture("zillow_for_sale.html"), :headers => {})
+    stub_request(:get, /.*zillow.com.*pending.*/).to_return(:status => 200, :body => rni_fixture("zillow_pending.html"), :headers => {})
+    stub_request(:get, /.*zillow.com.*off_market.*/).to_return(:status => 200, :body => rni_fixture("zillow_off_market.html"), :headers => {})
+    stub_request(:get, /.*zillow.com.*sold.*/).to_return(:status => 200, :body => rni_fixture("zillow_sold.html"), :headers => {})
+  end
+
   def scam_check_request
     stub_request(:get, "http://scam.com/this-is-bad").
       with(:headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Host'=>'scam.com', 'User-Agent'=>'Ruby'}).
@@ -75,6 +83,7 @@ RSpec.describe ZillowImporter do
     zi.stub(:get_default_date_listed) { default_time }
     google_map_request
     scam_check_request
+    zillow_check_request
   end  
 
   describe '#create_import_log' do
@@ -216,7 +225,7 @@ RSpec.describe ZillowImporter do
       il = create(:import_log, 
         source: "some source",
         import_job_id: ij.id,
-        origin_url: "http://legit.com/this-is-good", 
+        origin_url: "http://zillow.com/off_market", 
         transaction_type: "rental",
         date_transacted: transacted_date,
         price: 1000
@@ -302,7 +311,6 @@ RSpec.describe ZillowImporter do
       idiff.year_built.should == nil
     end    
   end
-
 
   describe '#generate_import_diffs' do
     context 'created' do
@@ -418,7 +426,7 @@ RSpec.describe ZillowImporter do
         il1 = create(:import_log, 
           source: "some source",        
           import_job_id: ij.id,
-          origin_url: "http://legit.com/this-is-good", 
+          origin_url: "http://zillow.com/off_market", 
           transaction_type: "rental",
           date_transacted: transacted_date,
           price: 1000
@@ -430,11 +438,41 @@ RSpec.describe ZillowImporter do
         nij.import_diffs.first.diff_type.should == "deleted"
       end
 
+      it 'does not create deleted import_diff rental type if For Rent is still on in the web page' do
+        il1 = create(:import_log, 
+          source: "some source",        
+          import_job_id: ij.id,
+          origin_url: "http://zillow.com/for_rent", 
+          transaction_type: "rental",
+          date_transacted: transacted_date,
+          price: 1000
+        )
+
+        nij = create(:import_job)
+        zi.generate_import_diffs nij.id
+        nij.import_diffs.size.should == 0
+      end      
+
+      it 'does not create deleted import_diff rental type if For Sale is still on in the web page' do
+        il1 = create(:import_log, 
+          source: "some source",        
+          import_job_id: ij.id,
+          origin_url: "http://zillow.com/for_sale", 
+          transaction_type: "sales",
+          date_transacted: transacted_date,
+          price: 1000
+        )
+
+        nij = create(:import_job)
+        zi.generate_import_diffs nij.id
+        nij.import_diffs.size.should == 0
+      end            
+
       it 'only creates import_diff for a property using the latest transaction for a property' do 
         il1 = create(:import_log, 
           source: "some source",        
           import_job_id: ij.id,
-          origin_url: "http://legit.com/this-is-good", 
+          origin_url: "http://zillow.com/sold", 
           transaction_type: "rental",
           date_transacted: transacted_date,
           price: 1000
@@ -443,7 +481,7 @@ RSpec.describe ZillowImporter do
         il2 = create(:import_log, 
           source: "some source",        
           import_job_id: ij.id,
-          origin_url: "http://legit.com/this-is-good", 
+          origin_url: "http://zillow.com/sold", 
           transaction_type: "rental",
           date_transacted: transacted_date + 1.day,
           price: 2000
@@ -516,7 +554,7 @@ RSpec.describe ZillowImporter do
       most_recent.should == false      
     end
 
-    it 'returns true if import log does not the most recent date for a property in a batch with many other properties' do
+    it 'returns true if import log does not match the most recent date for a property in a batch with many other properties' do
       il1 = create(:import_log, 
         source: "some source",        
         import_job_id: ij.id,
@@ -656,7 +694,7 @@ RSpec.describe ZillowImporter do
       il1 = create(:import_log,
         source: "some source",
         import_job_id: ij.id,
-        origin_url: "http://legit.com/this-is-good", 
+        origin_url: "http://zillow.com/off_market", 
         transaction_type: "rental",
         date_transacted: transacted_date,
         date_listed: transacted_date,
@@ -677,7 +715,61 @@ RSpec.describe ZillowImporter do
       ptt.date_closed.nil?.should == false
       ptt.transaction_status.should == "closed"
       ptt.price.should == 1000
-    end    
+    end
+
+    it 'does not closes an existing transaction when For Rent is still happening on Zillow' do
+      il1 = create(:import_log,
+        source: "some source",
+        import_job_id: ij.id,
+        origin_url: "http://zillow.com/for_rent", 
+        transaction_type: "rental",
+        date_transacted: transacted_date,
+        date_listed: transacted_date,
+        price: 1000
+      )
+      zi.generate_import_diffs ij.id
+      zi.generate_properties ij.id
+      zi.generate_transactions ij.id
+
+      nij = create(:import_job)
+      zi.generate_import_diffs nij.id
+      zi.generate_properties nij.id
+      zi.generate_transactions nij.id      
+
+      PropertyTransactionLog.all.size.should == 1
+      ptt = PropertyTransactionLog.all.first
+      ptt.date_listed.should == transacted_date.to_date
+      ptt.date_closed.nil?.should == true
+      ptt.transaction_status.should == "open"
+      ptt.price.should == 1000
+    end
+
+    it 'does not closes an existing transaction when For Sale is still happening on Zillow' do
+      il1 = create(:import_log,
+        source: "some source",
+        import_job_id: ij.id,
+        origin_url: "http://zillow.com/for_sale", 
+        transaction_type: "sales",
+        date_transacted: transacted_date,
+        date_listed: transacted_date,
+        price: 1000
+      )
+      zi.generate_import_diffs ij.id
+      zi.generate_properties ij.id
+      zi.generate_transactions ij.id
+
+      nij = create(:import_job)
+      zi.generate_import_diffs nij.id
+      zi.generate_properties nij.id
+      zi.generate_transactions nij.id      
+
+      PropertyTransactionLog.all.size.should == 1
+      ptt = PropertyTransactionLog.all.first
+      ptt.date_listed.should == transacted_date.to_date
+      ptt.date_closed.nil?.should == true
+      ptt.transaction_status.should == "open"
+      ptt.price.should == 1000
+    end
 
   end
 
@@ -722,6 +814,50 @@ RSpec.describe ZillowImporter do
       pp = Property.all.first
       pp.garage.should == false
     end    
+  end
+
+  describe '#is_really_closed?' do
+    context "rental" do
+      it "for_rental" do
+        zi.is_really_closed?('rental', 'http://zillow.com/for_rent').should == false
+      end
+
+      it "for_sale" do
+        zi.is_really_closed?('rental', 'http://zillow.com/for_sale').should == true
+      end
+
+      it "off_market" do
+        zi.is_really_closed?('rental', 'http://zillow.com/off_market').should == true
+      end
+
+      it "pending" do
+        zi.is_really_closed?('rental', 'http://zillow.com/pending').should == true
+      end
+
+      it "sold" do
+        zi.is_really_closed?('rental', 'http://zillow.com/sold').should == true
+      end
+    end
+
+    context "sales" do
+
+      it "for_sale" do
+        zi.is_really_closed?('sales', 'http://zillow.com/for_sale').should == false
+      end
+
+      it "off_market" do
+        zi.is_really_closed?('sales', 'http://zillow.com/off_market').should == true
+      end
+
+      it "pending" do
+        zi.is_really_closed?('sales', 'http://zillow.com/pending').should == true
+      end
+
+      it "sold" do
+        zi.is_really_closed?('sales', 'http://zillow.com/sold').should == true
+      end
+    end    
+
   end
 
 end 

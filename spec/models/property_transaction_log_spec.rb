@@ -212,7 +212,7 @@ RSpec.describe PropertyTransactionLog, type: :model do
     end    
   end
 
-  describe '#is_latest_transaction?'
+  describe '#is_latest_transaction_for_type?'
 
   describe '#set_is_latest', :focus do
     it 'sets the most recent transaction is_latest to true for the same transaction_type' do

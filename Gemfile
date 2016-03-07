@@ -4,7 +4,6 @@ gem 'dotenv-rails', :groups => [:development, :test, :production]
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.1.1'
 # Use sqlite3 as the database for Active Record
-gem 'sqlite3'
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 4.0.3'
 # Use Uglifier as compressor for JavaScript assets
@@ -38,6 +37,8 @@ gem "therubyracer"
 gem "less-rails" 
 gem "twitter-bootstrap-rails", '2.2.8'
 gem "d3-rails"
+gem "nokogiri"
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
