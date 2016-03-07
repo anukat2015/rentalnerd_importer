@@ -167,7 +167,7 @@ class ZillowImporter
   end
 
   def check_property_transaction_log_for_false_positive( ptl_id )
-    ptl = PropertyTransactionLog.find( ptl_id )
+    ptl = PropertyTransactionLog.find_by_id( ptl_id )
 
     return if ptl.nil?
     puts "Property Transaction Log (ID:#{ptl.id}), type:#{ptl.transaction_type}, price: #{ptl.price} "
