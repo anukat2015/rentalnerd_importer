@@ -40,6 +40,9 @@ class ImportJob < ActiveRecord::Base
   def set_normalcy!
     if get_previous_job_id.nil? && removed_rows > 0
       update( abnormal: true )
+      
+    elsif get_previous_job.total_rows.nil?
+      update( abnormal: false )
 
     elsif 1.0 * removed_rows / get_previous_job.total_rows > NORMALITY_THRESHOLD
       update( abnormal: true )

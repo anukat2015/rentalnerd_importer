@@ -204,6 +204,8 @@ class ZillowImporter
         true
       elsif /For Rent/.match(property_status)
         false
+      elsif /Coming Soon/.match(property_status)
+        false
       else
         raise "Unknown property status type for transaction"
       end
@@ -217,6 +219,8 @@ class ZillowImporter
         true        
       elsif /For Sale/.match(property_status)
         false
+      elsif /Coming Soon/.match(property_status)
+        false        
       else
         raise "Unknown property status type for transaction"
       end
