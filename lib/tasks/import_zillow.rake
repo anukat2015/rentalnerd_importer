@@ -37,4 +37,10 @@ namespace :db do
     di.set_zillow_year_built "http://data.getdata.io/n86_19de2d95d00239a0c9263ec9252b66bbeses/csv"    
   end
 
+  desc "Import random"  
+  task :import_zillow_random => :environment do 
+    di = DataImporter.new
+    di.import_zillow_alameda_county
+  end
+
 end
