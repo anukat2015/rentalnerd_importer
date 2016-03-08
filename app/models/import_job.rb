@@ -20,7 +20,7 @@ class ImportJob < ActiveRecord::Base
       @previous_import_job_id = ImportJob.where( source: source, task_key: task_key )
         .where( "id < ?", id ).order(id: :desc).limit(1).pluck(:id).first
     else
-      @previous_import_job_id = ImportJob.where( source: curr_job.source )
+      @previous_import_job_id = ImportJob.where( source: source )
         .where( "id < ?", id ).order(id: :desc).limit(1).pluck(:id).first
     end    
   end
@@ -32,7 +32,7 @@ class ImportJob < ActiveRecord::Base
       @previous_import_job = ImportJob.where( source: source, task_key: task_key )
         .where( "id < ?", id ).order(id: :desc).limit(1).first      
     else
-      @previous_import_job = ImportJob.where( source: curr_job.source )
+      @previous_import_job = ImportJob.where( source: source )
         .where( "id < ?", id ).order(id: :desc).limit(1).first
     end    
   end
