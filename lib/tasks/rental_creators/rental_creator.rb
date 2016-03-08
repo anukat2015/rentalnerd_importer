@@ -249,7 +249,7 @@ module RentalCreator
   end
 
   def generate_transactions job_id
-
+    curr_job = ImportJob.where( id: job_id ).first
     if curr_job.is_abnormal?
       raise "Property Transactions not allowed because ImportJob (ID: #{job_id}) was abnormal"
     end
