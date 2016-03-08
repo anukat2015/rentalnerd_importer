@@ -105,9 +105,12 @@ class ZillowImporter
     to_proceed = true
     if diff_type == "deleted"
       is_most_recent = most_recent_transaction_for_property_in_batch? import_log
-
       is_scam = purge_scam!( import_log["origin_url"] )
-      is_closed = is_really_closed?( import_log['transaction_type'], import_log["origin_url"] )
+      if is_scam
+        is_closed = false
+      else
+        is_closed = is_really_closed?( import_log['transaction_type'], import_log["origin_url"] )
+      end
       to_proceed = is_most_recent && !is_scam && is_closed
     end
     return unless to_proceed
