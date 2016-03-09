@@ -217,6 +217,8 @@ class ZillowImporter
         false
       elsif /Land/.match(property_status)
         false
+      else
+        raise "Unknown zillow transaction_type: #{transaction_type} property_status_type: #{property_status}"
       end
 
     when "sales"
@@ -240,9 +242,13 @@ class ZillowImporter
         true
       elsif /Land/.match(property_status)
         false
+      else
+        raise "Unknown zillow transaction_type: #{transaction_type} property_status_type: #{property_status}"
       end
+    else
+      raise "Unknown zillow transaction_type: #{transaction_type} property_status_type: #{property_status}"
     end
-
+  rescue
     warner = SlackFatalErrorWarning.new
     message = "Unknown zillow transaction_type: #{transaction_type} property_status_type: #{property_status}"
     warner.perform message
