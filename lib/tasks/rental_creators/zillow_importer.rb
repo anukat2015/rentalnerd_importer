@@ -217,8 +217,6 @@ class ZillowImporter
         false
       elsif /Land/.match(property_status)
         false
-      else
-        raise "Unknown property status type for transaction"
       end
 
     when "sales"
@@ -241,14 +239,14 @@ class ZillowImporter
       elsif /For Rent/.match(property_status)
         true
       elsif /Land/.match(property_status)
-        false        
-      else
-        raise "Unknown property status type for transaction"
+        false
       end
-
-    else
-      raise "Unknown property transaction_type"
     end
+
+    warner = SlackFatalErrorWarning.new
+    message = "Unknown zillow transaction_type: #{transaction_type} property_status_type: #{property_status}"
+    warner.perform message
+    false    
   end
 
   def current_property_page_status( url )
