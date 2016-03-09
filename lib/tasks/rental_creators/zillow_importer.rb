@@ -143,7 +143,7 @@ class ZillowImporter
 
     # Returns false if the import_log does not have the same date_transacted as the most recent log in record
     if most_recent.nil?
-      raise "cannot find any corresponding import_log in batch"
+      raise "cannot find any corresponding import_log in batch \n\t ImportJobID: #{import_log[:import_job_id]} \n\tOriginURL: #{import_log[:origin_url]}"
     elsif most_recent.present? && most_recent[:date_transacted] != import_log[:date_transacted]
       return false
 
