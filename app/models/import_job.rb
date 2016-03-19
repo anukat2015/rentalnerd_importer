@@ -40,6 +40,9 @@ class ImportJob < ActiveRecord::Base
   def set_normalcy!
     if get_previous_job_id.nil? && removed_rows > 0
       update( abnormal: true )
+
+    elsif get_previous_job_id.nil? && removed_rows == 0
+      update( abnormal: false )
       
     elsif get_previous_job.total_rows.nil?
       update( abnormal: false )
@@ -53,6 +56,6 @@ class ImportJob < ActiveRecord::Base
     else
       raise "unknown normalcy level occurred"
 
-    end    
+    end
   end
 end

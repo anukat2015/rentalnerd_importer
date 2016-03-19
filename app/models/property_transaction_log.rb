@@ -107,7 +107,15 @@ class PropertyTransactionLog < ActiveRecord::Base
 
   def set_is_latest
     if is_latest_transaction_for_type?
-      PropertyTransactionLog.where(property_id: property_id, transaction_type: transaction_type).update_all(is_latest: false)      
+      if id.present?
+        PropertyTransactionLog.where(property_id: property_id, transaction_type: transaction_type)
+          .where("id <> ? ", id)
+          .update_all(is_latest: false)
+      else
+        PropertyTransactionLog.where(property_id: property_id, transaction_type: transaction_type)
+          .update_all(is_latest: false)
+      end
+      
       self.is_latest = true
     end
   end
@@ -117,7 +125,7 @@ class PropertyTransactionLog < ActiveRecord::Base
     greater_transaction = PropertyTransactionLog.where(property_id: property_id)
       .where( transaction_type: transaction_type)
       .where(" date_closed > ? or date_listed > ? ", date_to_check, date_to_check)
-      .first    
+      .first
     return true if greater_transaction.nil?
     return false      
   end

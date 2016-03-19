@@ -410,7 +410,7 @@ RSpec.describe RentalCreator do
     end        
   end
 
-  describe '#get_previous_batch_id', :focus do
+  describe '#get_previous_batch_id' do
     it 'returns previous batch id when source provided matches' do
       ij_1 = create(:import_job, source: 'somewhere')
       ij_2 = create(:import_job, source: 'somewhere')
@@ -439,6 +439,16 @@ RSpec.describe RentalCreator do
       ij_4 = create(:import_job, source: 'somewhere', task_key: 'secret')
       ic.get_previous_batch_id( ij_4 ).should == ij_1.id
     end    
+  end
+
+  describe '#generate_deleted_diffs', :focus do
+    it 'sets removed rows to 0 if there was not previous import job' do
+      ij_1 = create(:import_job, source: 'somewhere', task_key: 'secret')
+      ij_1.removed_rows.should == nil
+      ic.generate_deleted_diffs ij_1.id
+      ij_1_new = ImportJob.find ij_1.id
+      ij_1_new.removed_rows.should == 0
+    end
   end
 
 end
