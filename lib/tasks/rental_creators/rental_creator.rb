@@ -123,7 +123,11 @@ module RentalCreator
     puts "\n\tProcessing deleted import_diffs"
     previous_import_job_id = self.get_previous_batch_id curr_import_job_id
 
-    return if previous_import_job_id.nil?
+    
+    if previous_import_job_id.nil?
+      ImportJob.where(id: curr_import_job_id).update_all(removed_rows: 0)
+      return
+    end
     removed_rows = 0
     get_sorted_import_logs( previous_import_job_id ).each_with_index do |prev_log, index|
       puts "\n\t\tRow. #{index}: detecting for changes to log #{prev_log.id} from batch #{previous_import_job_id}"

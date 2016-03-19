@@ -214,7 +214,7 @@ RSpec.describe PropertyTransactionLog, type: :model do
 
   describe '#is_latest_transaction_for_type?'
 
-  describe '#set_is_latest', :focus do
+  describe '#set_is_latest' do
     it 'sets the most recent transaction is_latest to true for the same transaction_type' do
       pt = create(:property)
       ptl_1 = PropertyTransactionLog.create!(
@@ -259,6 +259,21 @@ RSpec.describe PropertyTransactionLog, type: :model do
       ptl_1.is_latest.should == true
       ptl_2.is_latest.should == true            
     end
+
+    it 'does not set is_latest to false if we are setting the date_listed to a transaction that already has a date_closed' do
+      pt = create(:property)
+      ptl_1 = PropertyTransactionLog.create!(
+        property_id: pt.id,
+        price: 1000,
+        date_listed: "2008-02-03",
+        transaction_type: "sales"
+      )
+      ptl_1.is_latest.should == true
+      ptl_1.date_closed = "2008-03-01"
+      ptl_1.save!
+      ptl_1_new = PropertyTransactionLog.find ptl_1.id
+      ptl_1_new.is_latest.should == true
+    end    
   end
   
 end
