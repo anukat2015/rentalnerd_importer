@@ -267,16 +267,18 @@ class DataImporter
     Property.purge_records bad_records
     ImportLog.purge_records bad_records
     ImportDiff.purge_records bad_records
-    job.update(clean_rows: clean_row_count )
-    job.update(total_rows: row_count )
+    job.update( clean_rows: clean_row_count )
+    job.update( total_rows: row_count )
 
     sorted_rows = rows.sort do |row_1, row_2|
       row_1["event_date"] <=> row_2["event_date"]
     end
 
-    sorted_rows.each_with_index do |row, index|
-      puts "\n\tprocessing row: #{index}"
-      zi.create_import_log row
+    ActiveRecord::Base.transaction do
+      sorted_rows.each_with_index do |row, index|
+        puts "\n\tprocessing row: #{index}"
+        zi.create_import_log row
+      end
     end
 
     zi.generate_import_diffs job.id
