@@ -204,6 +204,12 @@ class DataImporter
     bad_records = []
 
     CSV.foreach( open(temp_file), :headers => :first_row ).each do |row|      
+
+      # If row does not have valid record
+      if row["address"].nil? 
+        puts "\n\tbad row found"
+        next
+      end
       row["address"] = row["address"].gsub("Incomplete address or missing price?Sometimes listing partners send Zillow listings that do not include a full address or price.To get more details on this property, please contact the listing agent, brokerage, or listing provider.", "")
       row["source"] = source_name
       row["origin_url"] = row["apartment page"]
