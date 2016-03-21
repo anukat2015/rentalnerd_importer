@@ -211,7 +211,10 @@ module RentalCreator
     end
 
     puts "\nProcessing properties for job #{job_id}"
+    processed_count = 0
     ImportDiff.where( import_job_id: job_id ).each do |import_diff|
+      processed_count += 1
+      puts "\n\tProcessing import diff No.#{processed_count}"
       create_property import_diff
     end
     LuxuryAddress.set_property_grades    
@@ -260,8 +263,10 @@ module RentalCreator
 
     puts "\nProcessing transactions for job #{job_id}"
     source = get_source_from_job job_id
+    processed_count = 0
     ImportDiff.where( import_job_id: job_id ).each do |import_diff|
-      puts "\tGenerating new transaction: #{import_diff[:origin_url]}\n\tSource: #{import_diff[:source]}"
+      processed_count += 1
+      puts "\tRecord No.#{processed_count}: Generating new transaction: #{import_diff[:origin_url]}\n\tSource: #{import_diff[:source]}"
       create_transaction import_diff
     end
   end
