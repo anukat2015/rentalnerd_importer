@@ -1,10 +1,10 @@
 Effect,Coefficient
 base_rent,0
-bedrooms,-44.730332280036428
-bathrooms,110.19782722964467
+bedrooms,-44.636885532449405
+bathrooms,110.1570508893704
 dist_to_park,0
-elevation,1.2515479472382034
+elevation,1.2525667305116279
 level,0
-age,-2.8185109683527547
+age,-2.8152795050750932
 garage,0
-mean square error of residuals,325446.46335602616
+mean square error of residuals,325114.13458417944
