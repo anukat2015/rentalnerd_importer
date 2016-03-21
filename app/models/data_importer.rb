@@ -273,9 +273,9 @@ class DataImporter
     sorted_rows = rows.sort do |row_1, row_2|
       row_1["event_date"] <=> row_2["event_date"]
     end
-
-    ActiveRecord::Base.transaction do
-      sorted_rows.each_with_index do |row, index|
+    
+    sorted_rows.each_with_index do |row, index|
+      ActiveRecord::Base.transaction do
         puts "\n\tprocessing row: #{index}"
         zi.create_import_log row
       end
