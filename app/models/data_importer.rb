@@ -53,7 +53,11 @@ class DataImporter
     "n235_de919bf33d33c15ab71f0e4a3230c402eses", #Zillow - Phoenix Arizon - Ntna-College
     "n232_f6a350851110f324e67adb0da72a3512eses", #Zillow - Phoenix Arizon - Southeast
     "n236_84181ed7dc4c53773664ddb567c41e0ceses", #Zillow - Phoenix Arizon - Northeast
-    "n238_d8db72849cac07b260d38956ba3d9860eses" #Zillow - Phoenix Arizon - Pepperwood
+    "n238_d8db72849cac07b260d38956ba3d9860eses", #Zillow - Phoenix Arizon - Pepperwood
+    "n348_0b77074142a6dd08e4178ddeb227f442eses", # 85044 to 85048 - 25K
+    "n349_cc17b83ee9ff13a50df9597d1e888ea1eses", # 85050 to 85086 - 27K
+    "n350_3082a01dfca701b41e24425491573451eses", # 85087 to 85118 - 35K
+    "n351_aec64233948bdbf2fdb0bc4f4d521d34eses" # 85119 to 85190 - 213K
   ]
 
   class << self
