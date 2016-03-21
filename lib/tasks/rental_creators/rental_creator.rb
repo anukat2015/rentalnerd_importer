@@ -84,7 +84,8 @@ module RentalCreator
 
     # There was no previous batch ever imported
     if previous_import_job_id.nil? == true
-      get_sorted_import_logs( curr_import_job_id ).each do |import_log|
+      get_sorted_import_logs( curr_import_job_id ).each_with_index do |import_log, index|
+        puts "\n\t\tRow. #{index}: processing import log #{import_log.id}"
         self.create_import_diff( curr_import_job_id, import_log, "created", import_log[:id] )
         added_rows += 1
       end
